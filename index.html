@@ -1156,6 +1156,18 @@
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
         <span data-i18n="saveSettings">Save Settings</span>
       </button>
+      <div class="ornament-divider"><span class="diamond">❖</span> <span data-i18n="backupRestoreHeader">Backup &amp; Restore</span> <span class="diamond">❖</span></div>
+      <div class="action-grid-2">
+        <button class="btn btn-outline" onclick="backupDataToDevice()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+          <span data-i18n="backupBtn">Backup to Device</span>
+        </button>
+        <button class="btn btn-outline" onclick="document.getElementById('restore-file-input').click()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8"></path><polyline points="17 5 12 0 7 5"></polyline><line x1="12" y1="0.5" x2="12" y2="13"></line></svg>
+          <span data-i18n="restoreBtn">Restore from Device</span>
+        </button>
+      </div>
+      <input type="file" id="restore-file-input" accept="application/json,.json" style="display:none" onchange="restoreDataFromFile(event)">
       <div class="ornament-divider"><span class="diamond">❖</span> <span data-i18n="dangerZoneHeader">Danger Zone</span> <span class="diamond">❖</span></div>
       <button class="btn btn-danger-outline btn-block" onclick="resetAppData()">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>
@@ -1445,7 +1457,7 @@ const I18N = {
     searchSamagri:'Search Samagri...', searchItems:'Search items...', searchPuja:'Search Puja...',
     searchYajman:'Search Yajman...', searchGlobal:'Search Yajman, Puja, Samagri...',
     samagriListHeader:'Samagri List', pujaHistoryHeader:'Puja History', recentVisitsHeader:'Recent Visits',
-    upcomingHeader:'Upcoming', businessDetailsHeader:'Business Details', languageHeader:'Language', dangerZoneHeader:'Danger Zone',
+    upcomingHeader:'Upcoming', businessDetailsHeader:'Business Details', languageHeader:'Language', dangerZoneHeader:'Danger Zone', backupRestoreHeader:'Backup & Restore',
     viewAll:'View all',
     businessName:'Business Name', shastriName:'Shastri Name', mobileNumber:'Mobile Number', addressLabel:'Address',
     itemNameLabel:'Item Name', pujaNameLabel:'Puja Name', yajmanNameLabel:'Yajman Name', locationLabel:'Location',
@@ -1485,6 +1497,9 @@ const I18N = {
     resetDataBtn:'Reset All Data',
     confirmResetData:'This will permanently delete all your samagri, pujas, yajmans and puja visit records. This cannot be undone.',
     dataResetMsg:'All data has been reset',
+    backupBtn:'Backup to Device', restoreBtn:'Restore from Device',
+    backupSuccessMsg:'Backup file saved', confirmRestoreData:'Restoring will replace all current data on this device with the contents of the selected file. This cannot be undone.',
+    restoreSuccessMsg:'Data restored successfully', restoreInvalidFile:'This file is not a valid VedPuja backup',
     unitNos:'Nos', unitPacket:'Packet', unitKg:'Kg', unitGram:'Gram', unitLitre:'Litre', unitML:'ML',
     pdfYajmanName:'Yajman Name', pdfDate:'Date', pdfLocation:'Location', pdfPuja:'Puja',
     pdfDakshina:'Dakshina', pdfMobile:'Mobile', pdfSamagriList:'Samagri List',
@@ -1504,7 +1519,7 @@ const I18N = {
     searchSamagri:'સામગ્રી શોધો...', searchItems:'આઇટમ શોધો...', searchPuja:'પૂજા શોધો...',
     searchYajman:'યજમાન શોધો...', searchGlobal:'યજમાન, પૂજા, સામગ્રી શોધો...',
     samagriListHeader:'સામગ્રી યાદી', pujaHistoryHeader:'પૂજા ઇતિહાસ', recentVisitsHeader:'તાજેતરની વિઝિટ',
-    upcomingHeader:'આગામી', businessDetailsHeader:'બિઝનેસ વિગતો', languageHeader:'ભાષા', dangerZoneHeader:'ડેન્જર ઝોન',
+    upcomingHeader:'આગામી', businessDetailsHeader:'બિઝનેસ વિગતો', languageHeader:'ભાષા', dangerZoneHeader:'ડેન્જર ઝોન', backupRestoreHeader:'બેકઅપ અને પુનઃસ્થાપિત',
     viewAll:'બધું જુઓ',
     businessName:'બિઝનેસ નામ', shastriName:'શાસ્ત્રીનું નામ', mobileNumber:'મોબાઇલ નંબર', addressLabel:'સરનામું',
     itemNameLabel:'આઇટમ નામ', pujaNameLabel:'પૂજા નામ', yajmanNameLabel:'યજમાન નામ', locationLabel:'સ્થળ',
@@ -1544,6 +1559,9 @@ const I18N = {
     resetDataBtn:'બધો ડેટા રીસેટ કરો',
     confirmResetData:'આ તમારી બધી સામગ્રી, પૂજા, યજમાન અને પૂજા વિઝિટ રેકોર્ડ કાયમ માટે કાઢી નાખશે. આ પૂર્વવત્ કરી શકાશે નહીં.',
     dataResetMsg:'બધો ડેટા રીસેટ થયો',
+    backupBtn:'ડિવાઇસ પર બેકઅપ કરો', restoreBtn:'ડિવાઇસમાંથી પુનઃસ્થાપિત કરો',
+    backupSuccessMsg:'બેકઅપ ફાઇલ સાચવાઈ', confirmRestoreData:'પુનઃસ્થાપિત કરવાથી આ ડિવાઇસ પરનો હાલનો બધો ડેટા પસંદ કરેલી ફાઇલની સામગ્રીથી બદલાઈ જશે. આ પૂર્વવત્ કરી શકાશે નહીં.',
+    restoreSuccessMsg:'ડેટા સફળતાપૂર્વક પુનઃસ્થાપિત થયો', restoreInvalidFile:'આ ફાઇલ માન્ય VedPuja બેકઅપ નથી',
     unitNos:'નંગ', unitPacket:'પેકેટ', unitKg:'કિલો', unitGram:'ગ્રામ', unitLitre:'લિટર', unitML:'એમએલ',
     pdfYajmanName:'યજમાન નામ', pdfDate:'તારીખ', pdfLocation:'સ્થળ', pdfPuja:'પૂજા',
     pdfDakshina:'દક્ષિણા', pdfMobile:'મોબાઇલ', pdfSamagriList:'સામગ્રી યાદી',
@@ -2029,6 +2047,60 @@ function saveSettings(){
   };
   setStore('settings', s);
   toast('Settings saved');
+}
+const BACKUP_KEYS = ['settings','samagriMaster','pujas','pujaTemplates','yajmans','yajmanEvents'];
+function backupDataToDevice(){
+  const data = {};
+  BACKUP_KEYS.forEach(key => { data[key] = getStore(key, null); });
+  const payload = {
+    app: 'vedpuja',
+    version: 1,
+    exportedAt: new Date().toISOString(),
+    data
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const dateStr = new Date().toISOString().slice(0,10);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `vedpuja-backup-${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+  toast(t('backupSuccessMsg'));
+}
+function restoreDataFromFile(event){
+  const file = event.target.files && event.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    let payload;
+    try{
+      payload = JSON.parse(reader.result);
+    }catch(e){
+      toast(t('restoreInvalidFile'));
+      event.target.value = '';
+      return;
+    }
+    const incomingData = (payload && payload.app === 'vedpuja' && payload.data) ? payload.data : null;
+    if(!incomingData){
+      toast(t('restoreInvalidFile'));
+      event.target.value = '';
+      return;
+    }
+    openConfirm(t('confirmRestoreData'), ()=>{
+      BACKUP_KEYS.forEach(key => {
+        if(incomingData[key] !== undefined && incomingData[key] !== null){
+          setStore(key, incomingData[key]);
+        }
+      });
+      toast(t('restoreSuccessMsg'));
+      setTimeout(()=>{ location.reload(); }, 600);
+    });
+    event.target.value = '';
+  };
+  reader.readAsText(file);
 }
 function resetAppData(){
   openConfirm(t('confirmResetData'), ()=>{

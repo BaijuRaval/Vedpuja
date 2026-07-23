@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Karm Kandi</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 
 <!-- Firebase (used only for license activation/verification) -->
 <script type="module">
@@ -3065,31 +3066,36 @@ function generatePDF(){
 
   const brand = s.businessName || t('home');
 
-  const html = `
-  <!DOCTYPE html><html><head><meta charset="UTF-8"><title>${escapeHtml(y.name||'Yajman')} - Samagri List</title>
-  <style>
-    body{font-family:Georgia,'Times New Roman',serif; color:#4A2E17; padding:0; margin:0; background:#efe3c6;}
-    .sheet{max-width:720px; margin:24px auto; background:#FFFCF3; border:2px solid #C79A3C; border-radius:6px; padding:34px 38px;}
-    .sheet::before{content:''; display:block;}
-    .header{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; border-bottom:2px solid #C79A3C; padding-bottom:14px; margin-bottom:18px;}
-    .header .brand{font-size:26px; font-weight:bold; color:#7A2D19; letter-spacing:.5px; line-height:1.2;}
-    .header .shastri-info{text-align:right; flex-shrink:0;}
-    .header .shastri-info p{margin:2px 0; font-size:12.5px; color:#93765A; font-family:Arial,sans-serif;}
-    .title-block{text-align:center; margin:18px 0;}
-    .title-block h2{display:inline-block; font-size:16px; letter-spacing:2px; color:#7A2D19; border-bottom:2px solid #9A3B22; padding-bottom:4px; margin:0; text-transform:uppercase;}
-    .grid{display:grid; grid-template-columns:1fr 1fr; gap:6px 24px; font-size:13.5px; font-family:Arial,sans-serif; margin-bottom:20px;}
-    .grid div span.k{color:#93765A; font-weight:bold;}
-    .samagri-columns{display:grid; grid-template-columns:1fr 1fr; gap:0 20px;}
-    table{width:100%; border-collapse:collapse; margin-top:6px; font-family:Arial,sans-serif;}
-    th{text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.5px; color:#fff; background:#9A3B22; padding:8px 6px;}
-    th.qty, td.qty{text-align:right;}
-    th.sno, td.sno{width:36px; text-align:center;}
-    td{padding:8px 6px; border-bottom:1px solid #EAD9A8; font-size:13.5px;}
-    tr.even td{background:#F7EEDC;}
-    .footer{text-align:center; margin-top:26px; font-size:11.5px; color:#93765A; border-top:1px dashed #C79A3C; padding-top:12px; font-family:Arial,sans-serif;}
-    @media print{ body{background:#fff;} .sheet{border:none; margin:0; max-width:none;} }
-  </style>
-  </head><body>
+  if(typeof html2pdf === 'undefined'){
+    toast('PDF library failed to load. Check your connection and try again.');
+    return;
+  }
+
+  const container = document.createElement('div');
+  container.id = 'pdf-export-root';
+  container.style.position = 'fixed';
+  container.style.left = '-99999px';
+  container.style.top = '0';
+  container.innerHTML = `
+    <style>
+      #pdf-export-root .sheet{width:720px; font-family:Georgia,'Times New Roman',serif; color:#4A2E17; background:#FFFCF3; border:2px solid #C79A3C; border-radius:6px; padding:34px 38px; box-sizing:border-box;}
+      #pdf-export-root .header{display:flex; align-items:flex-start; justify-content:space-between; gap:16px; border-bottom:2px solid #C79A3C; padding-bottom:14px; margin-bottom:18px;}
+      #pdf-export-root .header .brand{font-size:26px; font-weight:bold; color:#7A2D19; letter-spacing:.5px; line-height:1.2;}
+      #pdf-export-root .header .shastri-info{text-align:right; flex-shrink:0;}
+      #pdf-export-root .header .shastri-info p{margin:2px 0; font-size:12.5px; color:#93765A; font-family:Arial,sans-serif;}
+      #pdf-export-root .title-block{text-align:center; margin:18px 0;}
+      #pdf-export-root .title-block h2{display:inline-block; font-size:16px; letter-spacing:2px; color:#7A2D19; border-bottom:2px solid #9A3B22; padding-bottom:4px; margin:0; text-transform:uppercase;}
+      #pdf-export-root .grid{display:grid; grid-template-columns:1fr 1fr; gap:6px 24px; font-size:13.5px; font-family:Arial,sans-serif; margin-bottom:20px;}
+      #pdf-export-root .grid div span.k{color:#93765A; font-weight:bold;}
+      #pdf-export-root .samagri-columns{display:grid; grid-template-columns:1fr 1fr; gap:0 20px;}
+      #pdf-export-root table{width:100%; border-collapse:collapse; margin-top:6px; font-family:Arial,sans-serif;}
+      #pdf-export-root th{text-align:left; font-size:11.5px; text-transform:uppercase; letter-spacing:.5px; color:#fff; background:#9A3B22; padding:8px 6px;}
+      #pdf-export-root th.qty, #pdf-export-root td.qty{text-align:right;}
+      #pdf-export-root th.sno, #pdf-export-root td.sno{width:36px; text-align:center;}
+      #pdf-export-root td{padding:8px 6px; border-bottom:1px solid #EAD9A8; font-size:13.5px;}
+      #pdf-export-root tr.even td{background:#F7EEDC;}
+      #pdf-export-root .footer{text-align:center; margin-top:26px; font-size:11.5px; color:#93765A; border-top:1px dashed #C79A3C; padding-top:12px; font-family:Arial,sans-serif;}
+    </style>
     <div class="sheet">
       <div class="header">
         <div class="brand">${escapeHtml(brand)}</div>
@@ -3111,14 +3117,25 @@ function generatePDF(){
       ${samagriHtml}
       <div class="footer">॥ हरि ॐ ॥</div>
     </div>
-    <script>window.onload = function(){ setTimeout(function(){ window.print(); }, 250); };<\/script>
-  </body></html>`;
+  `;
+  document.body.appendChild(container);
 
-  const w = window.open('', '_blank');
-  if(!w){ toast('Please allow pop-ups to generate PDF'); return; }
-  w.document.open();
-  w.document.write(html);
-  w.document.close();
+  const safeName = (y.name || 'Yajman').replace(/[^a-zA-Z0-9]+/g, '_');
+  const filename = `${safeName}-samagri.pdf`;
+
+  toast('Generating PDF...');
+  html2pdf().set({
+    margin: 10,
+    filename,
+    image: { type: 'jpeg', quality: 0.98 },
+    html2canvas: { scale: 2, useCORS: true, backgroundColor: '#FFFCF3' },
+    jsPDF: { unit: 'pt', format: 'a4', orientation: 'portrait' }
+  }).from(container.querySelector('.sheet')).save().then(()=>{
+    document.body.removeChild(container);
+  }).catch(()=>{
+    toast('Could not generate PDF');
+    if(container.parentNode) document.body.removeChild(container);
+  });
 }
 
 /* =========================================================
@@ -3145,7 +3162,6 @@ function shareWhatsApp(){
   (e.samagri||[]).forEach(item=>{
     msg += `${item.checked ? '✅' : '⬜'} ${item.name}${item.qty ? ' — ' + item.qty + ' ' + unitLabel(item.unit || 'Nos') : ''}\n`;
   });
-  msg += `\n_Generated by Karm Kandi App_`;
 
   const url = 'https://wa.me/?text=' + encodeURIComponent(msg);
   window.open(url, '_blank');

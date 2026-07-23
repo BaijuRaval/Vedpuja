@@ -4,6 +4,106 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Karm Kandi</title>
+
+<!-- Firebase (used only for license activation/verification) -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-analytics.js";
+  import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    serverTimestamp
+  } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyClNBurDrZ1GXs5JXhjZdQ8VuupJazfsMw",
+    authDomain: "vedpuja-6f82f.firebaseapp.com",
+    projectId: "vedpuja-6f82f",
+    storageBucket: "vedpuja-6f82f.firebasestorage.app",
+    messagingSenderId: "204386789263",
+    appId: "1:204386789263:web:46d2736d6ade2dc0f00dfa",
+    measurementId: "G-T33ZGN68TL"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const analytics = getAnalytics(app);
+  const db = getFirestore(app);
+
+  window.firebaseApp = app;
+  window.firebaseDb = db;
+
+  // --- License Management (Firestore is used ONLY for this) ---
+  // Collection: licenses | Document ID = License Key
+  // Fields: status ('available' | 'used' | 'expired'), mobile, activatedAt
+
+  window.firestoreActivateLicense = async function (mobile, key) {
+    try {
+      const ref = doc(db, 'licenses', key);
+      const snap = await getDoc(ref);
+
+      if (!snap.exists()) {
+        return { ok: false, code: 'invalid' };
+      }
+
+      const data = snap.data();
+
+      if (data.status === 'expired') {
+        return { ok: false, code: 'expired' };
+      }
+
+      if (data.status === 'used') {
+        if (data.mobile !== mobile) {
+          return { ok: false, code: 'invalid' };
+        }
+        // Same license, same mobile — reactivating (e.g. reinstall).
+        return { ok: true };
+      }
+
+      if (data.status === 'available') {
+        await setDoc(ref, {
+          status: 'used',
+          mobile: mobile,
+          activatedAt: serverTimestamp()
+        }, { merge: true });
+        return { ok: true };
+      }
+
+      return { ok: false, code: 'invalid' };
+    } catch (err) {
+      return { ok: false, code: 'network', networkError: true };
+    }
+  };
+
+  window.firestoreCheckLicense = async function (key, mobile) {
+    try {
+      const ref = doc(db, 'licenses', key);
+      const snap = await getDoc(ref);
+
+      if (!snap.exists()) {
+        return { valid: false, offline: false };
+      }
+
+      const data = snap.data();
+
+      if (data.status === 'expired') {
+        return { valid: false, offline: false };
+      }
+
+      if (data.mobile !== mobile) {
+        return { valid: false, offline: false };
+      }
+
+      return { valid: true, offline: false };
+    } catch (err) {
+      // Firestore unreachable (most likely no internet) — fail open,
+      // trust the locally stored activation for this launch.
+      return { valid: true, offline: true };
+    }
+  };
+</script>
+
 <style>
   :root{
     --bg:#F7EEDC;
@@ -809,6 +909,80 @@
     visibility:visible;
   }
   #splash-screen.fade-out{ opacity:0; visibility:hidden; pointer-events:none; }
+  #activation-screen{
+    position:absolute;
+    inset:0;
+    z-index:600;
+    background-color:var(--bg);
+    background-size:cover;
+    background-position:center top;
+    background-repeat:no-repeat;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+  }
+  #activation-screen.hidden{ display:none; }
+  .activation-card{
+    width:100%;
+    max-width:380px;
+    background:var(--surface);
+    border:1px solid var(--divider);
+    border-radius:var(--radius);
+    box-shadow:var(--shadow-1);
+    padding:28px 24px;
+  }
+  .activation-card .om-badge{
+    width:56px;height:56px;
+    margin:0 auto 14px;
+    border-radius:50%;
+    background:radial-gradient(circle at 30% 30%, var(--gold-pale), var(--maroon-pale));
+    border:1px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Kokila','Nirmala UI','Mangal',var(--serif),sans-serif;
+    font-size:26px;
+    font-weight:700;
+    color:var(--maroon-dark);
+  }
+  .activation-card h1{
+    text-align:center;
+    font-family:var(--serif);
+    font-size:21px;
+    color:var(--maroon-dark);
+    margin:0 0 4px;
+  }
+  .activation-card .activation-subtitle{
+    text-align:center;
+    font-size:12.5px;
+    color:var(--ink-soft);
+    margin:0 0 20px;
+  }
+  .activation-error{
+    background:var(--danger-pale);
+    color:var(--danger);
+    font-size:12.5px;
+    font-weight:700;
+    padding:10px 14px;
+    border-radius:var(--radius-sm);
+    margin-bottom:16px;
+    text-align:center;
+    display:none;
+  }
+  .activation-error.show{ display:block; }
+  .trial-btn{
+    width:100%;
+    margin-top:10px;
+    padding:12px;
+    border-radius:var(--radius-sm);
+    font-size:13.5px;
+    font-weight:700;
+    font-family:var(--serif);
+    border:1.5px solid var(--gold);
+    background:transparent;
+    color:var(--maroon-dark);
+    cursor:pointer;
+  }
+  .trial-btn:active{ background:var(--gold-pale); }
   .loader-block{
     position:absolute;
     left:50%;
@@ -1011,6 +1185,31 @@
         <span>Loading<span class="dots"><span>.</span><span>.</span><span>.</span></span></span>
         <span class="dash">⟡</span>
       </div>
+    </div>
+  </div>
+
+  <!-- LICENSE ACTIVATION SCREEN -->
+  <div id="activation-screen" class="hidden">
+    <div class="activation-card">
+      <div class="om-badge">ॐ</div>
+      <h1 data-i18n="activationTitle">Activate VedPuja</h1>
+      <p class="activation-subtitle" data-i18n="activationSubtitle">Enter your license details to continue</p>
+      <div class="activation-error" id="activation-error"></div>
+      <form id="activation-form" onsubmit="handleActivate(event)">
+        <div class="field">
+          <label data-i18n="mobileNumber">Mobile Number</label>
+          <input type="tel" id="activation-mobile" required placeholder="e.g. 9876543210" autocomplete="tel">
+        </div>
+        <div class="field">
+          <label data-i18n="licenseKeyLabel">License Key</label>
+          <input type="text" id="activation-key" placeholder="XXXX-XXXX-XXXX" autocomplete="off">
+        </div>
+        <button type="submit" class="btn btn-primary btn-block" id="activation-submit-btn">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          <span data-i18n="activateBtn">Activate</span>
+        </button>
+      </form>
+      <button type="button" class="trial-btn" onclick="startFreeTrial()" data-i18n="startTrialBtn">Start 1 Day Free Trial</button>
     </div>
   </div>
 
@@ -1500,6 +1699,14 @@ const I18N = {
     backupBtn:'Backup to Device', restoreBtn:'Restore from Device',
     backupSuccessMsg:'Backup file saved', confirmRestoreData:'Restoring will replace all current data on this device with the contents of the selected file. This cannot be undone.',
     restoreSuccessMsg:'Data restored successfully', restoreInvalidFile:'This file is not a valid VedPuja backup',
+    activationTitle:'Activate VedPuja', activationSubtitle:'Enter your license details to continue',
+    licenseKeyLabel:'License Key', activateBtn:'Activate', startTrialBtn:'Start 1 Day Free Trial',
+    errEnterMobile:'Please enter your mobile number.', errEnterKey:'Please enter your license key.',
+    errInvalidKey:'Invalid License Key.', errLicenseExpired:'License Expired.',
+    errNetworkError:'Could not reach the license server. Please check your internet connection and try again.',
+    errTrialUsed:'You\'ve already used your free trial. Please activate a license to continue.',
+    errLicenseExpiredDisabled:'License Expired or Disabled.',
+    errTrialExpired:'Your free trial has expired. Please activate a license.',
     unitNos:'Nos', unitPacket:'Packet', unitKg:'Kg', unitGram:'Gram', unitLitre:'Litre', unitML:'ML',
     pdfYajmanName:'Yajman Name', pdfDate:'Date', pdfLocation:'Location', pdfPuja:'Puja',
     pdfDakshina:'Dakshina', pdfMobile:'Mobile', pdfSamagriList:'Samagri List',
@@ -1562,6 +1769,14 @@ const I18N = {
     backupBtn:'ડિવાઇસ પર બેકઅપ કરો', restoreBtn:'ડિવાઇસમાંથી પુનઃસ્થાપિત કરો',
     backupSuccessMsg:'બેકઅપ ફાઇલ સાચવાઈ', confirmRestoreData:'પુનઃસ્થાપિત કરવાથી આ ડિવાઇસ પરનો હાલનો બધો ડેટા પસંદ કરેલી ફાઇલની સામગ્રીથી બદલાઈ જશે. આ પૂર્વવત્ કરી શકાશે નહીં.',
     restoreSuccessMsg:'ડેટા સફળતાપૂર્વક પુનઃસ્થાપિત થયો', restoreInvalidFile:'આ ફાઇલ માન્ય VedPuja બેકઅપ નથી',
+    activationTitle:'VedPuja સક્રિય કરો', activationSubtitle:'ચાલુ રાખવા તમારી લાઇસન્સ વિગતો દાખલ કરો',
+    licenseKeyLabel:'લાઇસન્સ કી', activateBtn:'સક્રિય કરો', startTrialBtn:'1 દિવસની મફત ટ્રાયલ શરૂ કરો',
+    errEnterMobile:'કૃપા કરીને તમારો મોબાઇલ નંબર દાખલ કરો.', errEnterKey:'કૃપા કરીને તમારી લાઇસન્સ કી દાખલ કરો.',
+    errInvalidKey:'અમાન્ય લાઇસન્સ કી.', errLicenseExpired:'લાઇસન્સ સમાપ્ત થયું.',
+    errNetworkError:'લાઇસન્સ સર્વર સુધી પહોંચી શકાયું નથી. કૃપા કરીને તમારું ઇન્ટરનેટ કનેક્શન તપાસો અને ફરી પ્રયાસ કરો.',
+    errTrialUsed:'તમે પહેલેથી જ તમારી મફત ટ્રાયલનો ઉપયોગ કરી લીધો છે. ચાલુ રાખવા કૃપા કરીને લાઇસન્સ સક્રિય કરો.',
+    errLicenseExpiredDisabled:'લાઇસન્સ સમાપ્ત અથવા નિષ્ક્રિય થયું છે.',
+    errTrialExpired:'તમારી મફત ટ્રાયલ સમાપ્ત થઈ ગઈ છે. કૃપા કરીને લાઇસન્સ સક્રિય કરો.',
     unitNos:'નંગ', unitPacket:'પેકેટ', unitKg:'કિલો', unitGram:'ગ્રામ', unitLitre:'લિટર', unitML:'એમએલ',
     pdfYajmanName:'યજમાન નામ', pdfDate:'તારીખ', pdfLocation:'સ્થળ', pdfPuja:'પૂજા',
     pdfDakshina:'દક્ષિણા', pdfMobile:'મોબાઇલ', pdfSamagriList:'સામગ્રી યાદી',
@@ -3067,6 +3282,125 @@ function seedDefaultPujaTemplates(){
   setStore('pujas', newPujas);
   setStore('pujaTemplates', templates);
 }
+/* =========================================================
+   LICENSE ACTIVATION & VERIFICATION (Firestore used ONLY for licensing)
+   ========================================================= */
+const LICENSE_KEYS = {
+  activated: 'vedpujaActivated',
+  mobile: 'activatedMobile',
+  key: 'activatedKey',
+  trialUsed: 'vedpujaTrialUsed',
+  trialStart: 'vedpujaTrialStart'
+};
+const TRIAL_DURATION_MS = 24 * 60 * 60 * 1000;
+
+function clearLocalActivation(){
+  localStorage.removeItem(LICENSE_KEYS.activated);
+  localStorage.removeItem(LICENSE_KEYS.mobile);
+  localStorage.removeItem(LICENSE_KEYS.key);
+}
+function isTrialUsed(){
+  return localStorage.getItem(LICENSE_KEYS.trialUsed) === 'true';
+}
+function isTrialActive(){
+  if(!isTrialUsed()) return false;
+  const start = parseInt(localStorage.getItem(LICENSE_KEYS.trialStart), 10);
+  if(!start) return false;
+  return (Date.now() - start) < TRIAL_DURATION_MS;
+}
+function showActivationScreen(errorKey){
+  document.getElementById('splash-screen').classList.add('fade-out');
+  document.getElementById('activation-screen').classList.remove('hidden');
+  const errEl = document.getElementById('activation-error');
+  if(errorKey){
+    errEl.textContent = t(errorKey);
+    errEl.classList.add('show');
+  } else {
+    errEl.textContent = '';
+    errEl.classList.remove('show');
+  }
+}
+function showActivationError(msg){
+  const errEl = document.getElementById('activation-error');
+  errEl.textContent = msg;
+  errEl.classList.add('show');
+}
+function openApp(){
+  document.getElementById('splash-screen').classList.add('fade-out');
+  document.getElementById('activation-screen').classList.add('hidden');
+  goHome();
+}
+async function bootLicenseCheck(){
+  const activated = localStorage.getItem(LICENSE_KEYS.activated) === 'true';
+
+  if(activated){
+    const key = localStorage.getItem(LICENSE_KEYS.key);
+    const mobile = localStorage.getItem(LICENSE_KEYS.mobile);
+    const result = await window.firestoreCheckLicense(key, mobile);
+
+    if(!result.valid){
+      clearLocalActivation();
+      showActivationScreen('errLicenseExpiredDisabled');
+      return;
+    }
+    // Valid — either confirmed online, or offline and trusting
+    // the local activation (rechecked automatically next launch).
+    openApp();
+    return;
+  }
+
+  if(isTrialActive()){
+    openApp();
+    return;
+  }
+
+  if(isTrialUsed()){
+    showActivationScreen('errTrialExpired');
+    return;
+  }
+
+  showActivationScreen();
+}
+function setActivationLoading(isLoading){
+  const btn = document.getElementById('activation-submit-btn');
+  if(btn) btn.disabled = isLoading;
+}
+async function handleActivate(ev){
+  ev.preventDefault();
+  const mobile = document.getElementById('activation-mobile').value.trim();
+  const key = document.getElementById('activation-key').value.trim();
+
+  if(!mobile){ showActivationError(t('errEnterMobile')); return; }
+  if(!key){ showActivationError(t('errEnterKey')); return; }
+
+  setActivationLoading(true);
+  const result = await window.firestoreActivateLicense(mobile, key);
+  setActivationLoading(false);
+
+  if(!result.ok){
+    const msgKey = result.code === 'expired' ? 'errLicenseExpired'
+      : result.code === 'network' ? 'errNetworkError'
+      : 'errInvalidKey';
+    showActivationError(t(msgKey));
+    return;
+  }
+
+  localStorage.setItem(LICENSE_KEYS.activated, 'true');
+  localStorage.setItem(LICENSE_KEYS.mobile, mobile);
+  localStorage.setItem(LICENSE_KEYS.key, key);
+
+  openApp();
+}
+function startFreeTrial(){
+  if(isTrialUsed()){
+    showActivationError(t('errTrialUsed'));
+    return;
+  }
+  localStorage.setItem(LICENSE_KEYS.trialUsed, 'true');
+  localStorage.setItem(LICENSE_KEYS.trialStart, String(Date.now()));
+  openApp();
+}
+
 function init(){
   if(getStore('settings') === null) setStore('settings', {});
   if(getStore('samagriMaster') === null) setStore('samagriMaster', []);
@@ -3084,11 +3418,7 @@ function init(){
   document.querySelector('main').style.display = 'none';
 
   setTimeout(function(){
-    const splash = document.getElementById('splash-screen');
-    splash.classList.add('fade-out');
-    setTimeout(function(){
-      goHome();
-    }, 500);
+    bootLicenseCheck();
   }, 2500);
 }
 init();

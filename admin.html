@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>VedPuja License Manager</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+
+<style>
+    :root {
+        --primary: #7A2D19;
+        --primary-gradient: linear-gradient(135deg, #7A2D19, #A67C27);
+        --primary-container: #F1E4C4;
+        --on-primary-container: #7A2D19;
+        --secondary: #A67C27;
+        --surface: #F7EEDC;
+        --surface-variant: #F1E4C4;
+        --on-surface: #4A2E17;
+        --on-surface-variant: #8A6A44;
+        --card-bg: #FFFCF3;
+        --border-light: #EAD9A8;
+        --danger: #B03A2E;
+        --danger-container: #F6DDD7;
+        --on-danger-container: #B03A2E;
+        --success: #3F7D4F;
+        --success-container: #DCE8E0;
+        --on-success-container: #3F7D4F;
+        --warning: #92600B;
+        --warning-container: #FBE8CC;
+        --on-warning-container: #92600B;
+        --shadow-soft: 0 4px 20px rgba(74, 46, 23, 0.08);
+        --shadow-md: 0 10px 30px rgba(122, 45, 25, 0.18);
+        --safe-area-bottom: env(safe-area-inset-bottom, 0px);
+        --transition-smooth: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    html, body { height: 100%; margin: 0; padding: 0; overflow: hidden; }
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        background-color: #0F0E17;
+        background: radial-gradient(circle, #1E1B2E 0%, #0F0E17 100%);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 100%;
+        color: var(--on-surface);
+    }
+
+    .app-shell {
+        width: 100%;
+        max-width: 480px;
+        height: 100vh;
+        height: 100dvh;
+        background-color: var(--surface);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        position: relative;
+        box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+    }
+
+    @media (min-width: 768px) {
+        .app-shell {
+            height: 840px;
+            border-radius: 40px;
+            border: 8px solid #2A283E;
+        }
+    }
+
+    /* Header */
+    .app-header {
+        background-color: var(--primary);
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        flex-shrink: 0;
+    }
+
+    .header-main { display: flex; justify-content: space-between; align-items: center; }
+
+    .brand-group { display: flex; align-items: center; gap: 12px; }
+
+    .brand-logo {
+        width: 44px; height: 44px; border-radius: 14px;
+        background: #FFFFFF; display: flex; align-items: center; justify-content: center;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+    }
+
+    .brand-logo .material-icons-round { color: var(--primary); font-size: 22px; }
+
+    .brand-title { font-size: 20px; font-weight: 900; color: #FFFFFF; letter-spacing: -0.5px; line-height: 1; margin: 0; }
+
+    .brand-subtitle {
+        font-size: 9px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 1px; color: rgba(255,255,255,0.75); margin-top: 4px;
+    }
+
+    .icon-btn {
+        background: rgba(255, 255, 255, 0.15); color: #FFFFFF; border: none;
+        border-radius: 12px; width: 40px; height: 40px; display: flex;
+        align-items: center; justify-content: center; cursor: pointer; transition: var(--transition-smooth);
+    }
+    .icon-btn:active { background: rgba(255,255,255,0.28); transform: scale(0.95); }
+
+    /* Search */
+    .search-container { position: relative; width: 100%; }
+
+    .search-icon {
+        position: absolute; left: 16px; top: 50%; transform: translateY(-50%);
+        color: var(--on-surface-variant); font-size: 20px;
+    }
+
+    .search-container input {
+        width: 100%; padding: 12px 40px 12px 48px; border-radius: 28px;
+        border: 1px solid var(--border-light); background-color: var(--surface-variant); font-size: 14px;
+        font-weight: 500; color: var(--on-surface); transition: var(--transition-smooth);
+    }
+
+    .search-container input:focus {
+        background-color: #FFF; border-color: var(--primary);
+        box-shadow: 0 4px 12px rgba(6, 57, 112, 0.1); outline: none;
+    }
+
+    .search-clear {
+        position: absolute; right: 10px; top: 50%; transform: translateY(-50%);
+        background: none; border: none; color: var(--on-surface-variant);
+        cursor: pointer; display: flex; padding: 4px;
+    }
+
+    /* Content */
+    .content-area { flex: 1; overflow-y: auto; padding: 16px 16px 100px 16px; }
+    .content-area::-webkit-scrollbar { display: none; }
+
+    .hidden { display: none !important; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .fade-in { animation: fadeIn 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards; }
+
+    /* Stat chips */
+    .stats-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+
+    .stat-chip {
+        background-color: var(--card-bg); border-radius: 14px; padding: 10px 6px;
+        text-align: center; border: 1px solid var(--border-light); box-shadow: var(--shadow-soft);
+    }
+
+    .stat-chip .stat-value { font-size: 18px; font-weight: 900; color: var(--primary); }
+    .stat-chip.stat-available .stat-value { color: var(--success); }
+    .stat-chip.stat-used .stat-value { color: var(--secondary); }
+    .stat-chip.stat-expired .stat-value { color: var(--danger); }
+    .stat-chip .stat-label {
+        font-size: 9px; font-weight: 700; text-transform: uppercase;
+        letter-spacing: 0.5px; color: var(--on-surface-variant); margin-top: 2px;
+    }
+
+    /* Generate button */
+    .btn-submit {
+        width: 100%; background: linear-gradient(135deg, #E28743, #EAB676); color: white;
+        border: none; border-radius: 16px; padding: 14px; font-size: 14px; font-weight: 700;
+        cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px;
+        box-shadow: var(--shadow-md); transition: var(--transition-smooth); margin-bottom: 16px;
+    }
+    .btn-submit:active { transform: scale(0.98); box-shadow: 0 4px 10px rgba(226, 135, 67, 0.25); }
+    .btn-submit:disabled { opacity: 0.6; cursor: default; transform: none; }
+    .btn-submit .spinner {
+        width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.4);
+        border-top-color: #fff; animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Key cards */
+    .key-card {
+        background-color: var(--card-bg); border-radius: 20px; padding: 16px;
+        border: 1px solid var(--border-light); box-shadow: var(--shadow-soft);
+        margin-bottom: 12px; transition: var(--transition-smooth);
+    }
+
+    .key-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+
+    .key-value {
+        font-family: 'Roboto Mono', 'Courier New', monospace; font-size: 15px; font-weight: 700;
+        color: var(--on-surface); letter-spacing: 0.5px; word-break: break-all;
+    }
+
+    .status-badge {
+        font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 12px;
+        text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex;
+        align-items: center; gap: 4px; white-space: nowrap; flex-shrink: 0;
+    }
+    .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+    .status-badge.available { background-color: var(--success-container); color: var(--on-success-container); }
+    .status-badge.used { background-color: var(--primary-container); color: var(--on-primary-container); }
+    .status-badge.expired { background-color: var(--danger-container); color: var(--on-danger-container); }
+
+    .key-meta { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+
+    .key-meta-row {
+        font-size: 11px; font-weight: 500; color: var(--on-surface-variant);
+        display: flex; align-items: center; gap: 5px;
+    }
+    .key-meta-row .material-icons-round { font-size: 13px; }
+
+    .key-card-actions {
+        display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;
+        padding-top: 12px; border-top: 1px solid #F5F5EE;
+    }
+
+    .btn-action {
+        display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px;
+        border-radius: 12px; font-size: 11px; font-weight: 700; border: none;
+        cursor: pointer; transition: var(--transition-smooth);
+    }
+    .btn-action .material-icons-round { font-size: 14px; }
+    .btn-action:active { transform: scale(0.95); }
+
+    .btn-copy { background-color: #F5F5EE; color: var(--on-surface-variant); }
+    .btn-copy:active { background-color: #EAEADD; }
+
+    .btn-expiry { background-color: var(--primary-container); color: var(--on-primary-container); }
+    .btn-expiry:active { background-color: #8FCFDA; }
+
+    .btn-expire { background-color: var(--danger-container); color: var(--on-danger-container); }
+    .btn-expire:active { background-color: #F4D0C2; }
+
+    .btn-reactivate { background-color: var(--success-container); color: var(--on-success-container); }
+    .btn-reactivate:active { background-color: #C3E9CF; }
+
+    .btn-reset { background-color: var(--warning-container); color: var(--on-warning-container); }
+    .btn-reset:active { background-color: #F3DCB0; }
+
+    .btn-action:disabled { opacity: 0.5; cursor: default; }
+
+    /* Empty state */
+    .empty-state { text-align: center; padding: 60px 20px; }
+    .empty-state-icon {
+        width: 64px; height: 64px; border-radius: 50%; background-color: var(--primary-container);
+        display: flex; align-items: center; justify-content: center; margin: 0 auto 16px auto;
+    }
+    .empty-state-icon .material-icons-round { font-size: 30px; color: var(--primary); }
+    .empty-state-title { font-size: 14px; font-weight: 700; color: var(--on-surface); margin: 0 0 4px 0; }
+    .empty-state-desc { font-size: 12px; color: var(--on-surface-variant); margin: 0; }
+
+    /* Modal */
+    .app-modal-overlay {
+        position: absolute; inset: 0; background-color: rgba(15, 14, 23, 0.55);
+        z-index: 500; display: flex; align-items: center; justify-content: center; padding: 24px;
+    }
+
+    .app-modal-card {
+        background-color: var(--card-bg); border-radius: 22px; padding: 24px;
+        width: 100%; max-width: 320px; box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+        animation: fadeIn 0.2s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+    }
+
+    .app-modal-icon-wrap {
+        width: 52px; height: 52px; border-radius: 50%; background-color: var(--primary-container);
+        display: flex; align-items: center; justify-content: center; margin: 0 auto 14px auto;
+    }
+    .app-modal-icon-wrap .material-icons-round { font-size: 26px; color: var(--primary); }
+    .app-modal-icon-wrap.danger { background-color: var(--danger-container); }
+    .app-modal-icon-wrap.danger .material-icons-round { color: var(--danger); }
+
+    .app-modal-title { font-size: 15px; font-weight: 800; color: var(--on-surface); text-align: center; margin: 0 0 4px 0; }
+    .app-modal-message { font-size: 12px; font-weight: 500; color: var(--on-surface-variant); text-align: center; line-height: 1.5; margin: 0 0 18px 0; }
+
+    .form-label {
+        display: block; font-size: 10px; font-weight: 700; color: var(--on-surface-variant);
+        margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;
+    }
+
+    .form-control {
+        width: 100%; background-color: #FFF; border: 1px solid var(--border-light);
+        border-radius: 12px; padding: 10px 14px; font-size: 13px; font-weight: 600;
+        color: var(--on-surface); outline: none; transition: var(--transition-smooth); margin-bottom: 18px;
+    }
+    .form-control:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(6, 57, 112, 0.15); }
+
+    .app-modal-actions { display: flex; gap: 10px; }
+
+    .app-modal-btn { flex: 1; padding: 12px; border-radius: 14px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: var(--transition-smooth); }
+    .app-modal-btn-cancel { background-color: #F5F5EE; color: var(--on-surface-variant); }
+    .app-modal-btn-cancel:active { background-color: #EAEADD; }
+    .app-modal-btn-confirm { background: var(--primary-gradient); color: white; box-shadow: var(--shadow-md); }
+    .app-modal-btn-confirm:active { transform: scale(0.98); }
+    .app-modal-btn-confirm.danger { background: var(--danger); box-shadow: none; }
+
+    /* Toast */
+    .toast {
+        position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(20px);
+        background-color: #21130D; color: #fff; font-size: 12px; font-weight: 700;
+        padding: 12px 20px; border-radius: 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        z-index: 900; opacity: 0; transition: var(--transition-smooth); display: flex; align-items: center; gap: 8px; white-space: nowrap;
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    .toast .material-icons-round { font-size: 16px; color: var(--success-container); }
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+    <header class="app-header">
+        <div class="header-main">
+            <div class="brand-group">
+                <div class="brand-logo"><span class="material-icons-round">self_improvement</span></div>
+                <div style="display:flex;flex-direction:column;align-items:flex-start;">
+                    <h1 class="brand-title">License Manager</h1>
+                    <div class="brand-subtitle">VedPuja Admin</div>
+                </div>
+            </div>
+            <button class="icon-btn" onclick="loadKeys()" title="Refresh">
+                <span class="material-icons-round">refresh</span>
+            </button>
+        </div>
+
+        <div class="search-container">
+            <span class="material-icons-round search-icon">search</span>
+            <input type="text" id="search-input" placeholder="Search key, mobile, date, status..." oninput="renderKeys()">
+            <button class="search-clear hidden" id="clear-search" onclick="clearSearch()">
+                <span class="material-icons-round">close</span>
+            </button>
+        </div>
+    </header>
+
+    <main class="content-area">
+
+        <div class="stats-row">
+            <div class="stat-chip">
+                <div class="stat-value" id="stat-total">-</div>
+                <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-chip stat-available">
+                <div class="stat-value" id="stat-available">-</div>
+                <div class="stat-label">Available</div>
+            </div>
+            <div class="stat-chip stat-used">
+                <div class="stat-value" id="stat-used">-</div>
+                <div class="stat-label">Used</div>
+            </div>
+            <div class="stat-chip stat-expired">
+                <div class="stat-value" id="stat-expired">-</div>
+                <div class="stat-label">Expired</div>
+            </div>
+        </div>
+
+        <button class="btn-submit" id="generate-btn" onclick="createKeys(10)">
+            <span class="material-icons-round">add_circle</span>
+            <span>Generate 10 Keys</span>
+        </button>
+
+        <div id="keys-list"></div>
+
+        <div id="empty-state" class="empty-state hidden">
+            <div class="empty-state-icon"><span class="material-icons-round">key_off</span></div>
+            <p class="empty-state-title">No keys found</p>
+            <p class="empty-state-desc">Try a different search, or generate new keys above.</p>
+        </div>
+
+    </main>
+
+    <!-- Set Expiry Modal -->
+    <div id="expiry-modal" class="app-modal-overlay hidden">
+        <div class="app-modal-card">
+            <div class="app-modal-icon-wrap"><span class="material-icons-round">schedule</span></div>
+            <h3 class="app-modal-title">Schedule Expiry Date</h3>
+            <p class="app-modal-message" id="expiry-modal-key">This key will auto-expire at the date & time you choose below.</p>
+            <label class="form-label">Expiry Date & Time</label>
+            <input type="datetime-local" id="expiry-input" class="form-control">
+            <div class="app-modal-actions">
+                <button class="app-modal-btn app-modal-btn-cancel" onclick="closeExpiryModal()">Cancel</button>
+                <button class="app-modal-btn app-modal-btn-confirm" onclick="confirmSetExpiry()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Confirm Expire Now Modal -->
+    <div id="confirm-modal" class="app-modal-overlay hidden">
+        <div class="app-modal-card">
+            <div class="app-modal-icon-wrap danger"><span class="material-icons-round">block</span></div>
+            <h3 class="app-modal-title">Expire This Key Now?</h3>
+            <p class="app-modal-message" id="confirm-modal-key">This blocks the key immediately, regardless of any scheduled expiry date. You can reactivate it later.</p>
+            <div class="app-modal-actions">
+                <button class="app-modal-btn app-modal-btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+                <button class="app-modal-btn app-modal-btn-confirm danger" onclick="confirmExpireNow()">Expire Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reactivate Modal -->
+    <div id="reactivate-modal" class="app-modal-overlay hidden">
+        <div class="app-modal-card">
+            <div class="app-modal-icon-wrap"><span class="material-icons-round">restore</span></div>
+            <h3 class="app-modal-title">Reactivate This Key?</h3>
+            <p class="app-modal-message" id="reactivate-modal-key">This clears the scheduled expiry date and sets the key's status back to used.</p>
+            <div class="app-modal-actions">
+                <button class="app-modal-btn app-modal-btn-cancel" onclick="closeReactivateModal()">Cancel</button>
+                <button class="app-modal-btn app-modal-btn-confirm" onclick="confirmReactivate()">Reactivate</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reset Modal -->
+    <div id="reset-modal" class="app-modal-overlay hidden">
+        <div class="app-modal-card">
+            <div class="app-modal-icon-wrap"><span class="material-icons-round">restart_alt</span></div>
+            <h3 class="app-modal-title">Reset This Key?</h3>
+            <p class="app-modal-message" id="reset-modal-key">This wipes the mobile, activation date, and expiry date, and sets the key back to newly available.</p>
+            <div class="app-modal-actions">
+                <button class="app-modal-btn app-modal-btn-cancel" onclick="closeResetModal()">Cancel</button>
+                <button class="app-modal-btn app-modal-btn-confirm" onclick="confirmReset()">Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="toast" id="toast">
+        <span class="material-icons-round">check_circle</span>
+        <span id="toast-text">Copied</span>
+    </div>
+
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
+import {
+    getFirestore, doc, setDoc, getDocs, collection, Timestamp, deleteField
+} from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
+
+const firebaseConfig = {
+    apiKey: "AIzaSyClNBurDrZ1GXs5JXhjZdQ8VuupJazfsMw",
+    authDomain: "vedpuja-6f82f.firebaseapp.com",
+    projectId: "vedpuja-6f82f",
+    storageBucket: "vedpuja-6f82f.firebasestorage.app",
+    messagingSenderId: "204386789263",
+    appId: "1:204386789263:web:46d2736d6ade2dc0f00dfa",
+    measurementId: "G-T33ZGN68TL"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+let allKeys = [];
+let pendingKey = null;
+
+function blk(n) {
+    const c = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+    let s = "";
+    for (let i = 0; i < n; i++) s += c[Math.floor(Math.random() * c.length)];
+    return s;
+}
+function makeKey() { return `${blk(4)}-${blk(4)}-${blk(4)}`; }
+
+function tsToDate(ts) {
+    if (!ts) return null;
+    if (ts.toDate) return ts.toDate();
+    if (ts.seconds) return new Date(ts.seconds * 1000);
+    return null;
+}
+
+function formatDate(ts) {
+    const d = tsToDate(ts);
+    if (!d) return null;
+    return d.toLocaleString(undefined, { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+}
+
+function showToast(text) {
+    const toast = document.getElementById('toast');
+    document.getElementById('toast-text').textContent = text;
+    toast.classList.add('show');
+    setTimeout(() => toast.classList.remove('show'), 1800);
+}
+
+window.loadKeys = async function () {
+    const btn = document.getElementById('generate-btn');
+    const listEl = document.getElementById('keys-list');
+    listEl.innerHTML = '<p style="text-align:center;color:var(--on-surface-variant);font-size:12px;">Loading keys...</p>';
+
+    const snap = await getDocs(collection(db, "licenses"));
+    const now = new Date();
+    const updates = [];
+    allKeys = [];
+
+    snap.forEach(d => {
+        const data = d.data();
+        const expiresAt = tsToDate(data.expiresAt);
+        let status = data.status || 'available';
+
+        // Auto-flip to expired if past due (remember prior status so it can be reactivated)
+        if (expiresAt && expiresAt <= now && status !== 'expired') {
+            updates.push(setDoc(doc(db, "licenses", d.id), { status: 'expired', previousStatus: status }, { merge: true }));
+            data.previousStatus = status;
+            status = 'expired';
+        }
+
+        allKeys.push({
+            key: d.id,
+            status,
+            mobile: data.mobile || null,
+            activatedAt: data.activatedAt || null,
+            expiresAt: data.expiresAt || null,
+            createdAt: data.createdAt || null,
+            previousStatus: data.previousStatus || null
+        });
+    });
+
+    if (updates.length) await Promise.all(updates).catch(() => {});
+
+    allKeys.sort((a, b) => {
+        const da = tsToDate(a.createdAt), db_ = tsToDate(b.createdAt);
+        if (da && db_) return db_ - da;
+        if (da) return -1;
+        if (db_) return 1;
+        return a.key.localeCompare(b.key);
+    });
+
+    renderStats();
+    renderKeys();
+};
+
+function renderStats() {
+    const total = allKeys.length;
+    const available = allKeys.filter(k => k.status === 'available').length;
+    const used = allKeys.filter(k => k.status === 'used').length;
+    const expired = allKeys.filter(k => k.status === 'expired').length;
+    document.getElementById('stat-total').textContent = total;
+    document.getElementById('stat-available').textContent = available;
+    document.getElementById('stat-used').textContent = used;
+    document.getElementById('stat-expired').textContent = expired;
+}
+
+window.renderKeys = function () {
+    const q = document.getElementById('search-input').value.trim().toLowerCase();
+    document.getElementById('clear-search').classList.toggle('hidden', !q);
+
+    const listEl = document.getElementById('keys-list');
+    const emptyEl = document.getElementById('empty-state');
+
+    const filtered = allKeys.filter(k => {
+        if (!q) return true;
+        const activatedStr = formatDate(k.activatedAt) || '';
+        const expiresStr = formatDate(k.expiresAt) || '';
+        const haystack = [k.key, k.mobile, k.status, activatedStr, expiresStr].filter(Boolean).join(' ').toLowerCase();
+        return haystack.includes(q);
+    });
+
+    if (!filtered.length) {
+        listEl.innerHTML = '';
+        emptyEl.classList.remove('hidden');
+        return;
+    }
+    emptyEl.classList.add('hidden');
+
+    listEl.innerHTML = filtered.map(k => {
+        const activated = formatDate(k.activatedAt);
+        const expires = formatDate(k.expiresAt);
+        const isExpired = k.status === 'expired';
+
+        return `
+        <div class="key-card fade-in">
+            <div class="key-card-header">
+                <div class="key-value">${k.key}</div>
+                <span class="status-badge ${k.status}">${k.status}</span>
+            </div>
+            <div class="key-meta">
+                ${k.mobile ? `<div class="key-meta-row"><span class="material-icons-round">smartphone</span>${k.mobile}</div>` : ''}
+                ${activated ? `<div class="key-meta-row"><span class="material-icons-round">event_available</span>Activated ${activated}</div>` : ''}
+                ${expires ? `<div class="key-meta-row"><span class="material-icons-round">event_busy</span>Expires ${expires}</div>` : ''}
+            </div>
+            <div class="key-card-actions">
+                <button class="btn-action btn-copy" onclick="copyKey('${k.key}')">
+                    <span class="material-icons-round">content_copy</span>Copy
+                </button>
+                ${isExpired ? `
+                <button class="btn-action btn-reactivate" onclick="openReactivateModal('${k.key}')">
+                    <span class="material-icons-round">restore</span>Reactivate
+                </button>
+                <button class="btn-action btn-reset" onclick="openResetModal('${k.key}')">
+                    <span class="material-icons-round">restart_alt</span>Reset
+                </button>` : `
+                <button class="btn-action btn-expiry" onclick="openExpiryModal('${k.key}')">
+                    <span class="material-icons-round">schedule</span>Expiry Date
+                </button>
+                <button class="btn-action btn-expire" onclick="openConfirmModal('${k.key}')">
+                    <span class="material-icons-round">block</span>Expire Now
+                </button>
+                ${k.status === 'used' ? `
+                <button class="btn-action btn-reset" onclick="openResetModal('${k.key}')">
+                    <span class="material-icons-round">restart_alt</span>Reset
+                </button>` : ''}`}
+            </div>
+        </div>`;
+    }).join('');
+};
+
+window.clearSearch = function () {
+    document.getElementById('search-input').value = '';
+    renderKeys();
+};
+
+window.copyKey = async function (key) {
+    try {
+        await navigator.clipboard.writeText(key);
+    } catch (e) {
+        const ta = document.createElement('textarea');
+        ta.value = key;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+    }
+    showToast('Key copied');
+};
+
+window.openExpiryModal = function (key) {
+    pendingKey = key;
+    document.getElementById('expiry-modal-key').textContent = `Choose an expiry date & time for ${key}.`;
+    const k = allKeys.find(x => x.key === key);
+    const existing = k ? tsToDate(k.expiresAt) : null;
+    const base = existing || new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+    const pad = n => String(n).padStart(2, '0');
+    const val = `${base.getFullYear()}-${pad(base.getMonth() + 1)}-${pad(base.getDate())}T${pad(base.getHours())}:${pad(base.getMinutes())}`;
+    document.getElementById('expiry-input').value = val;
+    document.getElementById('expiry-modal').classList.remove('hidden');
+};
+
+window.closeExpiryModal = function () {
+    pendingKey = null;
+    document.getElementById('expiry-modal').classList.add('hidden');
+};
+
+window.confirmSetExpiry = async function () {
+    const val = document.getElementById('expiry-input').value;
+    if (!val || !pendingKey) return;
+    const dateObj = new Date(val);
+    await setDoc(doc(db, "licenses", pendingKey), { expiresAt: Timestamp.fromDate(dateObj) }, { merge: true });
+    closeExpiryModal();
+    showToast('Expiry set');
+    loadKeys();
+};
+
+window.openConfirmModal = function (key) {
+    pendingKey = key;
+    document.getElementById('confirm-modal-key').textContent = `This will immediately mark ${key} as expired.`;
+    document.getElementById('confirm-modal').classList.remove('hidden');
+};
+
+window.closeConfirmModal = function () {
+    pendingKey = null;
+    document.getElementById('confirm-modal').classList.add('hidden');
+};
+
+window.confirmExpireNow = async function () {
+    if (!pendingKey) return;
+    const k = allKeys.find(x => x.key === pendingKey);
+    const previousStatus = (k && k.status !== 'expired') ? k.status : 'available';
+    await setDoc(doc(db, "licenses", pendingKey), { status: 'expired', previousStatus }, { merge: true });
+    closeConfirmModal();
+    showToast('Key expired');
+    loadKeys();
+};
+
+window.openResetModal = function (key) {
+    pendingKey = key;
+    document.getElementById('reset-modal-key').textContent = `This wipes the mobile, activation date, and expiry date on ${key}, and sets it back to newly available.`;
+    document.getElementById('reset-modal').classList.remove('hidden');
+};
+
+window.closeResetModal = function () {
+    pendingKey = null;
+    document.getElementById('reset-modal').classList.add('hidden');
+};
+
+window.confirmReset = async function () {
+    if (!pendingKey) return;
+    await setDoc(doc(db, "licenses", pendingKey), {
+        status: 'available',
+        mobile: deleteField(),
+        activatedAt: deleteField(),
+        expiresAt: deleteField(),
+        previousStatus: deleteField()
+    }, { merge: true });
+    closeResetModal();
+    showToast('Key reset to available');
+    loadKeys();
+};
+window.openReactivateModal = function (key) {
+    pendingKey = key;
+    document.getElementById('reactivate-modal-key').textContent = `This clears the scheduled expiry date on ${key} and sets its status back to used.`;
+    document.getElementById('reactivate-modal').classList.remove('hidden');
+};
+
+window.closeReactivateModal = function () {
+    pendingKey = null;
+    document.getElementById('reactivate-modal').classList.add('hidden');
+};
+
+window.confirmReactivate = async function () {
+    if (!pendingKey) return;
+    await setDoc(doc(db, "licenses", pendingKey), {
+        status: 'used',
+        expiresAt: deleteField(),
+        previousStatus: deleteField()
+    }, { merge: true });
+    closeReactivateModal();
+    showToast('Key reactivated');
+    loadKeys();
+};
+
+window.createKeys = async function (count) {
+    const btn = document.getElementById('generate-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span><span>Generating...</span>';
+
+    const proms = [];
+    for (let i = 0; i < count; i++) {
+        const k = makeKey();
+        proms.push(setDoc(doc(db, "licenses", k), { status: "available", createdAt: Timestamp.now() }));
+    }
+    await Promise.all(proms);
+
+    btn.disabled = false;
+    btn.innerHTML = '<span class="material-icons-round">add_circle</span><span>Generate 10 Keys</span>';
+    showToast(`${count} keys generated`);
+    loadKeys();
+};
+
+loadKeys();
+</script>
+</body>
+</html>

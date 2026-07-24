@@ -223,6 +223,9 @@
     .btn-copy { background-color: #F5F5EE; color: var(--on-surface-variant); }
     .btn-copy:active { background-color: #EAEADD; }
 
+    .btn-name { background-color: var(--secondary); color: #fff; }
+    .btn-name:active { background-color: var(--primary); }
+
     .btn-expiry { background-color: var(--primary-container); color: var(--on-primary-container); }
     .btn-expiry:active { background-color: #8FCFDA; }
 
@@ -380,6 +383,21 @@
         </div>
     </div>
 
+    <!-- Name Modal -->
+    <div id="name-modal" class="app-modal-overlay hidden">
+        <div class="app-modal-card">
+            <div class="app-modal-icon-wrap"><span class="material-icons-round">badge</span></div>
+            <h3 class="app-modal-title">Label This Key</h3>
+            <p class="app-modal-message" id="name-modal-key">Give this key a name so you can tell whose license it is at a glance.</p>
+            <label class="form-label">Name</label>
+            <input type="text" id="name-input" class="form-control" placeholder="e.g. Pandit Ram Sharma" maxlength="80">
+            <div class="app-modal-actions">
+                <button class="app-modal-btn app-modal-btn-cancel" onclick="closeNameModal()">Cancel</button>
+                <button class="app-modal-btn app-modal-btn-confirm" onclick="confirmSetName()">Save</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Confirm Expire Now Modal -->
     <div id="confirm-modal" class="app-modal-overlay hidden">
         <div class="app-modal-card">
@@ -501,6 +519,7 @@ window.loadKeys = async function () {
         allKeys.push({
             key: d.id,
             status,
+            name: data.name || null,
             mobile: data.mobile || null,
             activatedAt: data.activatedAt || null,
             expiresAt: data.expiresAt || null,
@@ -545,7 +564,7 @@ window.renderKeys = function () {
         if (!q) return true;
         const activatedStr = formatDate(k.activatedAt) || '';
         const expiresStr = formatDate(k.expiresAt) || '';
-        const haystack = [k.key, k.mobile, k.status, activatedStr, expiresStr].filter(Boolean).join(' ').toLowerCase();
+        const haystack = [k.key, k.name, k.mobile, k.status, activatedStr, expiresStr].filter(Boolean).join(' ').toLowerCase();
         return haystack.includes(q);
     });
 
@@ -567,6 +586,7 @@ window.renderKeys = function () {
                 <div class="key-value">${k.key}</div>
                 <span class="status-badge ${k.status}">${k.status}</span>
             </div>
+            ${k.name ? `<div class="key-meta-row" style="font-weight:700; color:var(--on-surface); margin-bottom:2px;"><span class="material-icons-round">badge</span>${k.name}</div>` : ''}
             <div class="key-meta">
                 ${k.mobile ? `<div class="key-meta-row"><span class="material-icons-round">smartphone</span>${k.mobile}</div>` : ''}
                 ${activated ? `<div class="key-meta-row"><span class="material-icons-round">event_available</span>Activated ${activated}</div>` : ''}
@@ -575,6 +595,9 @@ window.renderKeys = function () {
             <div class="key-card-actions">
                 <button class="btn-action btn-copy" onclick="copyKey('${k.key}')">
                     <span class="material-icons-round">content_copy</span>Copy
+                </button>
+                <button class="btn-action btn-name" onclick="openNameModal('${k.key}')">
+                    <span class="material-icons-round">badge</span>${k.name ? 'Edit Name' : 'Add Name'}
                 </button>
                 ${isExpired ? `
                 <button class="btn-action btn-reactivate" onclick="openReactivateModal('${k.key}')">
@@ -641,6 +664,33 @@ window.confirmSetExpiry = async function () {
     await setDoc(doc(db, "licenses", pendingKey), { expiresAt: Timestamp.fromDate(dateObj) }, { merge: true });
     closeExpiryModal();
     showToast('Expiry set');
+    loadKeys();
+};
+
+window.openNameModal = function (key) {
+    pendingKey = key;
+    const k = allKeys.find(x => x.key === key);
+    document.getElementById('name-modal-key').textContent = `Give ${key} a name so you can tell whose license it is at a glance.`;
+    document.getElementById('name-input').value = (k && k.name) || '';
+    document.getElementById('name-modal').classList.remove('hidden');
+    setTimeout(() => document.getElementById('name-input').focus(), 50);
+};
+
+window.closeNameModal = function () {
+    pendingKey = null;
+    document.getElementById('name-modal').classList.add('hidden');
+};
+
+window.confirmSetName = async function () {
+    if (!pendingKey) return;
+    const val = document.getElementById('name-input').value.trim();
+    if (val) {
+        await setDoc(doc(db, "licenses", pendingKey), { name: val }, { merge: true });
+    } else {
+        await setDoc(doc(db, "licenses", pendingKey), { name: deleteField() }, { merge: true });
+    }
+    closeNameModal();
+    showToast(val ? 'Name saved' : 'Name cleared');
     loadKeys();
 };
 

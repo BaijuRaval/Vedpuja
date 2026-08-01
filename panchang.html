@@ -225,7 +225,7 @@
   <div class="status" id="engineStatus">Loading astronomical engine…</div>
 
   <footer>
-    Sun/Moon positions: Swiss Ephemeris (Moshier, via @swisseph/browser) · Sunrise/Sunset: Sunrise Equation · Ayanamsa: Lahiri (linear approximation)
+    Sun/Moon positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Sunrise/Sunset: Sunrise Equation · Ayanamsa: Lahiri (Swiss Ephemeris native)
   </footer>
 </div>
 
@@ -322,15 +322,6 @@ function computeSunTimes(dateLocal, lat, lon){
   };
 }
 
-/* Lahiri ayanamsa, linear approximation anchored at J2000 (accurate to ~1-2 arcmin over a century) */
-function lahiriAyanamsa(jd){
-  const T = (jd - 2451545.0) / 36525; // Julian centuries from J2000.0
-  const years = T * 100;
-  const ayanamsaJ2000 = 23.85263; // degrees, Lahiri ayanamsa near 1 Jan 2000
-  const precessionPerYear = 50.27963 / 3600; // degrees/year
-  return ayanamsaJ2000 + precessionPerYear*years;
-}
-
 function fmtTime(date){
   if(!date) return "--";
   return date.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true});
@@ -424,18 +415,22 @@ tickClock();
 async function loadSwissEphemeris(){
   setEngineStatus("Loading astronomical engine (Swiss Ephemeris, Moshier)…");
   try{
-    // Loaded as an ES module directly from jsDelivr's CDN build of the npm package.
-    // No bundler / npm install required — this works as a plain <script type="module"> import.
-    const mod = await import("https://cdn.jsdelivr.net/npm/@swisseph/browser@1.0.2/+esm");
+    // Self-hosted, unbundled files — js/swisseph/swisseph-browser.js locates its own
+    // swisseph.wasm via `new URL('./swisseph.wasm', import.meta.url)`, so swisseph-browser.js,
+    // swisseph.js and swisseph.wasm must all sit together in this same folder.
+    const mod = await import("./js/swisseph/swisseph-browser.js");
     const swe = new mod.SwissEphemeris();
     await swe.init();
+    // Configure Lahiri ayanamsa once; calculatePosition(..., CalculationFlag.Sidereal) will
+    // then return true Nirayana (sidereal) longitudes directly from Swiss Ephemeris itself.
+    swe.setSiderealMode(mod.SiderealMode.Lahiri);
     sweModule = mod;
     sweInstance = swe;
-    setEngineStatus("Astronomical engine ready (Moshier ephemeris, offline-capable).", "ok");
+    setEngineStatus("Astronomical engine ready (Moshier ephemeris, fully offline).", "ok");
     return true;
   }catch(err){
     console.error(err);
-    setEngineStatus("Could not load Swiss Ephemeris from the CDN. Check your internet connection (first load requires it) or see the self-hosting instructions.", "err");
+    setEngineStatus("Could not load the Swiss Ephemeris files from js/swisseph/. Make sure swisseph-browser.js, swisseph.js and swisseph.wasm are all present in that folder, and that this page is served over http:// or https:// (not opened directly as a file:// path).", "err");
     return false;
   }
 }
@@ -449,15 +444,15 @@ function computeAndRender(){
   el('latVal').textContent = userLat.toFixed(4)+"°";
   el('lonVal').textContent = userLon.toFixed(4)+"°";
 
-  // Sun & Moon tropical longitudes from Swiss Ephemeris (Moshier ephemeris, bundled — no extra files needed)
+  // Sun & Moon sidereal (Nirayana, Lahiri) longitudes directly from Swiss Ephemeris.
+  // Moshier ephemeris is bundled inside swisseph.wasm — no separate ephemeris files needed.
   const jd = sweInstance.dateToJulianDay(now);
-  const sunPos = sweInstance.calculatePosition(jd, sweModule.Planet.Sun);
-  const moonPos = sweInstance.calculatePosition(jd, sweModule.Planet.Moon);
+  const flags = sweModule.CalculationFlag.MoshierEphemeris | sweModule.CalculationFlag.Sidereal;
+  const sunPos = sweInstance.calculatePosition(jd, sweModule.Planet.Sun, flags);
+  const moonPos = sweInstance.calculatePosition(jd, sweModule.Planet.Moon, flags);
 
-  // Convert tropical -> sidereal (Nirayana) using Lahiri ayanamsa
-  const ayanamsa = lahiriAyanamsa(jd);
-  const sunSid = norm360(sunPos.longitude - ayanamsa);
-  const moonSid = norm360(moonPos.longitude - ayanamsa);
+  const sunSid = norm360(sunPos.longitude);
+  const moonSid = norm360(moonPos.longitude);
 
   const tithi = getTithi(moonSid, sunSid);
   const nakshatra = getNakshatra(moonSid);

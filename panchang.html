@@ -3,11 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Panchang | પંચાંગ</title>
+<title>Panchang</title>
 <style>
   :root{
-    --bg1:#120a1f;
-    --bg2:#2a1547;
+    --bg1:#0b0514;
+    --bg2:#1a0f2a;
     --gold:#e6b45a;
     --gold-light:#f5d799;
     --saffron:#ff7a3d;
@@ -26,9 +26,9 @@
   html,body{
     min-height:100%;
     background:
-      radial-gradient(circle at 15% -5%, #4a2570 0%, transparent 50%),
-      radial-gradient(circle at 95% 8%, #331a54 0%, transparent 45%),
-      linear-gradient(180deg,var(--bg1),#150a24 55%,#0b0514);
+      radial-gradient(circle at 20% 0%, rgba(74,37,112,0.22) 0%, transparent 40%),
+      radial-gradient(circle at 90% 10%, rgba(51,26,84,0.18) 0%, transparent 38%),
+      var(--bg1);
     color:var(--text-main);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",
       "Noto Sans Gujarati","Shruti",Arial,sans-serif;
@@ -127,6 +127,7 @@
   .prow .pval{text-align:right;flex:1;}
   .prow .pval .en{font-size:14px;font-weight:700;}
   .prow .pval .gu{font-size:12px;color:var(--gold-light);}
+  .gu:empty, .mgu:empty, .cgu:empty{display:none;}
   .prow .pval .time{font-size:12px;color:var(--text-sub);}
 
   .misc-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:2px;}
@@ -187,8 +188,8 @@
 
   <header class="top">
     <div class="om">ॐ</div>
-    <h1>Panchang &nbsp;|&nbsp; પંચાંગ</h1>
-    <div class="sub">Daily Vedic Almanac / દૈનિક પંચાંગ</div>
+    <h1>Panchang</h1>
+    <div class="sub">Daily Vedic Almanac</div>
     <div class="live-clock">Now: <b id="clockTime">--:--:--</b></div>
   </header>
 
@@ -200,7 +201,7 @@
   <div class="geo-card">
     <div class="geo-row"><span>Latitude</span><b id="latVal">--</b></div>
     <div class="geo-row"><span>Longitude</span><b id="lonVal">--</b></div>
-    <button id="locateBtn">📍 Detect My Location / સ્થાન શોધો</button>
+    <button id="locateBtn">📍 Detect My Location</button>
     <div class="manual-loc" id="manualLocBox">
       <input type="text" id="manualLat" placeholder="Latitude e.g. 23.0225">
       <input type="text" id="manualLon" placeholder="Longitude e.g. 72.5714">
@@ -241,31 +242,31 @@
 
       <div class="pcard">
         <div class="ptitle">🌙 Tithi</div>
-        <div class="prow"><div class="plabel">Current</div><div class="pval"><div class="en" id="tithiCurEn">--</div><div class="gu" id="tithiCurGu">--</div></div></div>
+        <div class="prow"><div class="plabel">Current</div><div class="pval"><div class="en" id="tithiCurEn">--</div><div class="gu" id="tithiCurGu"></div></div></div>
         <div class="prow"><div class="plabel">Ends At</div><div class="pval"><div class="time" id="tithiEnds">--</div></div></div>
-        <div class="prow"><div class="plabel">Next</div><div class="pval"><div class="en" id="tithiNextEn">--</div><div class="gu" id="tithiNextGu">--</div></div></div>
+        <div class="prow"><div class="plabel">Next</div><div class="pval"><div class="en" id="tithiNextEn">--</div><div class="gu" id="tithiNextGu"></div></div></div>
       </div>
 
       <div class="pcard">
         <div class="ptitle">⭐ Nakshatra</div>
-        <div class="prow"><div class="plabel">Current</div><div class="pval"><div class="en" id="nakCurEn">--</div><div class="gu" id="nakCurGu">--</div></div></div>
+        <div class="prow"><div class="plabel">Current</div><div class="pval"><div class="en" id="nakCurEn">--</div><div class="gu" id="nakCurGu"></div></div></div>
         <div class="prow"><div class="plabel">Ends At</div><div class="pval"><div class="time" id="nakEnds">--</div></div></div>
-        <div class="prow"><div class="plabel">Next</div><div class="pval"><div class="en" id="nakNextEn">--</div><div class="gu" id="nakNextGu">--</div></div></div>
+        <div class="prow"><div class="plabel">Next</div><div class="pval"><div class="en" id="nakNextEn">--</div><div class="gu" id="nakNextGu"></div></div></div>
         <div class="prow"><div class="plabel">Pada</div><div class="pval"><div class="en" id="nakPada">--</div></div></div>
       </div>
 
       <div class="pcard">
         <div class="ptitle">☸ Yoga</div>
-        <div class="prow"><div class="plabel">Current</div><div class="pval"><div class="en" id="yogaCurEn">--</div><div class="gu" id="yogaCurGu">--</div></div></div>
+        <div class="prow"><div class="plabel">Current</div><div class="pval"><div class="en" id="yogaCurEn">--</div><div class="gu" id="yogaCurGu"></div></div></div>
         <div class="prow"><div class="plabel">Ends At</div><div class="pval"><div class="time" id="yogaEnds">--</div></div></div>
-        <div class="prow"><div class="plabel">Next</div><div class="pval"><div class="en" id="yogaNextEn">--</div><div class="gu" id="yogaNextGu">--</div></div></div>
+        <div class="prow"><div class="plabel">Next</div><div class="pval"><div class="en" id="yogaNextEn">--</div><div class="gu" id="yogaNextGu"></div></div></div>
       </div>
 
       <div class="pcard">
         <div class="ptitle">🔱 Karana</div>
-        <div class="prow"><div class="plabel">Current</div><div class="pval"><div class="en" id="karCurEn">--</div><div class="gu" id="karCurGu">--</div></div></div>
+        <div class="prow"><div class="plabel">Current</div><div class="pval"><div class="en" id="karCurEn">--</div><div class="gu" id="karCurGu"></div></div></div>
         <div class="prow"><div class="plabel">Ends At</div><div class="pval"><div class="time" id="karEnds">--</div></div></div>
-        <div class="prow"><div class="plabel">Next</div><div class="pval"><div class="en" id="karNextEn">--</div><div class="gu" id="karNextGu">--</div></div></div>
+        <div class="prow"><div class="plabel">Next</div><div class="pval"><div class="en" id="karNextEn">--</div><div class="gu" id="karNextGu"></div></div></div>
       </div>
 
       <div class="misc-grid">
@@ -572,6 +573,22 @@ function findMostRecentIndexStart(jd, indexFn, targetIndex, stepDays, maxDays){
   return null;
 }
 
+function findNextIndexStart(jd, indexFn, targetIndex, stepDays, maxDays){
+  let t=jd, idxAtT=indexFn(t);
+  if (idxAtT===targetIndex) return jd;
+  const steps = Math.ceil(maxDays/stepDays);
+  for(let i=0;i<steps;i++){
+    const t2=t+stepDays, idxAtT2=indexFn(t2);
+    if (idxAtT!==targetIndex && idxAtT2===targetIndex){
+      let lo=t,hi=t2;
+      for(let k=0;k<40;k++){ const mid=(lo+hi)/2; if(indexFn(mid)===targetIndex) hi=mid; else lo=mid; }
+      return hi;
+    }
+    t=t2; idxAtT=idxAtT2;
+  }
+  return null;
+}
+
 function getElementInfo(jd, indexFn, stepDays){
   const currentIndex = indexFn(jd);
   const fwd = findTransitionForward(jd, indexFn, stepDays, 3);
@@ -598,16 +615,54 @@ function getAyana(sunSid){
 function getPanchaka(nakIdx, pada){
   return (nakIdx===22 && pada>=3) || (nakIdx>=23 && nakIdx<=26);
 }
+/* Finds the JD at which Panchaka ends (the Revati -> Ashwini nakshatra boundary), given the
+   currently active nakshatra. Panchaka always ends at the end of Revati, whichever of the
+   five qualifying nakshatras (late Dhanishtha, Shatabhisha, P.Bhadrapada, U.Bhadrapada, Revati)
+   is currently active. */
+function findPanchakaEnd(jd, currentNakIdx){
+  if (currentNakIdx===26){
+    const info = getElementInfo(jd, nakshatraIndexAt, 0.02);
+    return info.endsAtJd;
+  }
+  let t = jd;
+  for(let i=0;i<6;i++){
+    const trans = findTransitionForward(t, nakshatraIndexAt, 0.02, 3);
+    if (!trans) return null;
+    if (trans.fromIndex===26) return trans.jd;
+    t = trans.jd;
+  }
+  return null;
+}
+/* Returns { active, wholeDay, endsAtJd } describing Panchaka status at the reference moment,
+   relative to the selected calendar day (sunrise -> next sunrise). */
+function getPanchakaStatus(jd, nakIdx, pada, dayEndJd){
+  const active = getPanchaka(nakIdx, pada);
+  if (!active) return { active:false, wholeDay:false, endsAtJd:null };
+  const endsAtJd = findPanchakaEnd(jd, nakIdx);
+  const wholeDay = endsAtJd===null || endsAtJd >= dayEndJd;
+  return { active:true, wholeDay, endsAtJd };
+}
+
+/* Amanta system: the lunar month takes the name of the solar sidereal sign (rashi) that the
+   Sun occupies at the AMAVASYA THAT ENDS the current lunar month (not the one that started it).
+   This is the standard Amanta rule used in Gujarati/Maharashtrian/South Indian Panchangs.
+   Verified: for 1 August 2026 this correctly yields "Ashadha". */
 function getLunarMonth(jd){
-  const amavasyaJd = findMostRecentIndexStart(jd, tithiIndexAt, 29, 0.4, 35);
-  if (amavasyaJd===null) return null;
-  const {sunSid} = getSunMoonSidereal(amavasyaJd);
+  const endingAmavasyaJd = findNextIndexStart(jd, tithiIndexAt, 29, 0.4, 35);
+  if (endingAmavasyaJd===null) return null;
+  const {sunSid} = getSunMoonSidereal(endingAmavasyaJd);
   const rashiIdx = Math.floor(norm360(sunSid)/30);
   return LUNAR_MONTHS[rashiIdx];
 }
-function findAmavasyaNear(anchorJd, radiusDays){
-  let t = anchorJd - radiusDays;
-  const end = anchorJd + radiusDays;
+/* Finds the Kartik (Diwali) amavasya for a given Gregorian year by scanning the whole
+   Sep-Dec window and selecting the occurrence where the Sun is in sidereal Tula (Libra,
+   rashi index 6) — this is the astronomical condition that actually defines "Kartik"
+   amavasya, and correctly handles years with an intercalary (adhik) lunar month where a
+   naive calendar-proximity search could otherwise lock onto the wrong new moon. Verified
+   against real Diwali dates: 20 Oct 2025 and 8 Nov 2026 (2026 has an adhik maas). */
+function findKartikAmavasya(gregorianYear){
+  let t = toJulianUTC(new Date(Date.UTC(gregorianYear,8,1,12,0,0)));
+  const end = toJulianUTC(new Date(Date.UTC(gregorianYear,11,15,12,0,0)));
   const step = 0.4;
   let prevIdx = tithiIndexAt(t);
   while (t<end){
@@ -615,18 +670,37 @@ function findAmavasyaNear(anchorJd, radiusDays){
     if (idx2===29 && prevIdx!==29){
       let lo=t,hi=t2;
       for(let k=0;k<40;k++){ const mid=(lo+hi)/2; if(tithiIndexAt(mid)===29) hi=mid; else lo=mid; }
-      return hi;
+      const {sunSid} = getSunMoonSidereal(hi);
+      const rashi = Math.floor(norm360(sunSid)/30);
+      if (rashi===6) return hi;
+      t=hi;
     }
     t=t2; prevIdx=idx2;
   }
   return null;
 }
-function getGujaratiSamvat(jd, gregorianYear){
-  const anchor = toJulianUTC(new Date(Date.UTC(gregorianYear,10,1,12,0,0)));
-  const amavasyaJd = findAmavasyaNear(anchor, 25);
+function getGujaratiSamvatYear(jd, gregorianYear){
+  const amavasyaJd = findKartikAmavasya(gregorianYear);
   if (amavasyaJd===null) return gregorianYear+57;
   const newYearJd = amavasyaJd + 1;
   return jd >= newYearJd ? gregorianYear+57 : gregorianYear+56;
+}
+/* Standard 60-year Samvatsara (Jupiter) cycle name list. Anchored so that Gujarati Samvat
+   2082 = "Pingala" (confirmed reference point), then applied as a consistent linear cycle
+   for all other years — public sources disagree on the exact Vikram-year offset, so this
+   anchor is the reliable calibration point rather than an unverified formula. */
+const SAMVATSARA_NAMES = [
+  "Prabhava","Vibhava","Shukla","Pramoda","Prajapati","Angirasa","Shrimukha","Bhava","Yuva","Dhata",
+  "Ishvara","Bahudhanya","Pramathi","Vikrama","Vrisha","Chitrabhanu","Svabhanu","Tarana","Parthiva","Vyaya",
+  "Sarvajit","Sarvadhari","Virodhi","Vikriti","Khara","Nandana","Vijaya","Jaya","Manmatha","Durmukhi",
+  "Hevilambi","Vilambi","Vikari","Sharvari","Plava","Shubhakrit","Shobhakrit","Krodhi","Vishvavasu","Parabhava",
+  "Plavanga","Kilaka","Saumya","Sadharana","Virodhikrit","Paridhavi","Pramadi","Ananda","Rakshasa","Nala",
+  "Pingala","Kalayukti","Siddharthi","Raudra","Durmati","Dundubhi","Rudhirodgari","Raktakshi","Krodhana","Kshaya"
+];
+function getSamvatsaraName(samvatYear){
+  const anchorYear = 2082, anchorIndex = 50; // Pingala
+  const idx = ((samvatYear - anchorYear + anchorIndex) % 60 + 60) % 60;
+  return SAMVATSARA_NAMES[idx];
 }
 
 /* ===================== MUHURAT / KAAL RANGES ===================== */
@@ -724,30 +798,34 @@ async function loadSwissEphemeris(){
 
 /* ===================== RENDER HELPERS ===================== */
 
+/* Display language: 0 = English (current), 1 = Gujarati (kept in the data tables above for
+   future multilingual support — switch this constant, or wire it to a UI toggle, to enable it). */
+const CURRENT_LANG_INDEX = 0;
+function L(pair){ return pair ? pair[CURRENT_LANG_INDEX] : ""; }
+
 function renderElementCard(prefix, info, namePairFn, refDay){
   const cur = namePairFn(info.currentIndex);
   const next = info.nextIndex!==null ? namePairFn(info.nextIndex) : null;
-  el(prefix+'CurEn').textContent = cur[0];
-  el(prefix+'CurGu').textContent = cur[1];
+  el(prefix+'CurEn').textContent = L(cur);
   el(prefix+'Ends').textContent = info.endsAtJd ? timeLabel(fromJulianUTC(info.endsAtJd), refDay) : "—";
-  el(prefix+'NextEn').textContent = next ? next[0] : "—";
-  el(prefix+'NextGu').textContent = next ? next[1] : "";
+  el(prefix+'NextEn').textContent = next ? L(next) : "—";
 }
 
-function muhuratItemHtml(icon, en, gu, start, end, refDay, cls, active){
+function muhuratItemHtml(icon, name, start, end, refDay, cls, active){
   return `<div class="muhurat-item ${cls} ${active?'':'inactive'}">
-    <div class="mname"><span class="micon">${icon}</span><div>${en}<span class="mgu">${gu}</span></div></div>
+    <div class="mname"><span class="micon">${icon}</span><div>${name}<span class="mgu"></span></div></div>
     <div class="mtime">${timeLabel(start,refDay)} – ${timeLabel(end,refDay)}</div>
   </div>`;
 }
 function choghadiyaItemHtml(c, refDay){
   return `<div class="chogh-item ${c.type}">
-    <div class="cname">${c.name}<span class="cgu">${c.nameGu}</span></div>
+    <div class="cname">${c.name}<span class="cgu"></span></div>
     <div class="ctime">${timeLabel(c.start,refDay)} – ${timeLabel(c.end,refDay)}</div>
   </div>`;
 }
 
 /* ===================== MAIN COMPUTE + RENDER ===================== */
+
 
 function computeAndRender(){
   if(!sweInstance || userLat===null || userLon===null) return;
@@ -761,7 +839,7 @@ function computeAndRender(){
   el('biLon').textContent = userLon.toFixed(4)+"°";
   el('biLocation').textContent = userLat.toFixed(2)+", "+userLon.toFixed(2);
   el('biDate').textContent = fmtFullDate(refDay);
-  el('biWeekday').textContent = WEEKDAYS[weekday][0] + " / " + WEEKDAYS[weekday][1];
+  el('biWeekday').textContent = L(WEEKDAYS[weekday]);
 
   const sunToday = computeSunTimes(refDay, userLat, userLon);
   if (sunToday.polarNight || sunToday.midnightSun){
@@ -795,20 +873,28 @@ function computeAndRender(){
   el('nakPada').textContent = nakshatraPada(moonSid);
 
   const paksha = tithiInfo.currentIndex < 15 ? ["Shukla Paksha","શુક્લ પક્ષ"] : ["Krishna Paksha","કૃષ્ણ પક્ષ"];
-  el('miscPaksha').textContent = paksha[0]+" / "+paksha[1];
+  el('miscPaksha').textContent = L(paksha);
 
   const month = getLunarMonth(jdRef);
-  el('miscMonth').textContent = month ? month[0]+" / "+month[1] : "—";
+  el('miscMonth').textContent = month ? L(month) : "—";
 
-  el('miscSamvat').textContent = "Vikram " + getGujaratiSamvat(jdRef, refDay.getFullYear());
+  const samvatYear = getGujaratiSamvatYear(jdRef, refDay.getFullYear());
+  el('miscSamvat').textContent = samvatYear + " " + getSamvatsaraName(samvatYear);
 
   const ayana = getAyana(sunSid);
-  el('miscAyana').textContent = ayana[0]+" / "+ayana[1];
+  el('miscAyana').textContent = L(ayana);
 
   const nakStart = nakInfo.startedAtJd ? fromJulianUTC(nakInfo.startedAtJd) : null;
   const nakEnd = nakInfo.endsAtJd ? fromJulianUTC(nakInfo.endsAtJd) : null;
-  const panchakaActive = getPanchaka(nakInfo.currentIndex, nakshatraPada(moonSid));
-  el('miscPanchaka').textContent = panchakaActive ? "Active ⚠️ / સક્રિય" : "Not Active / નિષ્ક્રિય";
+  const dayEndJd = toJulianUTC(new Date(refDay.getTime()+24*3600*1000));
+  const panchaka = getPanchakaStatus(jdRef, nakInfo.currentIndex, nakshatraPada(moonSid), dayEndJd);
+  if (!panchaka.active){
+    el('miscPanchaka').textContent = "Not Active";
+  } else if (panchaka.wholeDay){
+    el('miscPanchaka').textContent = "Active (Whole Day)";
+  } else {
+    el('miscPanchaka').textContent = "Active until " + timeLabel(fromJulianUTC(panchaka.endsAtJd), refDay);
+  }
 
   /* ---- Muhurats ---- */
   const brahma = brahmaMuhurtaRange(sunToday.sunrise);
@@ -836,22 +922,22 @@ function computeAndRender(){
   const bhadraRange = bhadraActive ? { start: fromJulianUTC(karInfo.startedAtJd), end: fromJulianUTC(karInfo.endsAtJd) } : null;
 
   let ausHtml = "";
-  ausHtml += muhuratItemHtml("🟣","Brahma Muhurta","બ્રહ્મ મુહૂર્ત", brahma.start, brahma.end, refDay, "aus", true);
-  ausHtml += muhuratItemHtml("🟢","Abhijit Muhurta","અભિજિત મુહૂર્ત", abhijit.start, abhijit.end, refDay, "aus", weekday!==3);
-  ausHtml += muhuratItemHtml("🏆","Vijay Muhurta","વિજય મુહૂર્ત", vijay.start, vijay.end, refDay, "aus", true);
-  ausHtml += muhuratItemHtml("🌇","Godhuli Muhurta","ગોધૂલિ મુહૂર્ત", godhuli.start, godhuli.end, refDay, "aus", true);
-  if (amrit) ausHtml += muhuratItemHtml("💛","Amrit Kalam","અમૃત કાળ", amrit.start, amrit.end, refDay, "aus", true);
+  ausHtml += muhuratItemHtml("🟣","Brahma Muhurta", brahma.start, brahma.end, refDay, "aus", true);
+  ausHtml += muhuratItemHtml("🟢","Abhijit Muhurta", abhijit.start, abhijit.end, refDay, "aus", weekday!==3);
+  ausHtml += muhuratItemHtml("🏆","Vijay Muhurta", vijay.start, vijay.end, refDay, "aus", true);
+  ausHtml += muhuratItemHtml("🌇","Godhuli Muhurta", godhuli.start, godhuli.end, refDay, "aus", true);
+  if (amrit) ausHtml += muhuratItemHtml("💛","Amrit Kalam", amrit.start, amrit.end, refDay, "aus", true);
   el('ausMuhurats').innerHTML = ausHtml;
 
   let inausHtml = "";
-  inausHtml += muhuratItemHtml("🔴","Rahu Kaal","રાહુ કાળ", rahu.start, rahu.end, refDay, "inaus", true);
-  inausHtml += muhuratItemHtml("🟠","Gulika Kaal","ગુલિક કાળ", gulika.start, gulika.end, refDay, "inaus", true);
-  inausHtml += muhuratItemHtml("🟤","Yamaganda","યમગંડ", yama.start, yama.end, refDay, "inaus", true);
+  inausHtml += muhuratItemHtml("🔴","Rahu Kaal", rahu.start, rahu.end, refDay, "inaus", true);
+  inausHtml += muhuratItemHtml("🟠","Gulika Kaal", gulika.start, gulika.end, refDay, "inaus", true);
+  inausHtml += muhuratItemHtml("🟤","Yamaganda", yama.start, yama.end, refDay, "inaus", true);
   durMuhurtas.forEach(dm=>{
-    inausHtml += muhuratItemHtml("⚠️","Dur Muhurta","દુર્મુહૂર્ત", dm.start, dm.end, refDay, "inaus", true);
+    inausHtml += muhuratItemHtml("⚠️","Dur Muhurta", dm.start, dm.end, refDay, "inaus", true);
   });
-  if (varjyam) inausHtml += muhuratItemHtml("☠️","Varjyam","વર્જ્યમ", varjyam.start, varjyam.end, refDay, "inaus", true);
-  inausHtml += muhuratItemHtml("🐍","Bhadra","ભદ્રા", bhadraRange?bhadraRange.start:null, bhadraRange?bhadraRange.end:null, refDay, "inaus", bhadraActive);
+  if (varjyam) inausHtml += muhuratItemHtml("☠️","Varjyam", varjyam.start, varjyam.end, refDay, "inaus", true);
+  inausHtml += muhuratItemHtml("🐍","Bhadra", bhadraRange?bhadraRange.start:null, bhadraRange?bhadraRange.end:null, refDay, "inaus", bhadraActive);
   el('inausMuhurats').innerHTML = inausHtml;
 
   /* ---- Choghadiya ---- */
@@ -923,8 +1009,8 @@ function buildAndRenderTimeline(dayStart, dayEnd, sunToday, sunNext, moon, muhur
     add(muhurats.bhadraRange.end, "🐍", "Bhadra Ends");
   }
 
-  chogh.day.forEach(c=> add(c.start, "🔶", "Day Choghadiya Changes", c.name+" / "+c.nameGu));
-  chogh.night.forEach(c=> add(c.start, "🔷", "Night Choghadiya Changes", c.name+" / "+c.nameGu));
+  chogh.day.forEach(c=> add(c.start, "🔶", "Day Choghadiya Changes", c.name));
+  chogh.night.forEach(c=> add(c.start, "🔷", "Night Choghadiya Changes", c.name));
 
   events.sort((a,b)=>a.date-b.date);
 

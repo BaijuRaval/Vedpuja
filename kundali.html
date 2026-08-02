@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Daily Kundali</title>
+<title>Kundali</title>
 <style>
   :root{
     --bg1:#0b0514; --bg2:#1a0f2a;
@@ -31,11 +31,16 @@
   header.top{text-align:center;padding:16px 8px 10px;}
   header.top .om{font-size:30px;color:var(--gold);text-shadow:0 0 16px rgba(230,180,90,.6);}
   header.top h1{
-    font-size:20px;font-weight:700;letter-spacing:.4px;margin-top:4px;
+    font-size:22px;font-weight:700;letter-spacing:.4px;margin-top:4px;
     background:linear-gradient(90deg,var(--gold-light),var(--saffron));
     -webkit-background-clip:text;background-clip:text;color:transparent;
   }
-  header.top .sub{font-size:11px;color:var(--text-sub);margin-top:2px;}
+
+  /* ---------- mode selector ---------- */
+  .mode-bar{display:flex;gap:6px;margin:14px 0;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:5px;}
+  .mode-btn{flex:1;padding:10px 4px;border:none;border-radius:8px;background:transparent;color:var(--text-sub);font-size:12px;font-weight:700;text-align:center;line-height:1.3;}
+  .mode-btn.active{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;}
+  .mode-btn .soon{display:block;font-size:9px;font-weight:600;opacity:.8;}
 
   .date-bar{display:flex;gap:6px;align-items:center;margin:10px 0 8px;flex-wrap:wrap;}
   .date-bar input[type=date],.date-bar input[type=time]{
@@ -43,24 +48,8 @@
     color:var(--text-main);font-size:13px;padding:9px 8px;font-family:inherit;
   }
   .nav-bar{display:flex;gap:6px;margin-bottom:12px;}
-  .nav-bar button{
-    flex:1;padding:8px 6px;border:none;border-radius:9px;font-size:12px;font-weight:700;
-    background:var(--card-bg);border:1px solid var(--card-border);color:var(--gold-light);
-  }
+  .nav-bar button{flex:1;padding:8px 6px;border:none;border-radius:9px;font-size:12px;font-weight:700;background:var(--card-bg);border:1px solid var(--card-border);color:var(--gold-light);}
   .nav-bar button.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
-
-  .loc-msg{text-align:center;font-size:14px;font-weight:700;color:var(--warn);padding:10px 4px;}
-  .loc-detail{text-align:center;font-size:11px;color:var(--text-sub);padding:0 4px 10px;word-break:break-word;}
-  .loc-btn{display:block;width:100%;padding:11px;border:none;border-radius:11px;font-size:13.5px;font-weight:700;margin-bottom:8px;
-    background:var(--card-bg2);border:1px solid var(--card-border);color:var(--gold-light);}
-  .loc-btn:last-child{margin-bottom:0;}
-  .loc-btn.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
-  #locManualForm input{
-    width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--card-border);
-    background:rgba(255,255,255,.05);color:var(--text-main);font-size:12.5px;margin-bottom:8px;
-  }
-  .status{font-size:11.5px;color:var(--text-sub);text-align:center;padding:7px 4px 0;}
-  .status.err{color:var(--warn);} .status.ok{color:var(--ok);}
 
   .section{border-radius:var(--radius);overflow:hidden;margin-bottom:12px;border:1px solid var(--card-border);
     background:linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015));}
@@ -68,11 +57,24 @@
   .sec-header .hicon{font-size:18px;}
   .sec-body{padding:0 13px 14px;}
 
+  .loc-msg{text-align:center;font-size:14px;font-weight:700;color:var(--warn);padding:10px 4px;}
+  .loc-detail{text-align:center;font-size:11px;color:var(--text-sub);padding:0 4px 10px;word-break:break-word;}
+  .loc-btn{display:block;width:100%;padding:11px;border:none;border-radius:11px;font-size:13.5px;font-weight:700;margin-bottom:8px;
+    background:var(--card-bg2);border:1px solid var(--card-border);color:var(--gold-light);}
+  .loc-btn:last-child{margin-bottom:0;}
+  .loc-btn.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
+  #locManualForm input{width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--card-border);background:rgba(255,255,255,.05);color:var(--text-main);font-size:12.5px;margin-bottom:8px;}
+
   .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .info-item{background:var(--card-bg2);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:9px 10px;}
   .info-item .ilabel{font-size:10px;color:var(--text-sub);text-transform:uppercase;letter-spacing:.5px;}
   .info-item .ival{font-size:14px;font-weight:700;margin-top:3px;}
   .info-item.span2{grid-column:1/-1;}
+
+  .varga-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
+  .varga-btn{flex:0 0 auto;padding:8px 12px;border-radius:9px;border:1px solid var(--card-border);background:var(--card-bg2);color:var(--text-sub);font-size:12px;font-weight:700;white-space:nowrap;}
+  .varga-btn.active{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
+  .varga-current{text-align:center;font-size:11.5px;color:var(--gold-light);margin-top:8px;}
 
   .chart-wrap{display:flex;justify-content:center;padding:6px 0 4px;}
   .chart-wrap svg{width:100%;max-width:400px;height:auto;}
@@ -94,151 +96,158 @@
   .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .summary-grid .info-item .ival{font-size:13.5px;}
 
+  .soon-panel{text-align:center;padding:50px 20px;font-size:20px;font-weight:700;color:var(--gold-light);}
+
   footer{text-align:center;font-size:10px;color:var(--text-sub);opacity:.6;padding:14px 20px 0;line-height:1.5;}
 
-  #loaderOverlay{
-    position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:rgba(11,5,20,0.88);backdrop-filter:blur(3px);
-    opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease;
-  }
+  #loaderOverlay{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(11,5,20,0.88);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease;}
   #loaderOverlay.show{opacity:1;visibility:visible;}
-  .spinner{
-    width:44px;height:44px;border-radius:50%;
-    border:3px solid rgba(230,180,90,0.25);border-top-color:var(--gold);
-    animation:spin 0.9s linear infinite;margin-bottom:16px;
-  }
+  .spinner{width:44px;height:44px;border-radius:50%;border:3px solid rgba(230,180,90,0.25);border-top-color:var(--gold);animation:spin 0.9s linear infinite;margin-bottom:16px;}
   @keyframes spin{to{transform:rotate(360deg);}}
   .loader-text{font-size:15px;font-weight:700;color:var(--gold-light);letter-spacing:.3px;}
   .loader-sub{font-size:12px;color:var(--text-sub);margin-top:5px;}
-
   [disabled]{opacity:.45;pointer-events:none;}
 </style>
 </head>
 <body>
 <div id="loaderOverlay">
   <div class="spinner"></div>
-  <div class="loader-text">Calculating Daily Kundali...</div>
+  <div class="loader-text">Calculating Kundali...</div>
   <div class="loader-sub">Computing planetary positions...</div>
 </div>
 <div class="wrap">
 
   <header class="top">
     <div class="om">ॐ</div>
-    <h1>Daily Kundali</h1>
-    <div class="sub">Sidereal Transit Chart (Lahiri Ayanamsa)</div>
+    <h1>Kundali</h1>
   </header>
 
-  <div class="date-bar">
-    <input type="date" id="datePicker">
-    <input type="time" id="timePicker" step="60">
-  </div>
-  <div class="nav-bar">
-    <button id="prevDayBtn">◀ Previous Day</button>
-    <button id="todayBtn" class="primary">Today</button>
-    <button id="nextDayBtn">Next Day ▶</button>
+  <div class="mode-bar">
+    <button class="mode-btn active" id="modeDailyBtn">○ Daily Kundali</button>
+    <button class="mode-btn" id="modeBirthBtn">○ Birth Kundali</button>
+    <button class="mode-btn" id="modeMarriageBtn">○ Marriage Match<span class="soon">(Coming Soon)</span></button>
   </div>
 
-  <!-- LOCATION SECTION (exactly one state visible at a time) -->
+  <!-- ============ DAILY KUNDALI PANEL ============ -->
+  <div id="dailyPanel">
+    <div class="date-bar">
+      <input type="date" id="dailyDatePicker">
+      <input type="time" id="dailyTimePicker" step="60">
+    </div>
+    <div class="nav-bar">
+      <button id="prevDayBtn">◀ Previous Day</button>
+      <button id="todayBtn" class="primary">Today</button>
+      <button id="nextDayBtn">Next Day ▶</button>
+    </div>
+  </div>
+
+  <!-- ============ BIRTH KUNDALI PANEL ============ -->
+  <div id="birthPanel" style="display:none;">
+    <div class="date-bar">
+      <input type="date" id="birthDatePicker">
+      <input type="time" id="birthTimePicker" step="60">
+    </div>
+  </div>
+
+  <!-- ============ SHARED LOCATION SECTION ============ -->
   <div class="section" id="locationSection">
     <div class="sec-header"><span class="hicon">📍</span> Location</div>
     <div class="sec-body">
-
-      <div id="locGpsOff" class="loc-state" style="display:none;">
-        <div class="loc-msg">Please turn on GPS.</div>
-      </div>
-
+      <div id="locGpsOff" class="loc-state" style="display:none;"><div class="loc-msg">Please turn on GPS.</div></div>
       <div id="locChooser" class="loc-state" style="display:none;">
         <button id="myLocationBtn" class="loc-btn primary">📍 My Location</button>
         <button id="enterLocationBtn" class="loc-btn">✏️ Enter Location</button>
       </div>
-
       <div id="locError" class="loc-state" style="display:none;">
         <div class="loc-msg">Unable to get your location. Retry?</div>
         <div class="loc-detail" id="locErrorDetail"></div>
         <button id="retryLocationBtn" class="loc-btn primary">🔄 Retry</button>
         <button id="enterLocationBtn2" class="loc-btn">✏️ Enter Location</button>
       </div>
-
       <div id="locManualForm" class="loc-state" style="display:none;">
         <input type="text" id="manualLat" placeholder="Latitude e.g. 23.0225">
         <input type="text" id="manualLon" placeholder="Longitude e.g. 72.5714">
         <button id="manualLocSubmit" class="loc-btn primary">Submit</button>
       </div>
-
     </div>
   </div>
 
+  <!-- ============ MARRIAGE MATCH PANEL ============ -->
+  <div id="marriagePanel" style="display:none;">
+    <div class="soon-panel">Coming Soon</div>
+  </div>
+
+  <!-- ============ RESULTS (Daily or Birth) ============ -->
   <div id="resultContainer" style="display:none;">
 
-  <!-- SECTION 1: BASIC INFORMATION -->
-  <div class="section">
-    <div class="sec-header"><span class="hicon">📋</span> Basic Information</div>
-    <div class="sec-body">
-      <div class="info-grid">
-        <div class="info-item span2"><div class="ilabel">📅 Date</div><div class="ival" id="biDate">--</div></div>
-        <div class="info-item"><div class="ilabel">🕐 Time</div><div class="ival" id="biTime">--</div></div>
-        <div class="info-item"><div class="ilabel">🗓️ Weekday</div><div class="ival" id="biWeekday">--</div></div>
-        <div class="info-item"><div class="ilabel">📍 Location</div><div class="ival" id="biLocation">--</div></div>
-        <div class="info-item"><div class="ilabel">🌐 Time Zone</div><div class="ival" id="biTz">--</div></div>
-        <div class="info-item"><div class="ilabel">Latitude</div><div class="ival" id="biLat">--</div></div>
-        <div class="info-item"><div class="ilabel">Longitude</div><div class="ival" id="biLon">--</div></div>
-        <div class="info-item span2"><button id="changeLocBtn" class="loc-btn">Change Location</button></div>
+    <div class="section">
+      <div class="sec-header"><span class="hicon">📋</span> Basic Information</div>
+      <div class="sec-body">
+        <div class="info-grid">
+          <div class="info-item span2"><div class="ilabel">📅 Date</div><div class="ival" id="biDate">--</div></div>
+          <div class="info-item"><div class="ilabel">🕐 Time</div><div class="ival" id="biTime">--</div></div>
+          <div class="info-item"><div class="ilabel">🗓️ Weekday</div><div class="ival" id="biWeekday">--</div></div>
+          <div class="info-item"><div class="ilabel">📍 Location</div><div class="ival" id="biLocation">--</div></div>
+          <div class="info-item"><div class="ilabel">🌐 Time Zone</div><div class="ival" id="biTz">--</div></div>
+          <div class="info-item"><div class="ilabel">Latitude</div><div class="ival" id="biLat">--</div></div>
+          <div class="info-item"><div class="ilabel">Longitude</div><div class="ival" id="biLon">--</div></div>
+          <div class="info-item span2"><button id="changeLocBtn" class="loc-btn">Change Location</button></div>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- SECTION 2: DAILY KUNDALI -->
-  <div class="section">
-    <div class="sec-header"><span class="hicon">🔯</span> Daily Kundali</div>
-    <div class="sec-body">
-      <div class="chart-wrap"><svg id="chartSvg" viewBox="0 0 400 400"></svg></div>
-    </div>
-  </div>
-
-  <!-- SECTION 3: PLANETARY POSITIONS -->
-  <div class="section">
-    <div class="sec-header"><span class="hicon">🪐</span> Planetary Positions</div>
-    <div class="sec-body">
-      <div class="table-scroll">
-        <table class="ptable" id="planetTable">
-          <thead><tr>
-            <th>Planet</th><th>House</th><th>House Lord</th><th>Rashi</th><th>Sign Lord</th>
-            <th>Longitude</th><th>Degree</th><th>Nakshatra</th><th>Pada</th><th>Motion</th><th>Combust</th>
-          </tr></thead>
-          <tbody id="planetTableBody"></tbody>
-        </table>
+    <div class="section" id="chartSelectorSection" style="display:none;">
+      <div class="sec-header"><span class="hicon">🔢</span> Chart Selector</div>
+      <div class="sec-body">
+        <div class="varga-scroll" id="vargaScroll"></div>
+        <div class="varga-current" id="vargaCurrentLabel"></div>
       </div>
     </div>
-  </div>
 
-  <!-- SECTION 4: DAILY SUMMARY -->
-  <div class="section">
-    <div class="sec-header"><span class="hicon">📝</span> Daily Summary</div>
-    <div class="sec-body">
-      <div class="summary-grid">
-        <div class="info-item"><div class="ilabel">Ascendant</div><div class="ival" id="sumAsc">--</div></div>
-        <div class="info-item"><div class="ilabel">Ascendant Degree</div><div class="ival" id="sumAscDeg">--</div></div>
-        <div class="info-item"><div class="ilabel">Ascendant Nakshatra</div><div class="ival" id="sumAscNak">--</div></div>
-        <div class="info-item"><div class="ilabel">Ascendant Pada</div><div class="ival" id="sumAscPada">--</div></div>
-        <div class="info-item"><div class="ilabel">Sun Sign</div><div class="ival" id="sumSunSign">--</div></div>
-        <div class="info-item"><div class="ilabel">Moon Sign</div><div class="ival" id="sumMoonSign">--</div></div>
-        <div class="info-item"><div class="ilabel">Current Tithi</div><div class="ival" id="sumTithi">--</div></div>
-        <div class="info-item"><div class="ilabel">Current Nakshatra</div><div class="ival" id="sumNak">--</div></div>
-        <div class="info-item"><div class="ilabel">Current Yoga</div><div class="ival" id="sumYoga">--</div></div>
-        <div class="info-item"><div class="ilabel">Current Karana</div><div class="ival" id="sumKarana">--</div></div>
+    <div class="section">
+      <div class="sec-header"><span class="hicon">🔯</span> <span id="chartSectionTitle">North Indian Kundali</span></div>
+      <div class="sec-body"><div class="chart-wrap"><svg id="chartSvg" viewBox="0 0 400 400"></svg></div></div>
+    </div>
+
+    <div class="section">
+      <div class="sec-header"><span class="hicon">🪐</span> Planetary Positions</div>
+      <div class="sec-body">
+        <div class="table-scroll">
+          <table class="ptable" id="planetTable">
+            <thead><tr>
+              <th>Planet</th><th>House</th><th>House Lord</th><th>Rashi</th><th>Sign Lord</th>
+              <th>Longitude</th><th>Degree</th><th>Nakshatra</th><th>Pada</th><th>Motion</th><th>Combust</th>
+            </tr></thead>
+            <tbody id="planetTableBody"></tbody>
+          </table>
+        </div>
       </div>
     </div>
-  </div>
+
+    <div class="section">
+      <div class="sec-header"><span class="hicon">📝</span> <span id="summarySectionTitle">Daily Summary</span></div>
+      <div class="sec-body">
+        <div class="summary-grid">
+          <div class="info-item"><div class="ilabel">Ascendant</div><div class="ival" id="sumAsc">--</div></div>
+          <div class="info-item"><div class="ilabel">Ascendant Lord</div><div class="ival" id="sumAscLord">--</div></div>
+          <div class="info-item"><div class="ilabel">Moon Sign</div><div class="ival" id="sumMoonSign">--</div></div>
+          <div class="info-item"><div class="ilabel">Sun Sign</div><div class="ival" id="sumSunSign">--</div></div>
+          <div class="info-item"><div class="ilabel" id="sumNakLabel">Moon Nakshatra</div><div class="ival" id="sumNak">--</div></div>
+          <div class="info-item"><div class="ilabel" id="sumPadaLabel">Moon Nakshatra Pada</div><div class="ival" id="sumPada">--</div></div>
+        </div>
+      </div>
+    </div>
 
   </div><!-- /resultContainer -->
 
   <footer>
-    Sun/Moon/Planet positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Ayanamsa: Lahiri (Sidereal) · House System: Whole Sign · Rahu: Mean Node, Ketu: Rahu + 180°
+    Sun/Moon/Planet positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Ayanamsa: Lahiri (Sidereal) · House System: Whole Sign · Rahu: Mean Node, Ketu: Rahu + 180° · Divisional charts: Parashari Shodasavarga rules
   </footer>
 </div>
 
 <script type="module">
-/* ===================== NAME TABLES (English only; structure kept modular for future locales) ===================== */
+/* ===================== NAME TABLES ===================== */
 
 const RASHI = [
   ["Mesha","Mars"],["Vrishabha","Venus"],["Mithuna","Mercury"],["Karka","Moon"],
@@ -251,15 +260,112 @@ const NAKSHATRAS = [
   "Mula","Purva Ashadha","Uttara Ashadha","Shravana","Dhanishtha","Shatabhisha","Purva Bhadrapada",
   "Uttara Bhadrapada","Revati"
 ];
-const SHUKLA_TITHI = ["Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi","Purnima"];
-const KRISHNA_TITHI = ["Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi","Amavasya"];
-const YOGAS = ["Vishkambha","Priti","Ayushman","Saubhagya","Shobhana","Atiganda","Sukarma","Dhriti","Shula","Ganda","Vriddhi","Dhruva","Vyaghata","Harshana","Vajra","Siddhi","Vyatipata","Variyana","Parigha","Shiva","Siddha","Sadhya","Shubha","Shukla","Brahma","Indra","Vaidhriti"];
-const KARANA_MOVABLE = ["Bava","Balava","Kaulava","Taitila","Gara","Vanija","Vishti (Bhadra)"];
-const KARANA_FIXED = { 0:"Kimstughna", 57:"Shakuni", 58:"Chatushpada", 59:"Naga" };
 const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-
-/* Combustion orbs (degrees from Sun). Sun/Rahu/Ketu are not evaluated for combustion. */
 const COMBUST_ORB = { Moon:12, Mars:17, Mercury:14, Jupiter:11, Venus:10, Saturn:15 };
+
+/* ===================== DIVISIONAL CHART (VARGA) RULES =====================
+   Standard Parashari Shodasavarga rules. Each function takes the D1 (natal) rashi
+   index (0=Mesha..11=Meena) and the degree within that sign (0-30), and returns the
+   resulting varga rashi index (0-11). This layer is fully separate from the base
+   astronomy (computeBaseChart) so it can be extended/replaced independently. */
+
+function signElement(idx){ return ['fire','earth','air','water'][idx%4]; }
+function signModality(idx){ return ['movable','fixed','dual'][idx%3]; }
+function isOddSign(idx){ return idx%2===0; } // 0-indexed: Mesha(0)=sign#1=odd
+
+function vargaD1(r,d){ return r; }
+function vargaD2(r,d){
+  const odd = isOddSign(r);
+  const half = d<15 ? 0 : 1;
+  if (odd) return half===0 ? 4 : 3; // Leo : Cancer
+  return half===0 ? 3 : 4;          // Cancer : Leo
+}
+function vargaD3(r,d){ const part=Math.min(2,Math.floor(d/10)); return (r+part*4)%12; }
+function vargaD4(r,d){ const part=Math.min(3,Math.floor(d/7.5)); return (r+part*3)%12; }
+function vargaD7(r,d){
+  const start = isOddSign(r) ? r : (r+6)%12;
+  const part = Math.min(6, Math.floor(d/(30/7)));
+  return (start+part)%12;
+}
+function vargaD9(r,d){
+  const startMap = {fire:0, earth:9, air:6, water:3};
+  const start = startMap[signElement(r)];
+  const part = Math.min(8, Math.floor(d/(30/9)));
+  return (start+part)%12;
+}
+function vargaD10(r,d){
+  const start = isOddSign(r) ? r : (r+8)%12;
+  const part = Math.min(9, Math.floor(d/3));
+  return (start+part)%12;
+}
+function vargaD12(r,d){ const part=Math.min(11,Math.floor(d/2.5)); return (r+part)%12; }
+function vargaD16(r,d){
+  const startMap = {movable:0, fixed:4, dual:8};
+  const start = startMap[signModality(r)];
+  const part = Math.min(15, Math.floor(d/1.875));
+  return (start+part)%12;
+}
+function vargaD20(r,d){
+  const startMap = {movable:0, fixed:8, dual:4};
+  const start = startMap[signModality(r)];
+  const part = Math.min(19, Math.floor(d/1.5));
+  return (start+part)%12;
+}
+function vargaD24(r,d){
+  const start = isOddSign(r) ? 4 : 3; // Leo : Cancer
+  const part = Math.min(23, Math.floor(d/1.25));
+  return (start+part)%12;
+}
+function vargaD27(r,d){
+  const startMap = {fire:0, earth:3, air:6, water:9};
+  const start = startMap[signElement(r)];
+  const part = Math.min(26, Math.floor(d/(30/27)));
+  return (start+part)%12;
+}
+function vargaD30(r,d){
+  const odd = isOddSign(r);
+  if (odd){
+    if (d<5) return 0; if (d<10) return 10; if (d<18) return 8; if (d<25) return 2; return 1;
+  }
+  if (d<5) return 1; if (d<12) return 2; if (d<20) return 8; if (d<25) return 10; return 0;
+}
+function vargaD40(r,d){
+  const start = isOddSign(r) ? 0 : 6;
+  const part = Math.min(39, Math.floor(d/0.75));
+  return (start+part)%12;
+}
+function vargaD45(r,d){
+  const startMap = {movable:0, fixed:4, dual:8};
+  const start = startMap[signModality(r)];
+  const part = Math.min(44, Math.floor(d/(2/3)));
+  return (start+part)%12;
+}
+function vargaD60(r,d){ const part=Math.min(59,Math.floor(d/0.5)); return (r+part)%12; }
+
+const VARGA_FUNCS = {1:vargaD1,2:vargaD2,3:vargaD3,4:vargaD4,7:vargaD7,9:vargaD9,10:vargaD10,12:vargaD12,16:vargaD16,20:vargaD20,24:vargaD24,27:vargaD27,30:vargaD30,40:vargaD40,45:vargaD45,60:vargaD60};
+const VARGA_LIST = [
+  {n:1,label:"D1",full:"D1 (Rashi)"},{n:2,label:"D2",full:"D2 (Hora)"},{n:3,label:"D3",full:"D3 (Drekkana)"},
+  {n:4,label:"D4",full:"D4 (Chaturthamsa)"},{n:7,label:"D7",full:"D7 (Saptamsa)"},{n:9,label:"D9",full:"D9 (Navamsa)"},
+  {n:10,label:"D10",full:"D10 (Dashamsa)"},{n:12,label:"D12",full:"D12 (Dwadashamsa)"},{n:16,label:"D16",full:"D16 (Shodashamsa)"},
+  {n:20,label:"D20",full:"D20 (Vimsamsa)"},{n:24,label:"D24",full:"D24 (Chaturvimshamsa)"},{n:27,label:"D27",full:"D27 (Nakshatramsa)"},
+  {n:30,label:"D30",full:"D30 (Trimsamsa)"},{n:40,label:"D40",full:"D40 (Khavedamsa)"},{n:45,label:"D45",full:"D45 (Akshavedamsa)"},
+  {n:60,label:"D60",full:"D60 (Shastiamsa)"}
+];
+
+/* Projects a base D1 chart through a divisional chart rule. Base data (longitude,
+   nakshatra, pada, retrograde, combust) is untouched — only rashi/house are re-derived
+   for the selected division. Keeps the varga layer swappable/extensible on its own. */
+function applyVarga(base, vargaN){
+  const vfn = VARGA_FUNCS[vargaN] || vargaD1;
+  const ascVargaRashi = vfn(base.ascendant.rashi, base.ascendant.longitude % 30);
+  const planets = base.planets.map(p=>{
+    const vRashi = vfn(p.rashi, p.longitude % 30);
+    const house = ((vRashi - ascVargaRashi + 12) % 12) + 1;
+    return { ...p, vargaRashi:vRashi, house };
+  });
+  const ascendant = { ...base.ascendant, vargaRashi:ascVargaRashi, house:1 };
+  return { ascendant, planets };
+}
 
 /* ===================== MATH / TIME HELPERS ===================== */
 
@@ -283,16 +389,14 @@ function fmtTime12(date){ return date.toLocaleTimeString('en-IN',{hour:'2-digit'
 
 let userLat=null, userLon=null;
 let sweModule=null, sweInstance=null;
-let selectedDateTime = new Date();
+let currentMode = 'daily'; // 'daily' | 'birth' | 'marriage'
+let selectedDateTime = new Date();   // daily kundali reference moment
+let birthDateTime = new Date();      // birth kundali reference moment
+let selectedVarga = 1;               // birth kundali chart selector
+let dailyBaseData = null;            // last computed base D1 data for daily mode
+let birthBaseData = null;            // last computed base D1 data for birth mode
 
 const el = id => document.getElementById(id);
-function showGpsOffMessage(text){
-  el('locGpsOff').querySelector('.loc-msg').textContent = text || "Please turn on GPS.";
-  el('locGpsOff').style.display = 'block';
-  el('locChooser').style.display = 'none';
-  el('locError').style.display = 'none';
-  el('locManualForm').style.display = 'none';
-}
 
 /* ===================== SWISS EPHEMERIS LOADING ===================== */
 
@@ -311,7 +415,7 @@ async function loadSwissEphemeris(){
   }
 }
 
-/* ===================== CORE ASTRONOMY (modular) ===================== */
+/* ===================== CORE ASTRONOMY (modular; independent of divisional-chart layer) ===================== */
 
 function getSiderealPosition(jd, body){
   const flags = sweModule.CalculationFlag.MoshierEphemeris | sweModule.CalculationFlag.Sidereal | sweModule.CalculationFlag.Speed;
@@ -329,24 +433,13 @@ function nakshatraPada(lon){
   const span=360/27, padaSpan=span/4;
   return Math.floor((norm360(lon)%span)/padaSpan)+1;
 }
-function tithiName(sunSid, moonSid){
-  const idx = Math.floor(norm360(moonSid-sunSid)/12)%30;
-  return idx<15 ? SHUKLA_TITHI[idx] : KRISHNA_TITHI[idx%15];
-}
-function yogaName(sunSid, moonSid){
-  const idx = Math.floor(norm360(sunSid+moonSid)/(360/27))%27;
-  return YOGAS[idx];
-}
-function karanaName(sunSid, moonSid){
-  const idx = Math.floor(norm360(moonSid-sunSid)/6)%60;
-  if (KARANA_FIXED[idx]) return KARANA_FIXED[idx];
-  return KARANA_MOVABLE[(idx-1)%7];
-}
 
-/* Computes the full daily kundali data set for a given moment/location. Kept as a single
-   pure function so future features (dashas, aspects, divisional charts, etc.) can consume
-   this same output without touching the render layer. */
-function computeKundali(jd, lat, lon){
+/* Computes the base D1 (natal) chart for a given moment/location: ascendant + all 9
+   graha positions. This is the ONLY function that talks to the ephemeris engine and to
+   lat/lon — everything downstream (varga projection, chart, table, summary) consumes
+   its plain-data output, so replacing the location input later (e.g. birth-place city
+   search) only needs to supply lat/lon here, nothing else changes. */
+function computeBaseChart(jd, lat, lon){
   const ascSid = getSiderealAscendant(jd, lat, lon);
   const ascRashi = rashiIndex(ascSid);
 
@@ -366,60 +459,32 @@ function computeKundali(jd, lat, lon){
 
   const planets = bodies.map(b=>{
     const pos = b.key==="Sun" ? sun : getSiderealPosition(jd, b.body);
-    const lon = pos.longitude;
-    const rashi = rashiIndex(lon);
-    const house = ((rashi - ascRashi + 12) % 12) + 1;
-    const nak = nakshatraIndex(lon);
+    const lon2 = pos.longitude;
+    const rashi = rashiIndex(lon2);
+    const nak = nakshatraIndex(lon2);
     const retro = pos.speed < 0;
-    let combustDeg=null, combust=null;
-    if (COMBUST_ORB[b.key] !== undefined){
-      combustDeg = angDiff(lon, sunSid);
-      combust = combustDeg < COMBUST_ORB[b.key];
-    }
-    return { name:b.key, longitude:lon, rashi, house, nak, pada:nakshatraPada(lon), retro, combust };
+    let combust=null;
+    if (COMBUST_ORB[b.key] !== undefined) combust = angDiff(lon2, sunSid) < COMBUST_ORB[b.key];
+    return { name:b.key, longitude:lon2, rashi, nak, pada:nakshatraPada(lon2), retro, combust };
   });
 
   const rahu = planets.find(p=>p.name==="Rahu");
   const ketuLon = norm360(rahu.longitude + 180);
-  const ketuRashi = rashiIndex(ketuLon);
-  planets.push({
-    name:"Ketu", longitude:ketuLon, rashi:ketuRashi,
-    house: ((ketuRashi - ascRashi + 12) % 12) + 1,
-    nak:nakshatraIndex(ketuLon), pada:nakshatraPada(ketuLon),
-    retro: rahu.retro, combust:null
-  });
+  planets.push({ name:"Ketu", longitude:ketuLon, rashi:rashiIndex(ketuLon), nak:nakshatraIndex(ketuLon), pada:nakshatraPada(ketuLon), retro:rahu.retro, combust:null });
 
-  const ascendant = {
-    name:"Ascendant", longitude:ascSid, rashi:ascRashi, house:1,
-    nak:nakshatraIndex(ascSid), pada:nakshatraPada(ascSid),
-    retro:null, combust:null
-  };
+  const ascendant = { name:"Ascendant", longitude:ascSid, rashi:ascRashi, nak:nakshatraIndex(ascSid), pada:nakshatraPada(ascSid), retro:null, combust:null };
 
-  const moonSid = planets.find(p=>p.name==="Moon").longitude;
-
-  return {
-    ascendant, planets,
-    sunSid, moonSid,
-    tithi: tithiName(sunSid, moonSid),
-    nakshatra: NAKSHATRAS[nakshatraIndex(moonSid)],
-    yoga: yogaName(sunSid, moonSid),
-    karana: karanaName(sunSid, moonSid)
-  };
+  return { ascendant, planets };
 }
 
 /* ===================== NORTH INDIAN CHART (SVG) ===================== */
 
 const CHART_ABBR = { Sun:"Su",Moon:"Mo",Mars:"Ma",Mercury:"Me",Jupiter:"Ju",Venus:"Ve",Saturn:"Sa",Rahu:"Ra",Ketu:"Ke",Ascendant:"As" };
-/* House label anchor points (fixed North-Indian layout); house 1 = top, numbering proceeds
-   counter-clockwise. Coordinates are in a 400x400 viewBox. */
-const HOUSE_POS = {
-  1:[200,80], 2:[95,45], 3:[45,95], 4:[80,200], 5:[45,305], 6:[95,355],
-  7:[200,320], 8:[305,355], 9:[355,305], 10:[320,200], 11:[355,95], 12:[305,45]
-};
+const HOUSE_POS = { 1:[200,80],2:[95,45],3:[45,95],4:[80,200],5:[45,305],6:[95,355],7:[200,320],8:[305,355],9:[355,305],10:[320,200],11:[355,95],12:[305,45] };
 
-function renderChart(data){
+function renderChart(vdata){
   const svg = el('chartSvg');
-  const ascRashi = data.ascendant.rashi;
+  const ascRashi = vdata.ascendant.vargaRashi;
   const lines = `
     <polygon class="chart-line" points="0,0 400,0 400,400 0,400"/>
     <line class="chart-line" x1="0" y1="0" x2="400" y2="400"/>
@@ -429,19 +494,16 @@ function renderChart(data){
     <line class="chart-line" x1="200" y1="400" x2="0" y2="200"/>
     <line class="chart-line" x1="0" y1="200" x2="200" y2="0"/>
   `;
-  const byHouse = {};
-  for(let h=1;h<=12;h++) byHouse[h]=[];
-  data.planets.forEach(p=> byHouse[p.house].push(p));
-  byHouse[1].push(data.ascendant);
-  byHouse[1].sort((a,b)=> a.name==="Ascendant" ? -1 : b.name==="Ascendant" ? 1 : 0);
+  const byHouse = {}; for(let h=1;h<=12;h++) byHouse[h]=[];
+  vdata.planets.forEach(p=> byHouse[p.house].push(p));
+  byHouse[1].unshift(vdata.ascendant);
 
   let content = "";
   for(let h=1;h<=12;h++){
     const rashiNum = ((ascRashi + h - 1) % 12) + 1;
     const [cx,cy] = HOUSE_POS[h];
     content += `<text class="chart-house-num" x="${cx}" y="${cy-16}" text-anchor="middle">${rashiNum}</text>`;
-    const items = byHouse[h];
-    items.forEach((p,i)=>{
+    byHouse[h].forEach((p,i)=>{
       const label = CHART_ABBR[p.name] + (p.retro ? "(R)" : "");
       content += `<text class="chart-planet ${p.retro?'retro':''}" x="${cx}" y="${cy + i*15}" text-anchor="middle">${label}</text>`;
     });
@@ -449,224 +511,252 @@ function renderChart(data){
   svg.innerHTML = lines + content;
 }
 
-/* ===================== TABLE + SUMMARY RENDER ===================== */
-
-function renderTable(data){
+function renderTable(vdata){
   const order = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn","Rahu","Ketu"];
-  const ordered = [data.ascendant, ...order.map(n=>data.planets.find(p=>p.name===n))];
-
+  const ordered = [vdata.ascendant, ...order.map(n=>vdata.planets.find(p=>p.name===n))];
   el('planetTableBody').innerHTML = ordered.map(p=>{
-    const rashi = RASHI[p.rashi];
-    const houseLord = RASHI[((p.rashi))][1];
+    const rashi = RASHI[p.vargaRashi];
+    const houseLord = RASHI[p.vargaRashi][1];
     const motion = p.retro===null ? "—" : (p.retro ? '<span class="retro-tag">Retrograde</span>' : '<span class="direct-tag">Direct</span>');
     const combust = p.combust===null ? "—" : (p.combust ? '<span class="combust-yes">Yes</span>' : '<span class="combust-no">No</span>');
     return `<tr>
-      <td><b>${p.name}</b></td>
-      <td>${p.house}</td>
-      <td>${houseLord}</td>
-      <td>${rashi[0]}</td>
-      <td>${rashi[1]}</td>
-      <td>${p.longitude.toFixed(2)}°</td>
-      <td>${fmtDeg(p.longitude)}</td>
-      <td>${NAKSHATRAS[p.nak]}</td>
-      <td>${p.pada}</td>
-      <td>${motion}</td>
-      <td>${combust}</td>
+      <td><b>${p.name}</b></td><td>${p.house}</td><td>${houseLord}</td><td>${rashi[0]}</td><td>${rashi[1]}</td>
+      <td>${p.longitude.toFixed(2)}°</td><td>${fmtDeg(p.longitude)}</td><td>${NAKSHATRAS[p.nak]}</td><td>${p.pada}</td>
+      <td>${motion}</td><td>${combust}</td>
     </tr>`;
   }).join('');
 }
 
-function renderSummary(data){
-  el('sumAsc').textContent = RASHI[data.ascendant.rashi][0];
-  el('sumAscDeg').textContent = fmtDeg(data.ascendant.longitude);
-  el('sumAscNak').textContent = NAKSHATRAS[data.ascendant.nak];
-  el('sumAscPada').textContent = data.ascendant.pada;
-  el('sumSunSign').textContent = RASHI[data.planets.find(p=>p.name==="Sun").rashi][0];
-  el('sumMoonSign').textContent = RASHI[data.planets.find(p=>p.name==="Moon").rashi][0];
-  el('sumTithi').textContent = data.tithi;
-  el('sumNak').textContent = data.nakshatra;
-  el('sumYoga').textContent = data.yoga;
-  el('sumKarana').textContent = data.karana;
+function renderSummary(base, vdata, labelPrefix){
+  el('sumAsc').textContent = RASHI[vdata.ascendant.vargaRashi][0];
+  el('sumAscLord').textContent = RASHI[vdata.ascendant.vargaRashi][1];
+  el('sumMoonSign').textContent = RASHI[vdata.planets.find(p=>p.name==="Moon").vargaRashi][0];
+  el('sumSunSign').textContent = RASHI[vdata.planets.find(p=>p.name==="Sun").vargaRashi][0];
+  const moonBase = base.planets.find(p=>p.name==="Moon");
+  el('sumNak').textContent = NAKSHATRAS[moonBase.nak];
+  el('sumPada').textContent = moonBase.pada;
+  el('sumNakLabel').textContent = labelPrefix + "Moon Nakshatra";
+  el('sumPadaLabel').textContent = labelPrefix + "Moon Nakshatra Pada";
 }
 
-/* ===================== MAIN COMPUTE + RENDER ===================== */
+/* ===================== LOADER / CONTROL STATE ===================== */
 
-/* Every call is a fully independent, uncached calculation: a fresh Julian Day is built
-   from the current date/time, then houses, ascendant, every planet, Rahu/Ketu, nakshatras,
-   padas, houses and lords are all recomputed from scratch via computeKundali(). Nothing
-   from a previous run is reused. */
-function calculateFresh(dt, lat, lon){
-  const freshJd = toJulianUTC(new Date(dt.getTime()));
-  return computeKundali(freshJd, lat, lon);
+let activeRequestId = 0;
+const CONTROL_IDS = ['dailyDatePicker','dailyTimePicker','prevDayBtn','todayBtn','nextDayBtn','birthDatePicker','birthTimePicker','myLocationBtn','enterLocationBtn','enterLocationBtn2','retryLocationBtn','manualLocSubmit','modeDailyBtn','modeBirthBtn','modeMarriageBtn'];
+function showLoader(){ el('loaderOverlay').classList.add('show'); }
+function hideLoader(){ el('loaderOverlay').classList.remove('show'); }
+function setControlsDisabled(disabled){
+  CONTROL_IDS.forEach(id=>{ const n=el(id); if(disabled) n.setAttribute('disabled',''); else n.removeAttribute('disabled'); });
 }
+function nextFrame(){ return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); }
 
-function renderAll(dt, lat, lon, data){
+/* ===================== RENDER ORCHESTRATION ===================== */
+
+function renderBasicInfo(dt, lat, lon){
   el('biDate').textContent = fmtFullDate(dt);
   el('biTime').textContent = fmtTime12(dt);
   el('biWeekday').textContent = WEEKDAYS[dt.getDay()];
   el('biLocation').textContent = lat.toFixed(2)+", "+lon.toFixed(2);
   el('biLat').textContent = lat.toFixed(4)+"°";
   el('biLon').textContent = lon.toFixed(4)+"°";
-
   const tzOffsetMin = -dt.getTimezoneOffset();
   const tzSign = tzOffsetMin>=0 ? "+" : "-";
   const tzAbs = Math.abs(tzOffsetMin);
   const tzStr = `UTC${tzSign}${String(Math.floor(tzAbs/60)).padStart(2,'0')}:${String(tzAbs%60).padStart(2,'0')}`;
-  let tzName = "";
-  try{ tzName = Intl.DateTimeFormat().resolvedOptions().timeZone; }catch(e){}
+  let tzName = ""; try{ tzName = Intl.DateTimeFormat().resolvedOptions().timeZone; }catch(e){}
   el('biTz').textContent = tzName ? (tzName+" ("+tzStr+")") : tzStr;
-
-  renderChart(data);
-  renderTable(data);
-  renderSummary(data);
 }
 
-/* ===================== LOADER / RACE-GUARDED ORCHESTRATION ===================== */
+function renderDailyResult(){
+  const vdata = applyVarga(dailyBaseData, 1);
+  el('chartSelectorSection').style.display = 'none';
+  el('chartSectionTitle').textContent = 'North Indian Kundali (D1)';
+  el('summarySectionTitle').textContent = 'Daily Summary';
+  renderBasicInfo(selectedDateTime, userLat, userLon);
+  renderChart(vdata);
+  renderTable(vdata);
+  renderSummary(dailyBaseData, vdata, "");
+}
 
-let activeRequestId = 0;
-const CONTROL_IDS = ['datePicker','timePicker','prevDayBtn','todayBtn','nextDayBtn','myLocationBtn','enterLocationBtn','enterLocationBtn2','retryLocationBtn','manualLocSubmit'];
-
-function showLoader(){ el('loaderOverlay').classList.add('show'); }
-function hideLoader(){ el('loaderOverlay').classList.remove('show'); }
-function setControlsDisabled(disabled){
-  CONTROL_IDS.forEach(id=>{
-    const node = el(id);
-    if (disabled) node.setAttribute('disabled',''); else node.removeAttribute('disabled');
+function renderVargaSelector(){
+  el('vargaScroll').innerHTML = VARGA_LIST.map(v=>
+    `<button class="varga-btn ${v.n===selectedVarga?'active':''}" data-n="${v.n}">${v.label}</button>`
+  ).join('');
+  el('vargaScroll').querySelectorAll('.varga-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      selectedVarga = parseInt(btn.getAttribute('data-n'),10);
+      renderBirthChartAndTable(); // pure re-projection of already-fetched data — no new ephemeris call needed
+    });
   });
+  const cur = VARGA_LIST.find(v=>v.n===selectedVarga);
+  el('vargaCurrentLabel').textContent = "Showing: " + cur.full;
 }
-function nextFrame(){ return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); }
 
-/* Central entry point for every recalculation trigger (date change, time change, prev/next/
-   today, location detect, manual location). Each call gets a unique request id; if a newer
-   request starts before this one finishes, this one's result is discarded on completion so
-   the UI never shows partially-updated or stale data. */
-async function triggerRecalculation(){
+function renderBirthChartAndTable(){
+  const vdata = applyVarga(birthBaseData, selectedVarga);
+  const cur = VARGA_LIST.find(v=>v.n===selectedVarga);
+  el('chartSectionTitle').textContent = 'North Indian Kundali (' + cur.label + ')';
+  renderChart(vdata);
+  renderTable(vdata);
+  renderVargaSelector();
+}
+
+function renderBirthResult(){
+  el('chartSelectorSection').style.display = 'block';
+  el('summarySectionTitle').textContent = 'Birth Summary';
+  renderBasicInfo(birthDateTime, userLat, userLon);
+  renderBirthChartAndTable();
+  const d1 = applyVarga(birthBaseData, 1);
+  renderSummary(birthBaseData, d1, "Birth ");
+}
+
+/* Single entry point for every recalculation trigger. Always builds a fresh Julian Day
+   and calls computeBaseChart() from scratch — nothing from a previous run is reused.
+   Race-guarded: if a newer request starts before this one finishes, its result is
+   discarded so the UI never shows stale or partial data. */
+async function triggerRecalculation(mode){
   const myId = ++activeRequestId;
-  showLoader();
-  setControlsDisabled(true);
-  await nextFrame(); // let the loader actually paint before the synchronous WASM work runs
+  showLoader(); setControlsDisabled(true);
+  await nextFrame();
 
   if (!sweInstance || userLat===null || userLon===null){
     if (myId === activeRequestId){ hideLoader(); setControlsDisabled(false); }
     return;
   }
 
-  const dt = new Date(selectedDateTime.getTime());
-  const lat = userLat, lon = userLon;
-  const data = calculateFresh(dt, lat, lon);
+  if (mode === 'daily'){
+    const dt = new Date(selectedDateTime.getTime());
+    const freshJd = toJulianUTC(dt);
+    const data = computeBaseChart(freshJd, userLat, userLon);
+    if (myId !== activeRequestId) return;
+    dailyBaseData = data;
+    if (currentMode==='daily') renderDailyResult();
+  } else {
+    const dt = new Date(birthDateTime.getTime());
+    const freshJd = toJulianUTC(dt);
+    const data = computeBaseChart(freshJd, userLat, userLon);
+    if (myId !== activeRequestId) return;
+    birthBaseData = data;
+    if (currentMode==='birth') renderBirthResult();
+  }
 
-  if (myId !== activeRequestId) return; // superseded by a newer request; discard silently
-
-  renderAll(dt, lat, lon, data);
-  hideLoader();
-  setControlsDisabled(false);
+  hideLoader(); setControlsDisabled(false);
 }
 
-/* ===================== CONTROLS ===================== */
+/* ===================== MODE SWITCHING ===================== */
+
+function updateModeUI(){
+  el('modeDailyBtn').classList.toggle('active', currentMode==='daily');
+  el('modeBirthBtn').classList.toggle('active', currentMode==='birth');
+  el('modeMarriageBtn').classList.toggle('active', currentMode==='marriage');
+  el('dailyPanel').style.display = currentMode==='daily' ? 'block' : 'none';
+  el('birthPanel').style.display = currentMode==='birth' ? 'block' : 'none';
+  el('marriagePanel').style.display = currentMode==='marriage' ? 'block' : 'none';
+
+  if (currentMode==='marriage'){
+    el('locationSection').style.display = 'none';
+    el('resultContainer').style.display = 'none';
+    return;
+  }
+
+  if (userLat===null || userLon===null){
+    el('resultContainer').style.display = 'none';
+    showLocationSection();
+    return;
+  }
+
+  el('locationSection').style.display = 'none';
+  el('resultContainer').style.display = 'block';
+  if (currentMode==='daily'){
+    if (dailyBaseData) renderDailyResult(); else triggerRecalculation('daily');
+  } else {
+    if (birthBaseData) renderBirthResult(); else triggerRecalculation('birth');
+  }
+}
+
+el('modeDailyBtn').addEventListener('click', ()=>{ currentMode='daily'; updateModeUI(); });
+el('modeBirthBtn').addEventListener('click', ()=>{ currentMode='birth'; updateModeUI(); });
+el('modeMarriageBtn').addEventListener('click', ()=>{ currentMode='marriage'; updateModeUI(); });
+
+/* ===================== DATE/TIME CONTROLS ===================== */
 
 function dateToInputValue(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,'0')+"-"+String(d.getDate()).padStart(2,'0'); }
 function timeToInputValue(d){ return String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0'); }
 
-function syncPickers(){
-  el('datePicker').value = dateToInputValue(selectedDateTime);
-  el('timePicker').value = timeToInputValue(selectedDateTime);
-}
-function applyPickers(){
-  const dv = el('datePicker').value, tv = el('timePicker').value;
-  if (!dv || !tv) return;
-  const [y,m,d] = dv.split('-').map(Number);
-  const [hh,mm] = tv.split(':').map(Number);
-  selectedDateTime = new Date(y, m-1, d, hh, mm, 0);
-  triggerRecalculation();
-}
-el('datePicker').addEventListener('change', applyPickers);
-el('datePicker').addEventListener('input', applyPickers);
-el('timePicker').addEventListener('change', applyPickers);
-el('timePicker').addEventListener('input', applyPickers);
-el('prevDayBtn').addEventListener('click', ()=>{
-  selectedDateTime = new Date(selectedDateTime.getTime()-24*3600*1000);
-  syncPickers(); triggerRecalculation();
-});
-el('nextDayBtn').addEventListener('click', ()=>{
-  selectedDateTime = new Date(selectedDateTime.getTime()+24*3600*1000);
-  syncPickers(); triggerRecalculation();
-});
-el('todayBtn').addEventListener('click', ()=>{
-  selectedDateTime = new Date();
-  syncPickers(); triggerRecalculation();
-});
-syncPickers();
+function syncDailyPickers(){ el('dailyDatePicker').value=dateToInputValue(selectedDateTime); el('dailyTimePicker').value=timeToInputValue(selectedDateTime); }
+function syncBirthPickers(){ el('birthDatePicker').value=dateToInputValue(birthDateTime); el('birthTimePicker').value=timeToInputValue(birthDateTime); }
 
+function applyDailyPickers(){
+  const dv=el('dailyDatePicker').value, tv=el('dailyTimePicker').value;
+  if(!dv||!tv) return;
+  const [y,m,d]=dv.split('-').map(Number), [hh,mm]=tv.split(':').map(Number);
+  selectedDateTime = new Date(y,m-1,d,hh,mm,0);
+  triggerRecalculation('daily');
+}
+function applyBirthPickers(){
+  const dv=el('birthDatePicker').value, tv=el('birthTimePicker').value;
+  if(!dv||!tv) return;
+  const [y,m,d]=dv.split('-').map(Number), [hh,mm]=tv.split(':').map(Number);
+  birthDateTime = new Date(y,m-1,d,hh,mm,0);
+  triggerRecalculation('birth');
+}
+el('dailyDatePicker').addEventListener('change', applyDailyPickers);
+el('dailyDatePicker').addEventListener('input', applyDailyPickers);
+el('dailyTimePicker').addEventListener('change', applyDailyPickers);
+el('dailyTimePicker').addEventListener('input', applyDailyPickers);
+el('prevDayBtn').addEventListener('click', ()=>{ selectedDateTime=new Date(selectedDateTime.getTime()-24*3600*1000); syncDailyPickers(); triggerRecalculation('daily'); });
+el('nextDayBtn').addEventListener('click', ()=>{ selectedDateTime=new Date(selectedDateTime.getTime()+24*3600*1000); syncDailyPickers(); triggerRecalculation('daily'); });
+el('todayBtn').addEventListener('click', ()=>{ selectedDateTime=new Date(); syncDailyPickers(); triggerRecalculation('daily'); });
+el('birthDatePicker').addEventListener('change', applyBirthPickers);
+el('birthDatePicker').addEventListener('input', applyBirthPickers);
+el('birthTimePicker').addEventListener('change', applyBirthPickers);
+el('birthTimePicker').addEventListener('input', applyBirthPickers);
+syncDailyPickers(); syncBirthPickers();
+
+/* ===================== LOCATION FLOW ===================== */
+
+function showGpsOffMessage(text){
+  el('locGpsOff').querySelector('.loc-msg').textContent = text || "Please turn on GPS.";
+  el('locGpsOff').style.display='block'; el('locChooser').style.display='none';
+  el('locError').style.display='none'; el('locManualForm').style.display='none';
+}
 function showLocChooser(){
-  el('locGpsOff').style.display = 'none';
-  el('locChooser').style.display = 'block';
-  el('locError').style.display = 'none';
-  el('locManualForm').style.display = 'none';
+  el('locGpsOff').style.display='none'; el('locChooser').style.display='block';
+  el('locError').style.display='none'; el('locManualForm').style.display='none';
 }
 function showLocError(detail){
-  el('locGpsOff').style.display = 'none';
-  el('locChooser').style.display = 'none';
-  el('locError').style.display = 'block';
-  el('locErrorDetail').textContent = detail || '';
-  el('locManualForm').style.display = 'none';
+  el('locGpsOff').style.display='none'; el('locChooser').style.display='none';
+  el('locError').style.display='block'; el('locErrorDetail').textContent = detail||'';
+  el('locManualForm').style.display='none';
 }
 function showLocManualForm(){
-  el('locGpsOff').style.display = 'none';
-  el('locChooser').style.display = 'none';
-  el('locError').style.display = 'none';
-  el('locManualForm').style.display = 'block';
+  el('locGpsOff').style.display='none'; el('locChooser').style.display='none';
+  el('locError').style.display='none'; el('locManualForm').style.display='block';
 }
-function showResults(){
-  el('locationSection').style.display = 'none';
-  el('resultContainer').style.display = 'block';
-}
-function showLocationSection(){
-  el('resultContainer').style.display = 'none';
-  el('locationSection').style.display = 'block';
-}
+function showResults(){ el('locationSection').style.display='none'; el('resultContainer').style.display='block'; }
+function showLocationSection(){ el('resultContainer').style.display='none'; el('locationSection').style.display='block'; }
 
 async function useLocation(lat, lon){
   userLat=lat; userLon=lon;
-  await triggerRecalculation();
+  if (currentMode==='marriage') return;
+  await triggerRecalculation(currentMode);
   showResults();
 }
 
-/* Retries getCurrentPosition automatically for transient failures (timeout / position
-   unavailable), which happen normally while a GPS fix is still being acquired — these must
-   NOT be treated as "GPS off". Only PERMISSION_DENIED is treated as non-retryable. */
-function getPositionOnce(options){
-  return new Promise((resolve,reject)=>{
-    navigator.geolocation.getCurrentPosition(resolve, reject, options);
-  });
-}
-/* Retries getCurrentPosition, progressively relaxing accuracy/cache requirements. Forcing
-   enableHighAccuracy + maximumAge:0 on every attempt demands a brand-new precise GPS fix
-   each time, which commonly times out indoors or with a weak signal even when GPS is
-   genuinely enabled — this is a very common false-negative source, not an actual "GPS off"
-   condition, so later attempts fall back to faster network-based / cached positioning. */
+function getPositionOnce(options){ return new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,options)); }
 async function getLocationWithRetries(maxRetries, timeoutMs){
   let lastErr;
-  for (let attempt=0; attempt<=maxRetries; attempt++){
-    const relaxed = attempt >= 2; // after 2 precise attempts, allow faster/cached fixes
-    const options = relaxed
-      ? { enableHighAccuracy:false, timeout:Math.min(timeoutMs,15000), maximumAge:120000 }
-      : { enableHighAccuracy:true, timeout:timeoutMs, maximumAge:0 };
-    try{
-      return await getPositionOnce(options);
-    }catch(err){
-      lastErr = err;
-      if (err.code === 1) throw err; // PERMISSION_DENIED — no point retrying
-      // TIMEOUT (3) or POSITION_UNAVAILABLE (2): a fix may still be acquiring, retry
-    }
+  for(let attempt=0; attempt<=maxRetries; attempt++){
+    const relaxed = attempt>=2;
+    const options = relaxed ? {enableHighAccuracy:false,timeout:Math.min(timeoutMs,15000),maximumAge:120000} : {enableHighAccuracy:true,timeout:timeoutMs,maximumAge:0};
+    try{ return await getPositionOnce(options); }
+    catch(err){ lastErr=err; if(err.code===1) throw err; }
   }
   throw lastErr;
 }
 async function currentPermissionState(){
   if (navigator.permissions && navigator.permissions.query){
-    try{
-      const status = await navigator.permissions.query({ name:'geolocation' });
-      return status.state;
-    }catch(e){ /* unsupported query for this permission name */ }
+    try{ const s = await navigator.permissions.query({name:'geolocation'}); return s.state; }catch(e){}
   }
   return 'unknown';
 }
@@ -676,17 +766,15 @@ async function attemptMyLocation(){
   if (!window.isSecureContext){ showLocManualForm(); return; }
   showLoader(); setControlsDisabled(true);
   try{
-    const pos = await getLocationWithRetries(4, 25000); // up to 5 attempts, 25s each
+    const pos = await getLocationWithRetries(4, 25000);
     await useLocation(pos.coords.latitude, pos.coords.longitude);
-    // loader is hidden inside triggerRecalculation() only once Kundali is fully rendered
   }catch(err){
     const permState = await currentPermissionState();
     hideLoader(); setControlsDisabled(false);
     console.error("Geolocation failed:", err.code, err.message, "permission state:", permState);
-    if (err.code === 1 || permState === 'denied'){
-      showGpsOffMessage(); // permission genuinely denied — reported by the browser, not guessed
-    } else {
-      const codeNames = {1:'PERMISSION_DENIED',2:'POSITION_UNAVAILABLE',3:'TIMEOUT'};
+    if (err.code===1 || permState==='denied') showGpsOffMessage();
+    else {
+      const codeNames={1:'PERMISSION_DENIED',2:'POSITION_UNAVAILABLE',3:'TIMEOUT'};
       showLocError(`(${codeNames[err.code]||'code '+err.code}: ${err.message||'no message'}, permission: ${permState})`);
     }
   }
@@ -700,28 +788,20 @@ el('manualLocSubmit').addEventListener('click', ()=>{
   if (isNaN(lat)||isNaN(lon)||lat<-90||lat>90||lon<-180||lon>180) return;
   useLocation(lat, lon);
 });
-el('changeLocBtn').addEventListener('click', ()=>{
-  showLocationSection();
-  showLocChooser();
-});
+el('changeLocBtn').addEventListener('click', ()=>{ showLocationSection(); showLocChooser(); });
 
-/* Detects GPS/location availability without prompting, and reacts live if the user
-   toggles the permission while the page is open. */
 async function watchGeolocationAvailability(){
   if (!navigator.geolocation){ showGpsOffMessage(); return; }
   if (!window.isSecureContext){ showLocManualForm(); return; }
   if (navigator.permissions && navigator.permissions.query){
     try{
-      const status = await navigator.permissions.query({ name:'geolocation' });
+      const status = await navigator.permissions.query({name:'geolocation'});
       const apply = ()=>{
-        if (el('resultContainer').style.display === 'block') return; // don't interrupt an active session
-        if (status.state === 'denied') showGpsOffMessage();
-        else showLocChooser();
+        if (el('resultContainer').style.display==='block') return;
+        if (status.state==='denied') showGpsOffMessage(); else showLocChooser();
       };
-      apply();
-      status.onchange = apply;
-      return;
-    }catch(e){ /* fall through */ }
+      apply(); status.onchange = apply; return;
+    }catch(e){}
   }
   showLocChooser();
 }

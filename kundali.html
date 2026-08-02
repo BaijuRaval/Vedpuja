@@ -631,18 +631,25 @@ async function useLocation(lat, lon){
 /* Retries getCurrentPosition automatically for transient failures (timeout / position
    unavailable), which happen normally while a GPS fix is still being acquired — these must
    NOT be treated as "GPS off". Only PERMISSION_DENIED is treated as non-retryable. */
-function getPositionOnce(timeoutMs){
+function getPositionOnce(options){
   return new Promise((resolve,reject)=>{
-    navigator.geolocation.getCurrentPosition(resolve, reject, {
-      enableHighAccuracy:true, timeout:timeoutMs, maximumAge:0
-    });
+    navigator.geolocation.getCurrentPosition(resolve, reject, options);
   });
 }
+/* Retries getCurrentPosition, progressively relaxing accuracy/cache requirements. Forcing
+   enableHighAccuracy + maximumAge:0 on every attempt demands a brand-new precise GPS fix
+   each time, which commonly times out indoors or with a weak signal even when GPS is
+   genuinely enabled — this is a very common false-negative source, not an actual "GPS off"
+   condition, so later attempts fall back to faster network-based / cached positioning. */
 async function getLocationWithRetries(maxRetries, timeoutMs){
   let lastErr;
   for (let attempt=0; attempt<=maxRetries; attempt++){
+    const relaxed = attempt >= 2; // after 2 precise attempts, allow faster/cached fixes
+    const options = relaxed
+      ? { enableHighAccuracy:false, timeout:Math.min(timeoutMs,15000), maximumAge:120000 }
+      : { enableHighAccuracy:true, timeout:timeoutMs, maximumAge:0 };
     try{
-      return await getPositionOnce(timeoutMs);
+      return await getPositionOnce(options);
     }catch(err){
       lastErr = err;
       if (err.code === 1) throw err; // PERMISSION_DENIED — no point retrying
@@ -663,6 +670,7 @@ async function currentPermissionState(){
 
 async function attemptMyLocation(){
   if (!navigator.geolocation){ showGpsOffMessage(); return; }
+  if (!window.isSecureContext){ showLocManualForm(); return; }
   showLoader(); setControlsDisabled(true);
   try{
     const pos = await getLocationWithRetries(4, 25000); // up to 5 attempts, 25s each
@@ -696,6 +704,7 @@ el('changeLocBtn').addEventListener('click', ()=>{
    toggles the permission while the page is open. */
 async function watchGeolocationAvailability(){
   if (!navigator.geolocation){ showGpsOffMessage(); return; }
+  if (!window.isSecureContext){ showLocManualForm(); return; }
   if (navigator.permissions && navigator.permissions.query){
     try{
       const status = await navigator.permissions.query({ name:'geolocation' });

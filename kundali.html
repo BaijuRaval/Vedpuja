@@ -576,11 +576,15 @@ function applyPickers(){
   if (!dv || !tv) return;
   const [y,m,d] = dv.split('-').map(Number);
   const [hh,mm] = tv.split(':').map(Number);
-  selectedDateTime = new Date(y, m-1, d, hh, mm, 0);
+  const next = new Date(y, m-1, d, hh, mm, 0);
+  if (next.getTime() === selectedDateTime.getTime()) return; // avoid duplicate recompute if both input+change fire
+  selectedDateTime = next;
   triggerRecalculation();
 }
 el('datePicker').addEventListener('change', applyPickers);
+el('datePicker').addEventListener('input', applyPickers);
 el('timePicker').addEventListener('change', applyPickers);
+el('timePicker').addEventListener('input', applyPickers);
 el('prevDayBtn').addEventListener('click', ()=>{
   selectedDateTime = new Date(selectedDateTime.getTime()-24*3600*1000);
   syncPickers(); triggerRecalculation();

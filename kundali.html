@@ -92,9 +92,31 @@
   .summary-grid .info-item .ival{font-size:13.5px;}
 
   footer{text-align:center;font-size:10px;color:var(--text-sub);opacity:.6;padding:14px 20px 0;line-height:1.5;}
+
+  #loaderOverlay{
+    position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:rgba(11,5,20,0.88);backdrop-filter:blur(3px);
+    opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease;
+  }
+  #loaderOverlay.show{opacity:1;visibility:visible;}
+  .spinner{
+    width:44px;height:44px;border-radius:50%;
+    border:3px solid rgba(230,180,90,0.25);border-top-color:var(--gold);
+    animation:spin 0.9s linear infinite;margin-bottom:16px;
+  }
+  @keyframes spin{to{transform:rotate(360deg);}}
+  .loader-text{font-size:15px;font-weight:700;color:var(--gold-light);letter-spacing:.3px;}
+  .loader-sub{font-size:12px;color:var(--text-sub);margin-top:5px;}
+
+  [disabled]{opacity:.45;pointer-events:none;}
 </style>
 </head>
 <body>
+<div id="loaderOverlay">
+  <div class="spinner"></div>
+  <div class="loader-text">Calculating Daily Kundali...</div>
+  <div class="loader-sub">Computing planetary positions...</div>
+</div>
 <div class="wrap">
 
   <header class="top">
@@ -441,18 +463,24 @@ function renderSummary(data){
 
 /* ===================== MAIN COMPUTE + RENDER ===================== */
 
-function computeAndRender(){
-  if(!sweInstance || userLat===null || userLon===null) return;
+/* Every call is a fully independent, uncached calculation: a fresh Julian Day is built
+   from the current date/time, then houses, ascendant, every planet, Rahu/Ketu, nakshatras,
+   padas, houses and lords are all recomputed from scratch via computeKundali(). Nothing
+   from a previous run is reused. */
+function calculateFresh(dt, lat, lon){
+  const freshJd = toJulianUTC(new Date(dt.getTime()));
+  return computeKundali(freshJd, lat, lon);
+}
 
-  const dt = selectedDateTime;
+function renderAll(dt, lat, lon, data){
   el('biDate').textContent = fmtFullDate(dt);
   el('biTime').textContent = fmtTime12(dt);
   el('biWeekday').textContent = WEEKDAYS[dt.getDay()];
-  el('biLocation').textContent = userLat.toFixed(2)+", "+userLon.toFixed(2);
-  el('biLat').textContent = userLat.toFixed(4)+"°";
-  el('biLon').textContent = userLon.toFixed(4)+"°";
-  el('latVal').textContent = userLat.toFixed(4)+"°";
-  el('lonVal').textContent = userLon.toFixed(4)+"°";
+  el('biLocation').textContent = lat.toFixed(2)+", "+lon.toFixed(2);
+  el('biLat').textContent = lat.toFixed(4)+"°";
+  el('biLon').textContent = lon.toFixed(4)+"°";
+  el('latVal').textContent = lat.toFixed(4)+"°";
+  el('lonVal').textContent = lon.toFixed(4)+"°";
 
   const tzOffsetMin = -dt.getTimezoneOffset();
   const tzSign = tzOffsetMin>=0 ? "+" : "-";
@@ -462,12 +490,50 @@ function computeAndRender(){
   try{ tzName = Intl.DateTimeFormat().resolvedOptions().timeZone; }catch(e){}
   el('biTz').textContent = tzName ? (tzName+" ("+tzStr+")") : tzStr;
 
-  const jd = toJulianUTC(dt);
-  const data = computeKundali(jd, userLat, userLon);
-
   renderChart(data);
   renderTable(data);
   renderSummary(data);
+}
+
+/* ===================== LOADER / RACE-GUARDED ORCHESTRATION ===================== */
+
+let activeRequestId = 0;
+const CONTROL_IDS = ['datePicker','timePicker','prevDayBtn','todayBtn','nextDayBtn','locateBtn','manualLocBtn'];
+
+function showLoader(){ el('loaderOverlay').classList.add('show'); }
+function hideLoader(){ el('loaderOverlay').classList.remove('show'); }
+function setControlsDisabled(disabled){
+  CONTROL_IDS.forEach(id=>{
+    const node = el(id);
+    if (disabled) node.setAttribute('disabled',''); else node.removeAttribute('disabled');
+  });
+}
+function nextFrame(){ return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); }
+
+/* Central entry point for every recalculation trigger (date change, time change, prev/next/
+   today, location detect, manual location). Each call gets a unique request id; if a newer
+   request starts before this one finishes, this one's result is discarded on completion so
+   the UI never shows partially-updated or stale data. */
+async function triggerRecalculation(){
+  const myId = ++activeRequestId;
+  showLoader();
+  setControlsDisabled(true);
+  await nextFrame(); // let the loader actually paint before the synchronous WASM work runs
+
+  if (!sweInstance || userLat===null || userLon===null){
+    if (myId === activeRequestId){ hideLoader(); setControlsDisabled(false); }
+    return;
+  }
+
+  const dt = new Date(selectedDateTime.getTime());
+  const lat = userLat, lon = userLon;
+  const data = calculateFresh(dt, lat, lon);
+
+  if (myId !== activeRequestId) return; // superseded by a newer request; discard silently
+
+  renderAll(dt, lat, lon, data);
+  hideLoader();
+  setControlsDisabled(false);
 }
 
 /* ===================== CONTROLS ===================== */
@@ -485,28 +551,28 @@ function applyPickers(){
   const [y,m,d] = dv.split('-').map(Number);
   const [hh,mm] = tv.split(':').map(Number);
   selectedDateTime = new Date(y, m-1, d, hh, mm, 0);
-  computeAndRender();
+  triggerRecalculation();
 }
 el('datePicker').addEventListener('change', applyPickers);
 el('timePicker').addEventListener('change', applyPickers);
 el('prevDayBtn').addEventListener('click', ()=>{
   selectedDateTime = new Date(selectedDateTime.getTime()-24*3600*1000);
-  syncPickers(); computeAndRender();
+  syncPickers(); triggerRecalculation();
 });
 el('nextDayBtn').addEventListener('click', ()=>{
   selectedDateTime = new Date(selectedDateTime.getTime()+24*3600*1000);
-  syncPickers(); computeAndRender();
+  syncPickers(); triggerRecalculation();
 });
 el('todayBtn').addEventListener('click', ()=>{
   selectedDateTime = new Date();
-  syncPickers(); computeAndRender();
+  syncPickers(); triggerRecalculation();
 });
 syncPickers();
 
 function useLocation(lat, lon){
   userLat=lat; userLon=lon;
   setStatus("Location set: "+lat.toFixed(4)+", "+lon.toFixed(4), "ok");
-  computeAndRender();
+  triggerRecalculation();
 }
 el('locateBtn').addEventListener('click', ()=>{
   if (!navigator.geolocation){
@@ -531,13 +597,17 @@ el('manualLocBtn').addEventListener('click', ()=>{
 /* ===================== INIT ===================== */
 
 (async function init(){
+  showLoader();
+  setControlsDisabled(true);
   await loadSwissEphemeris();
   if (navigator.geolocation){
     navigator.geolocation.getCurrentPosition(
       pos=>useLocation(pos.coords.latitude,pos.coords.longitude),
-      ()=>setStatus("Tap 'Detect My Location' to allow access, or enter coordinates manually.","err"),
+      ()=>{ setStatus("Tap 'Detect My Location' to allow access, or enter coordinates manually.","err"); hideLoader(); setControlsDisabled(false); },
       { enableHighAccuracy:true, timeout:10000, maximumAge:300000 }
     );
+  } else {
+    hideLoader(); setControlsDisabled(false);
   }
 })();
 </script>

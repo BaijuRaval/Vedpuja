@@ -507,8 +507,6 @@ function renderAll(dt, lat, lon, data){
   el('biLocation').textContent = lat.toFixed(2)+", "+lon.toFixed(2);
   el('biLat').textContent = lat.toFixed(4)+"°";
   el('biLon').textContent = lon.toFixed(4)+"°";
-  el('latVal').textContent = lat.toFixed(4)+"°";
-  el('lonVal').textContent = lon.toFixed(4)+"°";
 
   const tzOffsetMin = -dt.getTimezoneOffset();
   const tzSign = tzOffsetMin>=0 ? "+" : "-";

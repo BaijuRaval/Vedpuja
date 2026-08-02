@@ -49,13 +49,15 @@
   }
   .nav-bar button.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
 
-  .geo-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;}
-  .geo-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text-sub);margin-bottom:8px;}
-  .geo-row b{color:var(--text-main);}
-  #locateBtn{display:block;width:100%;padding:10px;border:none;border-radius:11px;background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;font-weight:700;font-size:13px;}
-  .manual-loc{display:none;gap:8px;margin-top:9px;}
-  .manual-loc input{flex:1;padding:8px 9px;border-radius:9px;border:1px solid var(--card-border);background:rgba(255,255,255,.05);color:var(--text-main);font-size:12.5px;}
-  .manual-loc button{padding:8px 12px;border-radius:9px;border:none;background:var(--gold);color:#241206;font-weight:700;font-size:12.5px;}
+  .loc-msg{text-align:center;font-size:14px;font-weight:700;color:var(--warn);padding:10px 4px;}
+  .loc-btn{display:block;width:100%;padding:11px;border:none;border-radius:11px;font-size:13.5px;font-weight:700;margin-bottom:8px;
+    background:var(--card-bg2);border:1px solid var(--card-border);color:var(--gold-light);}
+  .loc-btn:last-child{margin-bottom:0;}
+  .loc-btn.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
+  #locManualForm input{
+    width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--card-border);
+    background:rgba(255,255,255,.05);color:var(--text-main);font-size:12.5px;margin-bottom:8px;
+  }
   .status{font-size:11.5px;color:var(--text-sub);text-align:center;padding:7px 4px 0;}
   .status.err{color:var(--warn);} .status.ok{color:var(--ok);}
 
@@ -135,18 +137,30 @@
     <button id="nextDayBtn">Next Day ▶</button>
   </div>
 
-  <div class="geo-card">
-    <div class="geo-row"><span>Latitude</span><b id="latVal">--</b></div>
-    <div class="geo-row"><span>Longitude</span><b id="lonVal">--</b></div>
-    <button id="locateBtn">📍 Detect My Location</button>
-    <div class="manual-loc" id="manualLocBox">
-      <input type="text" id="manualLat" placeholder="Latitude e.g. 23.0225">
-      <input type="text" id="manualLon" placeholder="Longitude e.g. 72.5714">
-      <button id="manualLocBtn">Use</button>
+  <!-- LOCATION SECTION (exactly one state visible at a time) -->
+  <div class="section" id="locationSection">
+    <div class="sec-header"><span class="hicon">📍</span> Location</div>
+    <div class="sec-body">
+
+      <div id="locGpsOff" class="loc-state" style="display:none;">
+        <div class="loc-msg">Please turn on GPS.</div>
+      </div>
+
+      <div id="locChooser" class="loc-state" style="display:none;">
+        <button id="myLocationBtn" class="loc-btn primary">📍 My Location</button>
+        <button id="enterLocationBtn" class="loc-btn">✏️ Enter Location</button>
+      </div>
+
+      <div id="locManualForm" class="loc-state" style="display:none;">
+        <input type="text" id="manualLat" placeholder="Latitude e.g. 23.0225">
+        <input type="text" id="manualLon" placeholder="Longitude e.g. 72.5714">
+        <button id="manualLocSubmit" class="loc-btn primary">Submit</button>
+      </div>
+
     </div>
-    <div class="status" id="locStatus">Tap above to detect location, or enter it manually.</div>
-    <div class="status" id="engineStatus">Loading astronomical engine…</div>
   </div>
+
+  <div id="resultContainer" style="display:none;">
 
   <!-- SECTION 1: BASIC INFORMATION -->
   <div class="section">
@@ -160,6 +174,7 @@
         <div class="info-item"><div class="ilabel">🌐 Time Zone</div><div class="ival" id="biTz">--</div></div>
         <div class="info-item"><div class="ilabel">Latitude</div><div class="ival" id="biLat">--</div></div>
         <div class="info-item"><div class="ilabel">Longitude</div><div class="ival" id="biLon">--</div></div>
+        <div class="info-item span2"><button id="changeLocBtn" class="loc-btn">Change Location</button></div>
       </div>
     </div>
   </div>
@@ -206,6 +221,8 @@
       </div>
     </div>
   </div>
+
+  </div><!-- /resultContainer -->
 
   <footer>
     Sun/Moon/Planet positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Ayanamsa: Lahiri (Sidereal) · House System: Whole Sign · Rahu: Mean Node, Ketu: Rahu + 180°
@@ -261,24 +278,26 @@ let sweModule=null, sweInstance=null;
 let selectedDateTime = new Date();
 
 const el = id => document.getElementById(id);
-function setStatus(msg,cls){ const s=el('locStatus'); s.textContent=msg; s.className='status'+(cls?' '+cls:''); }
-function setEngineStatus(msg,cls){ const s=el('engineStatus'); s.textContent=msg; s.className='status'+(cls?' '+cls:''); }
+function showGpsOffMessage(text){
+  el('locGpsOff').querySelector('.loc-msg').textContent = text || "Please turn on GPS.";
+  el('locGpsOff').style.display = 'block';
+  el('locChooser').style.display = 'none';
+  el('locManualForm').style.display = 'none';
+}
 
 /* ===================== SWISS EPHEMERIS LOADING ===================== */
 
 async function loadSwissEphemeris(){
-  setEngineStatus("Loading astronomical engine (Swiss Ephemeris, Moshier)…");
   try{
     const mod = await import("./js/swisseph/swisseph-browser.js");
     const swe = new mod.SwissEphemeris();
     await swe.init();
     swe.setSiderealMode(mod.SiderealMode.Lahiri);
     sweModule = mod; sweInstance = swe;
-    setEngineStatus("Astronomical engine ready (Moshier ephemeris, fully offline).","ok");
     return true;
   }catch(err){
     console.error(err);
-    setEngineStatus("Could not load js/swisseph/*. Ensure swisseph-browser.js, swisseph.js and swisseph.wasm are present together, and this page is served over http(s), not file://.","err");
+    showGpsOffMessage("Could not load the astronomical engine. Ensure js/swisseph/ files are present and this page is served over http(s).");
     return false;
   }
 }
@@ -498,7 +517,7 @@ function renderAll(dt, lat, lon, data){
 /* ===================== LOADER / RACE-GUARDED ORCHESTRATION ===================== */
 
 let activeRequestId = 0;
-const CONTROL_IDS = ['datePicker','timePicker','prevDayBtn','todayBtn','nextDayBtn','locateBtn','manualLocBtn'];
+const CONTROL_IDS = ['datePicker','timePicker','prevDayBtn','todayBtn','nextDayBtn','myLocationBtn','enterLocationBtn','manualLocSubmit'];
 
 function showLoader(){ el('loaderOverlay').classList.add('show'); }
 function hideLoader(){ el('loaderOverlay').classList.remove('show'); }
@@ -569,46 +588,78 @@ el('todayBtn').addEventListener('click', ()=>{
 });
 syncPickers();
 
-function useLocation(lat, lon){
-  userLat=lat; userLon=lon;
-  setStatus("Location set: "+lat.toFixed(4)+", "+lon.toFixed(4), "ok");
-  triggerRecalculation();
+function showLocChooser(){
+  el('locGpsOff').style.display = 'none';
+  el('locChooser').style.display = 'block';
+  el('locManualForm').style.display = 'none';
 }
-el('locateBtn').addEventListener('click', ()=>{
-  if (!navigator.geolocation){
-    setStatus("Geolocation not supported. Enter coordinates manually below.","err");
-    el('manualLocBox').style.display='flex'; return;
-  }
-  setStatus("Requesting location permission…");
+function showLocManualForm(){
+  el('locGpsOff').style.display = 'none';
+  el('locChooser').style.display = 'none';
+  el('locManualForm').style.display = 'block';
+}
+function showResults(){
+  el('locationSection').style.display = 'none';
+  el('resultContainer').style.display = 'block';
+}
+function showLocationSection(){
+  el('resultContainer').style.display = 'none';
+  el('locationSection').style.display = 'block';
+}
+
+async function useLocation(lat, lon){
+  userLat=lat; userLon=lon;
+  await triggerRecalculation();
+  showResults();
+}
+
+el('myLocationBtn').addEventListener('click', ()=>{
+  if (!navigator.geolocation){ showGpsOffMessage(); return; }
+  showLoader(); setControlsDisabled(true);
   navigator.geolocation.getCurrentPosition(
-    pos=>useLocation(pos.coords.latitude,pos.coords.longitude),
-    err=>{ setStatus("Location denied ("+err.message+"). Enter manually below.","err"); el('manualLocBox').style.display='flex'; },
-    { enableHighAccuracy:true, timeout:10000, maximumAge:300000 }
+    pos=> useLocation(pos.coords.latitude, pos.coords.longitude),
+    ()=>{ hideLoader(); setControlsDisabled(false); showGpsOffMessage(); },
+    { enableHighAccuracy:true, timeout:10000, maximumAge:0 }
   );
 });
-el('manualLocBtn').addEventListener('click', ()=>{
+el('enterLocationBtn').addEventListener('click', showLocManualForm);
+el('manualLocSubmit').addEventListener('click', ()=>{
   const lat=parseFloat(el('manualLat').value), lon=parseFloat(el('manualLon').value);
-  if (isNaN(lat)||isNaN(lon)||lat<-90||lat>90||lon<-180||lon>180){
-    setStatus("Enter valid latitude (-90..90) and longitude (-180..180).","err"); return;
-  }
-  useLocation(lat,lon);
+  if (isNaN(lat)||isNaN(lon)||lat<-90||lat>90||lon<-180||lon>180) return;
+  useLocation(lat, lon);
 });
+el('changeLocBtn').addEventListener('click', ()=>{
+  showLocationSection();
+  showLocChooser();
+});
+
+/* Detects GPS/location availability without prompting, and reacts live if the user
+   toggles the permission while the page is open. */
+async function watchGeolocationAvailability(){
+  if (!navigator.geolocation){ showGpsOffMessage(); return; }
+  if (navigator.permissions && navigator.permissions.query){
+    try{
+      const status = await navigator.permissions.query({ name:'geolocation' });
+      const apply = ()=>{
+        if (el('resultContainer').style.display === 'block') return; // don't interrupt an active session
+        if (status.state === 'denied') showGpsOffMessage();
+        else showLocChooser();
+      };
+      apply();
+      status.onchange = apply;
+      return;
+    }catch(e){ /* fall through */ }
+  }
+  showLocChooser();
+}
 
 /* ===================== INIT ===================== */
 
 (async function init(){
-  showLoader();
-  setControlsDisabled(true);
-  await loadSwissEphemeris();
-  if (navigator.geolocation){
-    navigator.geolocation.getCurrentPosition(
-      pos=>useLocation(pos.coords.latitude,pos.coords.longitude),
-      ()=>{ setStatus("Tap 'Detect My Location' to allow access, or enter coordinates manually.","err"); hideLoader(); setControlsDisabled(false); },
-      { enableHighAccuracy:true, timeout:10000, maximumAge:300000 }
-    );
-  } else {
-    hideLoader(); setControlsDisabled(false);
-  }
+  el('resultContainer').style.display = 'none';
+  const enginePromise = loadSwissEphemeris();
+  watchGeolocationAvailability();
+  await enginePromise;
 })();
 </script>
 </body>

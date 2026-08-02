@@ -576,9 +576,7 @@ function applyPickers(){
   if (!dv || !tv) return;
   const [y,m,d] = dv.split('-').map(Number);
   const [hh,mm] = tv.split(':').map(Number);
-  const next = new Date(y, m-1, d, hh, mm, 0);
-  if (next.getTime() === selectedDateTime.getTime()) return; // avoid duplicate recompute if both input+change fire
-  selectedDateTime = next;
+  selectedDateTime = new Date(y, m-1, d, hh, mm, 0);
   triggerRecalculation();
 }
 el('datePicker').addEventListener('change', applyPickers);

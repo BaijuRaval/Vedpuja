@@ -151,6 +151,12 @@
         <button id="enterLocationBtn" class="loc-btn">✏️ Enter Location</button>
       </div>
 
+      <div id="locError" class="loc-state" style="display:none;">
+        <div class="loc-msg">Unable to get your location. Retry?</div>
+        <button id="retryLocationBtn" class="loc-btn primary">🔄 Retry</button>
+        <button id="enterLocationBtn2" class="loc-btn">✏️ Enter Location</button>
+      </div>
+
       <div id="locManualForm" class="loc-state" style="display:none;">
         <input type="text" id="manualLat" placeholder="Latitude e.g. 23.0225">
         <input type="text" id="manualLon" placeholder="Longitude e.g. 72.5714">
@@ -282,6 +288,7 @@ function showGpsOffMessage(text){
   el('locGpsOff').querySelector('.loc-msg').textContent = text || "Please turn on GPS.";
   el('locGpsOff').style.display = 'block';
   el('locChooser').style.display = 'none';
+  el('locError').style.display = 'none';
   el('locManualForm').style.display = 'none';
 }
 
@@ -517,7 +524,7 @@ function renderAll(dt, lat, lon, data){
 /* ===================== LOADER / RACE-GUARDED ORCHESTRATION ===================== */
 
 let activeRequestId = 0;
-const CONTROL_IDS = ['datePicker','timePicker','prevDayBtn','todayBtn','nextDayBtn','myLocationBtn','enterLocationBtn','manualLocSubmit'];
+const CONTROL_IDS = ['datePicker','timePicker','prevDayBtn','todayBtn','nextDayBtn','myLocationBtn','enterLocationBtn','enterLocationBtn2','retryLocationBtn','manualLocSubmit'];
 
 function showLoader(){ el('loaderOverlay').classList.add('show'); }
 function hideLoader(){ el('loaderOverlay').classList.remove('show'); }
@@ -591,11 +598,19 @@ syncPickers();
 function showLocChooser(){
   el('locGpsOff').style.display = 'none';
   el('locChooser').style.display = 'block';
+  el('locError').style.display = 'none';
+  el('locManualForm').style.display = 'none';
+}
+function showLocError(){
+  el('locGpsOff').style.display = 'none';
+  el('locChooser').style.display = 'none';
+  el('locError').style.display = 'block';
   el('locManualForm').style.display = 'none';
 }
 function showLocManualForm(){
   el('locGpsOff').style.display = 'none';
   el('locChooser').style.display = 'none';
+  el('locError').style.display = 'none';
   el('locManualForm').style.display = 'block';
 }
 function showResults(){
@@ -646,23 +661,27 @@ async function currentPermissionState(){
   return 'unknown';
 }
 
-el('myLocationBtn').addEventListener('click', async ()=>{
+async function attemptMyLocation(){
   if (!navigator.geolocation){ showGpsOffMessage(); return; }
   showLoader(); setControlsDisabled(true);
   try{
     const pos = await getLocationWithRetries(4, 25000); // up to 5 attempts, 25s each
     await useLocation(pos.coords.latitude, pos.coords.longitude);
+    // loader is hidden inside triggerRecalculation() only once Kundali is fully rendered
   }catch(err){
-    hideLoader(); setControlsDisabled(false);
     const permState = await currentPermissionState();
+    hideLoader(); setControlsDisabled(false);
     if (err.code === 1 || permState === 'denied'){
-      showGpsOffMessage(); // permission genuinely denied
+      showGpsOffMessage(); // permission genuinely denied — reported by the browser, not guessed
     } else {
-      showLocChooser(); // permission is granted/prompt but a fix couldn't be acquired — no false "GPS off" message; user can simply retry
+      showLocError(); // real fetch failure (timeout/unavailable after retries) — always shown, never silent
     }
   }
-});
+}
+el('myLocationBtn').addEventListener('click', attemptMyLocation);
+el('retryLocationBtn').addEventListener('click', attemptMyLocation);
 el('enterLocationBtn').addEventListener('click', showLocManualForm);
+el('enterLocationBtn2').addEventListener('click', showLocManualForm);
 el('manualLocSubmit').addEventListener('click', ()=>{
   const lat=parseFloat(el('manualLat').value), lon=parseFloat(el('manualLon').value);
   if (isNaN(lat)||isNaN(lon)||lat<-90||lat>90||lon<-180||lon>180) return;

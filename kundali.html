@@ -50,6 +50,7 @@
   .nav-bar button.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
 
   .loc-msg{text-align:center;font-size:14px;font-weight:700;color:var(--warn);padding:10px 4px;}
+  .loc-detail{text-align:center;font-size:11px;color:var(--text-sub);padding:0 4px 10px;word-break:break-word;}
   .loc-btn{display:block;width:100%;padding:11px;border:none;border-radius:11px;font-size:13.5px;font-weight:700;margin-bottom:8px;
     background:var(--card-bg2);border:1px solid var(--card-border);color:var(--gold-light);}
   .loc-btn:last-child{margin-bottom:0;}
@@ -153,6 +154,7 @@
 
       <div id="locError" class="loc-state" style="display:none;">
         <div class="loc-msg">Unable to get your location. Retry?</div>
+        <div class="loc-detail" id="locErrorDetail"></div>
         <button id="retryLocationBtn" class="loc-btn primary">🔄 Retry</button>
         <button id="enterLocationBtn2" class="loc-btn">✏️ Enter Location</button>
       </div>
@@ -601,10 +603,11 @@ function showLocChooser(){
   el('locError').style.display = 'none';
   el('locManualForm').style.display = 'none';
 }
-function showLocError(){
+function showLocError(detail){
   el('locGpsOff').style.display = 'none';
   el('locChooser').style.display = 'none';
   el('locError').style.display = 'block';
+  el('locErrorDetail').textContent = detail || '';
   el('locManualForm').style.display = 'none';
 }
 function showLocManualForm(){
@@ -679,10 +682,12 @@ async function attemptMyLocation(){
   }catch(err){
     const permState = await currentPermissionState();
     hideLoader(); setControlsDisabled(false);
+    console.error("Geolocation failed:", err.code, err.message, "permission state:", permState);
     if (err.code === 1 || permState === 'denied'){
       showGpsOffMessage(); // permission genuinely denied — reported by the browser, not guessed
     } else {
-      showLocError(); // real fetch failure (timeout/unavailable after retries) — always shown, never silent
+      const codeNames = {1:'PERMISSION_DENIED',2:'POSITION_UNAVAILABLE',3:'TIMEOUT'};
+      showLocError(`(${codeNames[err.code]||'code '+err.code}: ${err.message||'no message'}, permission: ${permState})`);
     }
   }
 }

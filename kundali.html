@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Daily Kundali</title>
+<style>
+  :root{
+    --bg1:#0b0514; --bg2:#1a0f2a;
+    --gold:#e6b45a; --gold-light:#f5d799; --saffron:#ff7a3d;
+    --card-bg:rgba(255,255,255,0.055); --card-bg2:rgba(255,255,255,0.03);
+    --card-border:rgba(230,180,90,0.22);
+    --text-main:#fdf6ec; --text-sub:#bfaed9;
+    --ok:#7bd88f; --warn:#ff8a80; --neutral:#f6cf6b;
+    --radius:16px; --radius-sm:11px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{
+    min-height:100%;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(74,37,112,0.22) 0%, transparent 40%),
+      radial-gradient(circle at 90% 10%, rgba(51,26,84,0.18) 0%, transparent 38%),
+      var(--bg1);
+    color:var(--text-main);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+    padding-bottom:34px; font-size:14.5px;
+  }
+  .wrap{max-width:560px;margin:0 auto;padding:14px 12px 6px;}
+
+  header.top{text-align:center;padding:16px 8px 10px;}
+  header.top .om{font-size:30px;color:var(--gold);text-shadow:0 0 16px rgba(230,180,90,.6);}
+  header.top h1{
+    font-size:20px;font-weight:700;letter-spacing:.4px;margin-top:4px;
+    background:linear-gradient(90deg,var(--gold-light),var(--saffron));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+  }
+  header.top .sub{font-size:11px;color:var(--text-sub);margin-top:2px;}
+
+  .date-bar{display:flex;gap:6px;align-items:center;margin:10px 0 8px;flex-wrap:wrap;}
+  .date-bar input[type=date],.date-bar input[type=time]{
+    flex:1;min-width:120px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-sm);
+    color:var(--text-main);font-size:13px;padding:9px 8px;font-family:inherit;
+  }
+  .nav-bar{display:flex;gap:6px;margin-bottom:12px;}
+  .nav-bar button{
+    flex:1;padding:8px 6px;border:none;border-radius:9px;font-size:12px;font-weight:700;
+    background:var(--card-bg);border:1px solid var(--card-border);color:var(--gold-light);
+  }
+  .nav-bar button.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
+
+  .geo-card{background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius);padding:12px 14px;margin-bottom:12px;}
+  .geo-row{display:flex;justify-content:space-between;font-size:12px;color:var(--text-sub);margin-bottom:8px;}
+  .geo-row b{color:var(--text-main);}
+  #locateBtn{display:block;width:100%;padding:10px;border:none;border-radius:11px;background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;font-weight:700;font-size:13px;}
+  .manual-loc{display:none;gap:8px;margin-top:9px;}
+  .manual-loc input{flex:1;padding:8px 9px;border-radius:9px;border:1px solid var(--card-border);background:rgba(255,255,255,.05);color:var(--text-main);font-size:12.5px;}
+  .manual-loc button{padding:8px 12px;border-radius:9px;border:none;background:var(--gold);color:#241206;font-weight:700;font-size:12.5px;}
+  .status{font-size:11.5px;color:var(--text-sub);text-align:center;padding:7px 4px 0;}
+  .status.err{color:var(--warn);} .status.ok{color:var(--ok);}
+
+  .section{border-radius:var(--radius);overflow:hidden;margin-bottom:12px;border:1px solid var(--card-border);
+    background:linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015));}
+  .sec-header{display:flex;align-items:center;gap:10px;padding:13px 15px;font-size:14.5px;font-weight:700;letter-spacing:.3px;}
+  .sec-header .hicon{font-size:18px;}
+  .sec-body{padding:0 13px 14px;}
+
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .info-item{background:var(--card-bg2);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:9px 10px;}
+  .info-item .ilabel{font-size:10px;color:var(--text-sub);text-transform:uppercase;letter-spacing:.5px;}
+  .info-item .ival{font-size:14px;font-weight:700;margin-top:3px;}
+  .info-item.span2{grid-column:1/-1;}
+
+  .chart-wrap{display:flex;justify-content:center;padding:6px 0 4px;}
+  .chart-wrap svg{width:100%;max-width:400px;height:auto;}
+  .chart-house-num{fill:var(--gold);font-size:11px;font-weight:700;}
+  .chart-planet{fill:var(--text-main);font-size:12.5px;font-weight:700;}
+  .chart-planet.retro{fill:var(--warn);}
+  .chart-line{stroke:var(--card-border);stroke-width:1.4;fill:none;}
+
+  table.ptable{width:100%;border-collapse:collapse;font-size:11.3px;}
+  table.ptable th{color:var(--gold);text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;padding:6px 5px;border-bottom:1px solid var(--card-border);white-space:nowrap;}
+  table.ptable td{padding:7px 5px;border-bottom:1px dashed rgba(255,255,255,0.06);white-space:nowrap;}
+  table.ptable tr:last-child td{border-bottom:none;}
+  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
+  .retro-tag{color:var(--warn);font-weight:700;}
+  .direct-tag{color:var(--ok);}
+  .combust-yes{color:var(--warn);font-weight:700;}
+  .combust-no{color:var(--text-sub);}
+
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .summary-grid .info-item .ival{font-size:13.5px;}
+
+  footer{text-align:center;font-size:10px;color:var(--text-sub);opacity:.6;padding:14px 20px 0;line-height:1.5;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <div class="om">ॐ</div>
+    <h1>Daily Kundali</h1>
+    <div class="sub">Sidereal Transit Chart (Lahiri Ayanamsa)</div>
+  </header>
+
+  <div class="date-bar">
+    <input type="date" id="datePicker">
+    <input type="time" id="timePicker" step="60">
+  </div>
+  <div class="nav-bar">
+    <button id="prevDayBtn">◀ Previous Day</button>
+    <button id="todayBtn" class="primary">Today</button>
+    <button id="nextDayBtn">Next Day ▶</button>
+  </div>
+
+  <div class="geo-card">
+    <div class="geo-row"><span>Latitude</span><b id="latVal">--</b></div>
+    <div class="geo-row"><span>Longitude</span><b id="lonVal">--</b></div>
+    <button id="locateBtn">📍 Detect My Location</button>
+    <div class="manual-loc" id="manualLocBox">
+      <input type="text" id="manualLat" placeholder="Latitude e.g. 23.0225">
+      <input type="text" id="manualLon" placeholder="Longitude e.g. 72.5714">
+      <button id="manualLocBtn">Use</button>
+    </div>
+    <div class="status" id="locStatus">Tap above to detect location, or enter it manually.</div>
+    <div class="status" id="engineStatus">Loading astronomical engine…</div>
+  </div>
+
+  <!-- SECTION 1: BASIC INFORMATION -->
+  <div class="section">
+    <div class="sec-header"><span class="hicon">📋</span> Basic Information</div>
+    <div class="sec-body">
+      <div class="info-grid">
+        <div class="info-item span2"><div class="ilabel">📅 Date</div><div class="ival" id="biDate">--</div></div>
+        <div class="info-item"><div class="ilabel">🕐 Time</div><div class="ival" id="biTime">--</div></div>
+        <div class="info-item"><div class="ilabel">🗓️ Weekday</div><div class="ival" id="biWeekday">--</div></div>
+        <div class="info-item"><div class="ilabel">📍 Location</div><div class="ival" id="biLocation">--</div></div>
+        <div class="info-item"><div class="ilabel">🌐 Time Zone</div><div class="ival" id="biTz">--</div></div>
+        <div class="info-item"><div class="ilabel">Latitude</div><div class="ival" id="biLat">--</div></div>
+        <div class="info-item"><div class="ilabel">Longitude</div><div class="ival" id="biLon">--</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: DAILY KUNDALI -->
+  <div class="section">
+    <div class="sec-header"><span class="hicon">🔯</span> Daily Kundali</div>
+    <div class="sec-body">
+      <div class="chart-wrap"><svg id="chartSvg" viewBox="0 0 400 400"></svg></div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: PLANETARY POSITIONS -->
+  <div class="section">
+    <div class="sec-header"><span class="hicon">🪐</span> Planetary Positions</div>
+    <div class="sec-body">
+      <div class="table-scroll">
+        <table class="ptable" id="planetTable">
+          <thead><tr>
+            <th>Planet</th><th>House</th><th>House Lord</th><th>Rashi</th><th>Sign Lord</th>
+            <th>Longitude</th><th>Degree</th><th>Nakshatra</th><th>Pada</th><th>Motion</th><th>Combust</th>
+          </tr></thead>
+          <tbody id="planetTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: DAILY SUMMARY -->
+  <div class="section">
+    <div class="sec-header"><span class="hicon">📝</span> Daily Summary</div>
+    <div class="sec-body">
+      <div class="summary-grid">
+        <div class="info-item"><div class="ilabel">Ascendant</div><div class="ival" id="sumAsc">--</div></div>
+        <div class="info-item"><div class="ilabel">Ascendant Degree</div><div class="ival" id="sumAscDeg">--</div></div>
+        <div class="info-item"><div class="ilabel">Ascendant Nakshatra</div><div class="ival" id="sumAscNak">--</div></div>
+        <div class="info-item"><div class="ilabel">Ascendant Pada</div><div class="ival" id="sumAscPada">--</div></div>
+        <div class="info-item"><div class="ilabel">Sun Sign</div><div class="ival" id="sumSunSign">--</div></div>
+        <div class="info-item"><div class="ilabel">Moon Sign</div><div class="ival" id="sumMoonSign">--</div></div>
+        <div class="info-item"><div class="ilabel">Current Tithi</div><div class="ival" id="sumTithi">--</div></div>
+        <div class="info-item"><div class="ilabel">Current Nakshatra</div><div class="ival" id="sumNak">--</div></div>
+        <div class="info-item"><div class="ilabel">Current Yoga</div><div class="ival" id="sumYoga">--</div></div>
+        <div class="info-item"><div class="ilabel">Current Karana</div><div class="ival" id="sumKarana">--</div></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Sun/Moon/Planet positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Ayanamsa: Lahiri (Sidereal) · House System: Whole Sign · Rahu: Mean Node, Ketu: Rahu + 180°
+  </footer>
+</div>
+
+<script type="module">
+/* ===================== NAME TABLES (English only; structure kept modular for future locales) ===================== */
+
+const RASHI = [
+  ["Mesha","Mars"],["Vrishabha","Venus"],["Mithuna","Mercury"],["Karka","Moon"],
+  ["Simha","Sun"],["Kanya","Mercury"],["Tula","Venus"],["Vrishchika","Mars"],
+  ["Dhanu","Jupiter"],["Makara","Saturn"],["Kumbha","Saturn"],["Meena","Jupiter"]
+];
+const NAKSHATRAS = [
+  "Ashwini","Bharani","Krittika","Rohini","Mrigashira","Ardra","Punarvasu","Pushya","Ashlesha",
+  "Magha","Purva Phalguni","Uttara Phalguni","Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha",
+  "Mula","Purva Ashadha","Uttara Ashadha","Shravana","Dhanishtha","Shatabhisha","Purva Bhadrapada",
+  "Uttara Bhadrapada","Revati"
+];
+const SHUKLA_TITHI = ["Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi","Purnima"];
+const KRISHNA_TITHI = ["Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi","Amavasya"];
+const YOGAS = ["Vishkambha","Priti","Ayushman","Saubhagya","Shobhana","Atiganda","Sukarma","Dhriti","Shula","Ganda","Vriddhi","Dhruva","Vyaghata","Harshana","Vajra","Siddhi","Vyatipata","Variyana","Parigha","Shiva","Siddha","Sadhya","Shubha","Shukla","Brahma","Indra","Vaidhriti"];
+const KARANA_MOVABLE = ["Bava","Balava","Kaulava","Taitila","Gara","Vanija","Vishti (Bhadra)"];
+const KARANA_FIXED = { 0:"Kimstughna", 57:"Shakuni", 58:"Chatushpada", 59:"Naga" };
+const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+
+/* Combustion orbs (degrees from Sun). Sun/Rahu/Ketu are not evaluated for combustion. */
+const COMBUST_ORB = { Moon:12, Mars:17, Mercury:14, Jupiter:11, Venus:10, Saturn:15 };
+
+/* ===================== MATH / TIME HELPERS ===================== */
+
+const D2R=Math.PI/180, R2D=180/Math.PI;
+const sinD=d=>Math.sin(d*D2R), cosD=d=>Math.cos(d*D2R);
+const asinD=x=>Math.asin(Math.max(-1,Math.min(1,x)))*R2D;
+const norm360=x=>((x%360)+360)%360;
+function toJulianUTC(date){ return date.getTime()/86400000 + 2440587.5; }
+function angDiff(a,b){ const d=Math.abs(norm360(a-b)); return d>180?360-d:d; }
+function fmtDeg(lon){
+  const inSign = lon % 30;
+  const d = Math.floor(inSign);
+  const m = Math.floor((inSign-d)*60);
+  const s = Math.round(((inSign-d)*60-m)*60);
+  return `${d}°${String(m).padStart(2,'0')}'${String(s).padStart(2,'0')}"`;
+}
+function fmtFullDate(date){ return date.toLocaleDateString('en-IN',{year:'numeric',month:'long',day:'numeric'}); }
+function fmtTime12(date){ return date.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+
+/* ===================== APP STATE ===================== */
+
+let userLat=null, userLon=null;
+let sweModule=null, sweInstance=null;
+let selectedDateTime = new Date();
+
+const el = id => document.getElementById(id);
+function setStatus(msg,cls){ const s=el('locStatus'); s.textContent=msg; s.className='status'+(cls?' '+cls:''); }
+function setEngineStatus(msg,cls){ const s=el('engineStatus'); s.textContent=msg; s.className='status'+(cls?' '+cls:''); }
+
+/* ===================== SWISS EPHEMERIS LOADING ===================== */
+
+async function loadSwissEphemeris(){
+  setEngineStatus("Loading astronomical engine (Swiss Ephemeris, Moshier)…");
+  try{
+    const mod = await import("./js/swisseph/swisseph-browser.js");
+    const swe = new mod.SwissEphemeris();
+    await swe.init();
+    swe.setSiderealMode(mod.SiderealMode.Lahiri);
+    sweModule = mod; sweInstance = swe;
+    setEngineStatus("Astronomical engine ready (Moshier ephemeris, fully offline).","ok");
+    return true;
+  }catch(err){
+    console.error(err);
+    setEngineStatus("Could not load js/swisseph/*. Ensure swisseph-browser.js, swisseph.js and swisseph.wasm are present together, and this page is served over http(s), not file://.","err");
+    return false;
+  }
+}
+
+/* ===================== CORE ASTRONOMY (modular) ===================== */
+
+function getSiderealPosition(jd, body){
+  const flags = sweModule.CalculationFlag.MoshierEphemeris | sweModule.CalculationFlag.Sidereal | sweModule.CalculationFlag.Speed;
+  const p = sweInstance.calculatePosition(jd, body, flags);
+  return { longitude: norm360(p.longitude), speed: p.longitudeSpeed };
+}
+function getSiderealAscendant(jd, lat, lon){
+  const houses = sweInstance.calculateHouses(jd, lat, lon, sweModule.HouseSystem.WholeSign);
+  const ayan = sweInstance.getAyanamsa(jd);
+  return norm360(houses.ascendant - ayan);
+}
+function rashiIndex(lon){ return Math.floor(norm360(lon)/30); }
+function nakshatraIndex(lon){ return Math.floor(norm360(lon)/(360/27))%27; }
+function nakshatraPada(lon){
+  const span=360/27, padaSpan=span/4;
+  return Math.floor((norm360(lon)%span)/padaSpan)+1;
+}
+function tithiName(sunSid, moonSid){
+  const idx = Math.floor(norm360(moonSid-sunSid)/12)%30;
+  return idx<15 ? SHUKLA_TITHI[idx] : KRISHNA_TITHI[idx%15];
+}
+function yogaName(sunSid, moonSid){
+  const idx = Math.floor(norm360(sunSid+moonSid)/(360/27))%27;
+  return YOGAS[idx];
+}
+function karanaName(sunSid, moonSid){
+  const idx = Math.floor(norm360(moonSid-sunSid)/6)%60;
+  if (KARANA_FIXED[idx]) return KARANA_FIXED[idx];
+  return KARANA_MOVABLE[(idx-1)%7];
+}
+
+/* Computes the full daily kundali data set for a given moment/location. Kept as a single
+   pure function so future features (dashas, aspects, divisional charts, etc.) can consume
+   this same output without touching the render layer. */
+function computeKundali(jd, lat, lon){
+  const ascSid = getSiderealAscendant(jd, lat, lon);
+  const ascRashi = rashiIndex(ascSid);
+
+  const sun = getSiderealPosition(jd, sweModule.Planet.Sun);
+  const sunSid = sun.longitude;
+
+  const bodies = [
+    { key:"Sun",     body:sweModule.Planet.Sun },
+    { key:"Moon",    body:sweModule.Planet.Moon },
+    { key:"Mars",    body:sweModule.Planet.Mars },
+    { key:"Mercury", body:sweModule.Planet.Mercury },
+    { key:"Jupiter", body:sweModule.Planet.Jupiter },
+    { key:"Venus",   body:sweModule.Planet.Venus },
+    { key:"Saturn",  body:sweModule.Planet.Saturn },
+    { key:"Rahu",    body:sweModule.LunarPoint.MeanNode }
+  ];
+
+  const planets = bodies.map(b=>{
+    const pos = b.key==="Sun" ? sun : getSiderealPosition(jd, b.body);
+    const lon = pos.longitude;
+    const rashi = rashiIndex(lon);
+    const house = ((rashi - ascRashi + 12) % 12) + 1;
+    const nak = nakshatraIndex(lon);
+    const retro = pos.speed < 0;
+    let combustDeg=null, combust=null;
+    if (COMBUST_ORB[b.key] !== undefined){
+      combustDeg = angDiff(lon, sunSid);
+      combust = combustDeg < COMBUST_ORB[b.key];
+    }
+    return { name:b.key, longitude:lon, rashi, house, nak, pada:nakshatraPada(lon), retro, combust };
+  });
+
+  const rahu = planets.find(p=>p.name==="Rahu");
+  const ketuLon = norm360(rahu.longitude + 180);
+  const ketuRashi = rashiIndex(ketuLon);
+  planets.push({
+    name:"Ketu", longitude:ketuLon, rashi:ketuRashi,
+    house: ((ketuRashi - ascRashi + 12) % 12) + 1,
+    nak:nakshatraIndex(ketuLon), pada:nakshatraPada(ketuLon),
+    retro: rahu.retro, combust:null
+  });
+
+  const ascendant = {
+    name:"Ascendant", longitude:ascSid, rashi:ascRashi, house:1,
+    nak:nakshatraIndex(ascSid), pada:nakshatraPada(ascSid),
+    retro:null, combust:null
+  };
+
+  const moonSid = planets.find(p=>p.name==="Moon").longitude;
+
+  return {
+    ascendant, planets,
+    sunSid, moonSid,
+    tithi: tithiName(sunSid, moonSid),
+    nakshatra: NAKSHATRAS[nakshatraIndex(moonSid)],
+    yoga: yogaName(sunSid, moonSid),
+    karana: karanaName(sunSid, moonSid)
+  };
+}
+
+/* ===================== NORTH INDIAN CHART (SVG) ===================== */
+
+const CHART_ABBR = { Sun:"Su",Moon:"Mo",Mars:"Ma",Mercury:"Me",Jupiter:"Ju",Venus:"Ve",Saturn:"Sa",Rahu:"Ra",Ketu:"Ke",Ascendant:"As" };
+/* House label anchor points (fixed North-Indian layout); house 1 = top, numbering proceeds
+   counter-clockwise. Coordinates are in a 400x400 viewBox. */
+const HOUSE_POS = {
+  1:[200,80], 2:[95,45], 3:[45,95], 4:[80,200], 5:[45,305], 6:[95,355],
+  7:[200,320], 8:[305,355], 9:[355,305], 10:[320,200], 11:[355,95], 12:[305,45]
+};
+
+function renderChart(data){
+  const svg = el('chartSvg');
+  const ascRashi = data.ascendant.rashi;
+  const lines = `
+    <polygon class="chart-line" points="0,0 400,0 400,400 0,400"/>
+    <line class="chart-line" x1="0" y1="0" x2="400" y2="400"/>
+    <line class="chart-line" x1="400" y1="0" x2="0" y2="400"/>
+    <line class="chart-line" x1="200" y1="0" x2="400" y2="200"/>
+    <line class="chart-line" x1="400" y1="200" x2="200" y2="400"/>
+    <line class="chart-line" x1="200" y1="400" x2="0" y2="200"/>
+    <line class="chart-line" x1="0" y1="200" x2="200" y2="0"/>
+  `;
+  const byHouse = {};
+  for(let h=1;h<=12;h++) byHouse[h]=[];
+  data.planets.forEach(p=> byHouse[p.house].push(p));
+  byHouse[1].push(data.ascendant);
+  byHouse[1].sort((a,b)=> a.name==="Ascendant" ? -1 : b.name==="Ascendant" ? 1 : 0);
+
+  let content = "";
+  for(let h=1;h<=12;h++){
+    const rashiNum = ((ascRashi + h - 1) % 12) + 1;
+    const [cx,cy] = HOUSE_POS[h];
+    content += `<text class="chart-house-num" x="${cx}" y="${cy-16}" text-anchor="middle">${rashiNum}</text>`;
+    const items = byHouse[h];
+    items.forEach((p,i)=>{
+      const label = CHART_ABBR[p.name] + (p.retro ? "(R)" : "");
+      content += `<text class="chart-planet ${p.retro?'retro':''}" x="${cx}" y="${cy + i*15}" text-anchor="middle">${label}</text>`;
+    });
+  }
+  svg.innerHTML = lines + content;
+}
+
+/* ===================== TABLE + SUMMARY RENDER ===================== */
+
+function renderTable(data){
+  const order = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn","Rahu","Ketu"];
+  const ordered = [data.ascendant, ...order.map(n=>data.planets.find(p=>p.name===n))];
+
+  el('planetTableBody').innerHTML = ordered.map(p=>{
+    const rashi = RASHI[p.rashi];
+    const houseLord = RASHI[((p.rashi))][1];
+    const motion = p.retro===null ? "—" : (p.retro ? '<span class="retro-tag">Retrograde</span>' : '<span class="direct-tag">Direct</span>');
+    const combust = p.combust===null ? "—" : (p.combust ? '<span class="combust-yes">Yes</span>' : '<span class="combust-no">No</span>');
+    return `<tr>
+      <td><b>${p.name}</b></td>
+      <td>${p.house}</td>
+      <td>${houseLord}</td>
+      <td>${rashi[0]}</td>
+      <td>${rashi[1]}</td>
+      <td>${p.longitude.toFixed(2)}°</td>
+      <td>${fmtDeg(p.longitude)}</td>
+      <td>${NAKSHATRAS[p.nak]}</td>
+      <td>${p.pada}</td>
+      <td>${motion}</td>
+      <td>${combust}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderSummary(data){
+  el('sumAsc').textContent = RASHI[data.ascendant.rashi][0];
+  el('sumAscDeg').textContent = fmtDeg(data.ascendant.longitude);
+  el('sumAscNak').textContent = NAKSHATRAS[data.ascendant.nak];
+  el('sumAscPada').textContent = data.ascendant.pada;
+  el('sumSunSign').textContent = RASHI[data.planets.find(p=>p.name==="Sun").rashi][0];
+  el('sumMoonSign').textContent = RASHI[data.planets.find(p=>p.name==="Moon").rashi][0];
+  el('sumTithi').textContent = data.tithi;
+  el('sumNak').textContent = data.nakshatra;
+  el('sumYoga').textContent = data.yoga;
+  el('sumKarana').textContent = data.karana;
+}
+
+/* ===================== MAIN COMPUTE + RENDER ===================== */
+
+function computeAndRender(){
+  if(!sweInstance || userLat===null || userLon===null) return;
+
+  const dt = selectedDateTime;
+  el('biDate').textContent = fmtFullDate(dt);
+  el('biTime').textContent = fmtTime12(dt);
+  el('biWeekday').textContent = WEEKDAYS[dt.getDay()];
+  el('biLocation').textContent = userLat.toFixed(2)+", "+userLon.toFixed(2);
+  el('biLat').textContent = userLat.toFixed(4)+"°";
+  el('biLon').textContent = userLon.toFixed(4)+"°";
+  el('latVal').textContent = userLat.toFixed(4)+"°";
+  el('lonVal').textContent = userLon.toFixed(4)+"°";
+
+  const tzOffsetMin = -dt.getTimezoneOffset();
+  const tzSign = tzOffsetMin>=0 ? "+" : "-";
+  const tzAbs = Math.abs(tzOffsetMin);
+  const tzStr = `UTC${tzSign}${String(Math.floor(tzAbs/60)).padStart(2,'0')}:${String(tzAbs%60).padStart(2,'0')}`;
+  let tzName = "";
+  try{ tzName = Intl.DateTimeFormat().resolvedOptions().timeZone; }catch(e){}
+  el('biTz').textContent = tzName ? (tzName+" ("+tzStr+")") : tzStr;
+
+  const jd = toJulianUTC(dt);
+  const data = computeKundali(jd, userLat, userLon);
+
+  renderChart(data);
+  renderTable(data);
+  renderSummary(data);
+}
+
+/* ===================== CONTROLS ===================== */
+
+function dateToInputValue(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,'0')+"-"+String(d.getDate()).padStart(2,'0'); }
+function timeToInputValue(d){ return String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0'); }
+
+function syncPickers(){
+  el('datePicker').value = dateToInputValue(selectedDateTime);
+  el('timePicker').value = timeToInputValue(selectedDateTime);
+}
+function applyPickers(){
+  const dv = el('datePicker').value, tv = el('timePicker').value;
+  if (!dv || !tv) return;
+  const [y,m,d] = dv.split('-').map(Number);
+  const [hh,mm] = tv.split(':').map(Number);
+  selectedDateTime = new Date(y, m-1, d, hh, mm, 0);
+  computeAndRender();
+}
+el('datePicker').addEventListener('change', applyPickers);
+el('timePicker').addEventListener('change', applyPickers);
+el('prevDayBtn').addEventListener('click', ()=>{
+  selectedDateTime = new Date(selectedDateTime.getTime()-24*3600*1000);
+  syncPickers(); computeAndRender();
+});
+el('nextDayBtn').addEventListener('click', ()=>{
+  selectedDateTime = new Date(selectedDateTime.getTime()+24*3600*1000);
+  syncPickers(); computeAndRender();
+});
+el('todayBtn').addEventListener('click', ()=>{
+  selectedDateTime = new Date();
+  syncPickers(); computeAndRender();
+});
+syncPickers();
+
+function useLocation(lat, lon){
+  userLat=lat; userLon=lon;
+  setStatus("Location set: "+lat.toFixed(4)+", "+lon.toFixed(4), "ok");
+  computeAndRender();
+}
+el('locateBtn').addEventListener('click', ()=>{
+  if (!navigator.geolocation){
+    setStatus("Geolocation not supported. Enter coordinates manually below.","err");
+    el('manualLocBox').style.display='flex'; return;
+  }
+  setStatus("Requesting location permission…");
+  navigator.geolocation.getCurrentPosition(
+    pos=>useLocation(pos.coords.latitude,pos.coords.longitude),
+    err=>{ setStatus("Location denied ("+err.message+"). Enter manually below.","err"); el('manualLocBox').style.display='flex'; },
+    { enableHighAccuracy:true, timeout:10000, maximumAge:300000 }
+  );
+});
+el('manualLocBtn').addEventListener('click', ()=>{
+  const lat=parseFloat(el('manualLat').value), lon=parseFloat(el('manualLon').value);
+  if (isNaN(lat)||isNaN(lon)||lat<-90||lat>90||lon<-180||lon>180){
+    setStatus("Enter valid latitude (-90..90) and longitude (-180..180).","err"); return;
+  }
+  useLocation(lat,lon);
+});
+
+/* ===================== INIT ===================== */
+
+(async function init(){
+  await loadSwissEphemeris();
+  if (navigator.geolocation){
+    navigator.geolocation.getCurrentPosition(
+      pos=>useLocation(pos.coords.latitude,pos.coords.longitude),
+      ()=>setStatus("Tap 'Detect My Location' to allow access, or enter coordinates manually.","err"),
+      { enableHighAccuracy:true, timeout:10000, maximumAge:300000 }
+    );
+  }
+})();
+</script>
+</body>
+</html>

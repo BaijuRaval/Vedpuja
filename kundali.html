@@ -217,7 +217,7 @@
           <table class="ptable" id="planetTable">
             <thead><tr>
               <th>Planet</th><th>House</th><th>House Lord</th><th>Rashi</th><th>Sign Lord</th>
-              <th>Longitude</th><th>Degree</th><th>Nakshatra</th><th>Pada</th><th>Motion</th><th>Combust</th>
+              <th>Longitude</th><th>Degree</th><th>Nakshatra</th><th>Nak. Lord</th><th>Pada</th><th>Motion</th><th>Combust</th><th>State</th><th>Status</th>
             </tr></thead>
             <tbody id="planetTableBody"></tbody>
           </table>
@@ -235,6 +235,15 @@
           <div class="info-item"><div class="ilabel">Sun Sign</div><div class="ival" id="sumSunSign">--</div></div>
           <div class="info-item"><div class="ilabel" id="sumNakLabel">Moon Nakshatra</div><div class="ival" id="sumNak">--</div></div>
           <div class="info-item"><div class="ilabel" id="sumPadaLabel">Moon Nakshatra Pada</div><div class="ival" id="sumPada">--</div></div>
+          <div class="info-item"><div class="ilabel">Varna</div><div class="ival" id="sumVarna">--</div></div>
+          <div class="info-item"><div class="ilabel">Vashya</div><div class="ival" id="sumVashya">--</div></div>
+          <div class="info-item"><div class="ilabel">Yoni</div><div class="ival" id="sumYoni">--</div></div>
+          <div class="info-item"><div class="ilabel">Gana</div><div class="ival" id="sumGana">--</div></div>
+          <div class="info-item"><div class="ilabel">Nadi</div><div class="ival" id="sumNadi">--</div></div>
+          <div class="info-item"><div class="ilabel">Moon Sign Lord</div><div class="ival" id="sumMoonLord">--</div></div>
+          <div class="info-item"><div class="ilabel">Tatva (Element)</div><div class="ival" id="sumTatva">--</div></div>
+          <div class="info-item"><div class="ilabel">Name Alphabet</div><div class="ival" id="sumNameAlpha">--</div></div>
+          <div class="info-item"><div class="ilabel">Paya</div><div class="ival" id="sumPaya">--</div></div>
         </div>
       </div>
     </div>
@@ -262,6 +271,88 @@ const NAKSHATRAS = [
 ];
 const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const COMBUST_ORB = { Moon:12, Mars:17, Mercury:14, Jupiter:11, Venus:10, Saturn:15 };
+
+/* Nakshatra lord: standard Vimshottari Dasha planet sequence, repeating 3x across 27 nakshatras */
+const VIMSHOTTARI_SEQUENCE = ["Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury"];
+function nakshatraLord(nakIdx){ return VIMSHOTTARI_SEQUENCE[nakIdx%9]; }
+
+/* Yoni (instinctive-nature animal symbol per nakshatra) — source: classical 14-animal Ashtakoot table */
+const YONI_TABLE = [
+  "Horse","Elephant","Sheep/Goat","Serpent","Serpent","Dog","Cat","Sheep/Goat","Cat","Rat","Rat","Cow",
+  "Buffalo","Tiger","Buffalo","Tiger","Deer","Deer","Dog","Monkey","Mongoose","Monkey","Lion","Horse",
+  "Lion","Cow","Elephant"
+];
+/* Gana (temperament) — Deva/Manushya/Rakshasa, 9 nakshatras each */
+const GANA_TABLE = [
+  "Deva","Manushya","Rakshasa","Manushya","Deva","Manushya","Deva","Deva","Rakshasa","Rakshasa","Manushya","Manushya",
+  "Deva","Rakshasa","Deva","Rakshasa","Deva","Rakshasa","Rakshasa","Manushya","Manushya","Deva","Rakshasa","Rakshasa",
+  "Manushya","Manushya","Deva"
+];
+/* Nadi (constitutional energy) — Aadi(Vata)/Madhya(Pitta)/Antya(Kapha), 9 nakshatras each */
+const NADI_TABLE = [
+  "Aadi","Madhya","Antya","Antya","Madhya","Aadi","Aadi","Madhya","Antya","Antya","Madhya","Aadi",
+  "Aadi","Madhya","Antya","Antya","Madhya","Aadi","Aadi","Madhya","Antya","Antya","Madhya","Aadi",
+  "Aadi","Madhya","Antya"
+];
+/* Naming syllable per nakshatra pada (108 total) — classical Namakarana table */
+const NAME_ALPHABET_TABLE = [
+  ["Chu","Che","Cho","La"],["Lee","Lu","Le","Lo"],["Aa","Ee","U","E"],["O","Va","Vi","Vu"],
+  ["Ve","Vo","Ka","Ke"],["Ku","Gha","Na","Chha"],["Ke","Ko","Ha","Hi"],["Hu","He","Ho","Da"],
+  ["Di","Du","De","Do"],["Ma","Mi","Mu","Me"],["Mo","Ta","Ti","Tu"],["Te","To","Pa","Pi"],
+  ["Pu","Sha","Na","Tha"],["Pe","Po","Ra","Re"],["Ru","Re","Ro","Ta"],["Ti","Te","Tu","To"],
+  ["Na","Ni","Nu","Ne"],["No","Ya","Yi","Yu"],["Ye","Yo","Ba","Bi"],["Bu","Dha","Bha","Pha"],
+  ["Bhe","Bho","Ja","Ji"],["Khi","Khu","Khe","Kho"],["Ga","Gi","Gu","Ge"],["Go","Sa","Si","Su"],
+  ["Se","So","Da","Di"],["Du","Tha","Jha","Na"],["De","Do","Cha","Chi"]
+];
+/* Varna — from Moon rashi's element (classical caste-like classification) */
+function getVarna(rashiIdx){
+  const el = signElement(rashiIdx);
+  return { fire:"Kshatriya", earth:"Vaishya", air:"Shudra", water:"Brahmin" }[el];
+}
+/* Vashya — 5-group classification, including the classical Sagittarius/Capricorn half-sign split */
+function getVashya(rashiIdx, degInSign){
+  if (rashiIdx===0 || rashiIdx===1) return "Chatushpada";
+  if (rashiIdx===2 || rashiIdx===5 || rashiIdx===6 || rashiIdx===10) return "Manava";
+  if (rashiIdx===3 || rashiIdx===11) return "Jalachara";
+  if (rashiIdx===4) return "Vanachara";
+  if (rashiIdx===7) return "Keeta";
+  if (rashiIdx===8) return degInSign<15 ? "Manava" : "Chatushpada";
+  if (rashiIdx===9) return degInSign<15 ? "Chatushpada" : "Jalachara";
+}
+/* Tatva (element) in Sanskrit naming */
+function getTatva(rashiIdx){
+  return { fire:"Agni (Fire)", earth:"Prithvi (Earth)", air:"Vayu (Air)", water:"Jal (Water)" }[signElement(rashiIdx)];
+}
+/* Paya — Gold/Silver/Copper/Iron by Moon's house from Lagna (well-defined, unambiguous classical rule) */
+function getPaya(moonHouse){
+  if ([1,6,11].includes(moonHouse)) return "Gold";
+  if ([2,5,9].includes(moonHouse)) return "Silver";
+  if ([3,7,10].includes(moonHouse)) return "Copper";
+  return "Iron"; // 4,8,12
+}
+
+/* Baladi Avastha (5-fold planet state by degree within sign; order reverses for even signs) */
+function getPlanetState(rashiIdx, degInSign){
+  const states = isOddSign(rashiIdx) ? ["Bala","Kumara","Yuva","Vriddha","Mrita"] : ["Mrita","Vriddha","Yuva","Kumara","Bala"];
+  return states[Math.min(4, Math.floor(degInSign/6))];
+}
+/* Dignity (exaltation/debilitation/own-sign/friend-enemy) — standard Parashari tables */
+const EXALTATION = { Sun:0, Moon:1, Mars:9, Mercury:5, Jupiter:3, Venus:11, Saturn:6, Rahu:1, Ketu:7 };
+const DEBILITATION = { Sun:6, Moon:7, Mars:3, Mercury:11, Jupiter:9, Venus:5, Saturn:0, Rahu:7, Ketu:1 };
+const OWN_SIGNS = { Sun:[4], Moon:[3], Mars:[0,7], Mercury:[2,5], Jupiter:[8,11], Venus:[1,6], Saturn:[9,10] };
+const NATURAL_FRIENDS = { Sun:["Moon","Mars","Jupiter"], Moon:["Sun","Mercury"], Mars:["Sun","Moon","Jupiter"], Mercury:["Sun","Venus"], Jupiter:["Sun","Moon","Mars"], Venus:["Mercury","Saturn"], Saturn:["Mercury","Venus"] };
+const NATURAL_ENEMIES = { Sun:["Venus","Saturn"], Moon:[], Mars:["Mercury"], Mercury:["Moon"], Jupiter:["Mercury","Venus"], Venus:["Sun","Moon"], Saturn:["Sun","Moon","Mars"] };
+function getPlanetStatus(planetName, rashiIdx){
+  if (planetName==="Ascendant") return "—";
+  if (DEBILITATION[planetName]===rashiIdx) return "Debilitated";
+  if (EXALTATION[planetName]===rashiIdx) return "Exalted";
+  if (OWN_SIGNS[planetName] && OWN_SIGNS[planetName].includes(rashiIdx)) return "Own Sign";
+  if (planetName==="Rahu" || planetName==="Ketu") return "—";
+  const signLord = RASHI[rashiIdx][1];
+  if (NATURAL_FRIENDS[planetName] && NATURAL_FRIENDS[planetName].includes(signLord)) return "Friendly Sign";
+  if (NATURAL_ENEMIES[planetName] && NATURAL_ENEMIES[planetName].includes(signLord)) return "Enemy Sign";
+  return "Neutral Sign";
+}
 
 /* ===================== DIVISIONAL CHART (VARGA) RULES =====================
    Standard Parashari Shodasavarga rules. Each function takes the D1 (natal) rashi
@@ -519,10 +610,13 @@ function renderTable(vdata){
     const houseLord = RASHI[p.vargaRashi][1];
     const motion = p.retro===null ? "—" : (p.retro ? '<span class="retro-tag">Retrograde</span>' : '<span class="direct-tag">Direct</span>');
     const combust = p.combust===null ? "—" : (p.combust ? '<span class="combust-yes">Yes</span>' : '<span class="combust-no">No</span>');
+    const nakLord = p.name==="Ascendant" ? "—" : nakshatraLord(p.nak);
+    const state = p.name==="Ascendant" ? "—" : getPlanetState(p.rashi, p.longitude % 30);
+    const status = getPlanetStatus(p.name, p.vargaRashi);
     return `<tr>
       <td><b>${p.name}</b></td><td>${p.house}</td><td>${houseLord}</td><td>${rashi[0]}</td><td>${rashi[1]}</td>
-      <td>${p.longitude.toFixed(2)}°</td><td>${fmtDeg(p.longitude)}</td><td>${NAKSHATRAS[p.nak]}</td><td>${p.pada}</td>
-      <td>${motion}</td><td>${combust}</td>
+      <td>${p.longitude.toFixed(2)}°</td><td>${fmtDeg(p.longitude)}</td><td>${NAKSHATRAS[p.nak]}</td><td>${nakLord}</td><td>${p.pada}</td>
+      <td>${motion}</td><td>${combust}</td><td>${state}</td><td>${status}</td>
     </tr>`;
   }).join('');
 }
@@ -533,10 +627,21 @@ function renderSummary(base, vdata, labelPrefix){
   el('sumMoonSign').textContent = RASHI[vdata.planets.find(p=>p.name==="Moon").vargaRashi][0];
   el('sumSunSign').textContent = RASHI[vdata.planets.find(p=>p.name==="Sun").vargaRashi][0];
   const moonBase = base.planets.find(p=>p.name==="Moon");
+  const moonVarga = vdata.planets.find(p=>p.name==="Moon");
   el('sumNak').textContent = NAKSHATRAS[moonBase.nak];
   el('sumPada').textContent = moonBase.pada;
   el('sumNakLabel').textContent = labelPrefix + "Moon Nakshatra";
   el('sumPadaLabel').textContent = labelPrefix + "Moon Nakshatra Pada";
+
+  el('sumVarna').textContent = getVarna(moonBase.rashi);
+  el('sumVashya').textContent = getVashya(moonBase.rashi, moonBase.longitude % 30);
+  el('sumYoni').textContent = YONI_TABLE[moonBase.nak];
+  el('sumGana').textContent = GANA_TABLE[moonBase.nak];
+  el('sumNadi').textContent = NADI_TABLE[moonBase.nak];
+  el('sumMoonLord').textContent = RASHI[moonBase.rashi][1];
+  el('sumTatva').textContent = getTatva(moonBase.rashi);
+  el('sumNameAlpha').textContent = NAME_ALPHABET_TABLE[moonBase.nak][moonBase.pada-1];
+  el('sumPaya').textContent = getPaya(moonVarga.house);
 }
 
 /* ===================== LOADER / CONTROL STATE ===================== */

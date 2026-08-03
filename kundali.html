@@ -217,7 +217,7 @@
           <table class="ptable" id="planetTable">
             <thead><tr>
               <th>Planet</th><th>House</th><th>House Lord</th><th>Rashi</th><th>Sign Lord</th>
-              <th>Longitude</th><th>Degree</th><th>Nakshatra</th><th>Nak. Lord</th><th>Pada</th><th>Motion</th><th>Combust</th><th>State</th><th>Status</th>
+              <th>Longitude</th><th>Degree</th><th>Nakshatra</th><th>Nak. Lord</th><th>Pada</th><th>Motion</th><th>Combust</th><th>Status</th>
             </tr></thead>
             <tbody id="planetTableBody"></tbody>
           </table>
@@ -611,12 +611,11 @@ function renderTable(vdata){
     const motion = p.retro===null ? "—" : (p.retro ? '<span class="retro-tag">Retrograde</span>' : '<span class="direct-tag">Direct</span>');
     const combust = p.combust===null ? "—" : (p.combust ? '<span class="combust-yes">Yes</span>' : '<span class="combust-no">No</span>');
     const nakLord = p.name==="Ascendant" ? "—" : nakshatraLord(p.nak);
-    const state = p.name==="Ascendant" ? "—" : getPlanetState(p.rashi, p.longitude % 30);
     const status = getPlanetStatus(p.name, p.vargaRashi);
     return `<tr>
       <td><b>${p.name}</b></td><td>${p.house}</td><td>${houseLord}</td><td>${rashi[0]}</td><td>${rashi[1]}</td>
       <td>${p.longitude.toFixed(2)}°</td><td>${fmtDeg(p.longitude)}</td><td>${NAKSHATRAS[p.nak]}</td><td>${nakLord}</td><td>${p.pada}</td>
-      <td>${motion}</td><td>${combust}</td><td>${state}</td><td>${status}</td>
+      <td>${motion}</td><td>${combust}</td><td>${status}</td>
     </tr>`;
   }).join('');
 }

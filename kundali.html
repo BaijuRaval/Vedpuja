@@ -271,6 +271,38 @@
     </div>
 
     <div class="section">
+      <div class="sec-header"><span class="hicon">💪</span> Shadbala</div>
+      <div class="sec-body">
+        <div class="dasha-hint">Based on the Rashi (D1) chart · six-fold planetary strength in Virupas (60 Virupas = 1 Rupa)</div>
+        <div class="table-scroll">
+          <table class="ptable" id="shadbalaTable">
+            <thead><tr>
+              <th>Planet</th><th>Uccha</th><th>Sapta-varga</th><th>Ojayugma</th><th>Kendradi</th><th>Drekkana</th><th>Sthana Total</th>
+              <th>Dig</th><th>Kala (Paksha)</th><th>Chesta</th><th>Naisargika</th><th>Drik</th>
+              <th>Total (Virupas)</th><th>Total (Rupas)</th><th>Required</th><th>Verdict</th>
+            </tr></thead>
+            <tbody id="shadbalaBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-header"><span class="hicon">🏛️</span> Bhavabala</div>
+      <div class="sec-body">
+        <div class="dasha-hint">Based on the Rashi (D1) chart · house strength in Virupas</div>
+        <div class="table-scroll">
+          <table class="ptable" id="bhavabalaTable">
+            <thead><tr>
+              <th>House</th><th>Sign</th><th>Lord</th><th>Bhavadhipati</th><th>Dig</th><th>Drishti</th><th>Total (Virupas)</th><th>Total (Rupas)</th>
+            </tr></thead>
+            <tbody id="bhavabalaBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
       <div class="sec-header"><span class="hicon">📝</span> <span id="summarySectionTitle">Daily Summary</span></div>
       <div class="sec-body">
         <div class="summary-grid">
@@ -304,7 +336,7 @@
   </div><!-- /resultContainer -->
 
   <footer>
-    Sun/Moon/Planet positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Ayanamsa: Lahiri (Sidereal) · House System: Whole Sign · Rahu: Mean Node, Ketu: Rahu + 180° · Divisional charts: Parashari Shodasavarga rules · Aspects: Parashari graha drishti (7th house full aspect for all grahas; Mars also 4th/8th, Jupiter also 5th/9th, Saturn also 3rd/10th; Rahu/Ketu shown on the common Jupiter-style 5th/7th/9th convention)
+    Sun/Moon/Planet positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Ayanamsa: Lahiri (Sidereal) · House System: Whole Sign · Rahu: Mean Node, Ketu: Rahu + 180° · Divisional charts: Parashari Shodasavarga rules · Aspects: Parashari graha drishti (7th house full aspect for all grahas; Mars also 4th/8th, Jupiter also 5th/9th, Saturn also 3rd/10th; Rahu/Ketu shown on the common Jupiter-style 5th/7th/9th convention) · Shadbala/Bhavabala: simplified engine (D1-based; full 5-part Sthana Bala, approximated Dig Bala, Paksha-only Kala Bala, retrograde/speed-ratio Chesta Bala, simplified net-aspect Drik Bala) — figures are for relative comparison, not precise classical Shadbala
   </footer>
 </div>
 
@@ -715,12 +747,12 @@ function computeBaseChart(jd, lat, lon){
     const retro = pos.speed < 0;
     let combust=null;
     if (COMBUST_ORB[b.key] !== undefined) combust = angDiff(lon2, sunSid) < COMBUST_ORB[b.key];
-    return { name:b.key, longitude:lon2, rashi, nak, pada:nakshatraPada(lon2), retro, combust };
+    return { name:b.key, longitude:lon2, rashi, nak, pada:nakshatraPada(lon2), retro, combust, speed:pos.speed };
   });
 
   const rahu = planets.find(p=>p.name==="Rahu");
   const ketuLon = norm360(rahu.longitude + 180);
-  planets.push({ name:"Ketu", longitude:ketuLon, rashi:rashiIndex(ketuLon), nak:nakshatraIndex(ketuLon), pada:nakshatraPada(ketuLon), retro:rahu.retro, combust:null });
+  planets.push({ name:"Ketu", longitude:ketuLon, rashi:rashiIndex(ketuLon), nak:nakshatraIndex(ketuLon), pada:nakshatraPada(ketuLon), retro:rahu.retro, combust:null, speed:rahu.speed });
 
   const ascendant = { name:"Ascendant", longitude:ascSid, rashi:ascRashi, nak:nakshatraIndex(ascSid), pada:nakshatraPada(ascSid), retro:null, combust:null };
 
@@ -842,6 +874,214 @@ function renderHouseAspects(vdata){
   el('houseAspectsBody').innerHTML = rows;
 }
 
+/* ===================== SHADBALA (SIX-FOLD PLANETARY STRENGTH) =====================
+   Always computed from the Rashi (D1) chart, independent of which varga is currently
+   selected — Shadbala is a D1-specific classical concept. Applies to the 7 classical
+   grahas only (Sun..Saturn); Rahu/Ketu are excluded per standard Parashari practice
+   since they have no Shadbala of their own.
+
+   IMPORTANT — this is a simplified engine, not a full classical implementation:
+   - Sthana Bala covers all 5 classical sub-parts (Uccha, Saptavargaja, Ojayugmarasyamsa,
+     Kendradi, Drekkana), using a 5-tier friend/enemy scale (no adhi-mitra/adhi-shatru split).
+   - Dig Bala is approximated from whole-sign house position rather than exact MC/IC/
+     Ascendant/Descendant cusp degrees (which this engine doesn't compute).
+   - Kala Bala here is Paksha Bala (lunar-phase strength) ONLY. Nathonnata, Tribhaga,
+     Year/Month/Day/Hour-lord, Ayana and Yuddha Bala are omitted — they need sunrise/
+     sunset and declination data this engine doesn't calculate — so Kala Bala totals
+     read lower than full classical software.
+   - Chesta Bala uses a retrograde/speed-ratio approximation, not the classical
+     Sighrocca-based Chesta Kendra; Sun and Moon don't carry this component (shown "—"),
+     matching classical practice.
+   - Drik Bala is a simplified net aspect-strength (benefic aspects add, malefic
+     subtract, using the standard partial-aspect table, divided by 4).
+   Totals are useful for comparing planets against each other, but shouldn't be read
+   as precise classical Shadbala figures. */
+
+const SHADBALA_PLANETS = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"];
+const BENEFIC_GRAHAS = ["Jupiter","Venus","Mercury","Moon"];
+const MALEFIC_GRAHAS = ["Sun","Mars","Saturn"];
+const REQUIRED_RUPAS = { Sun:5, Moon:6, Mars:5, Mercury:7, Jupiter:6.5, Venus:5.5, Saturn:5 };
+const NAISARGIKA_BALA = { Saturn:60/7, Mars:120/7, Mercury:180/7, Jupiter:240/7, Venus:300/7, Moon:360/7, Sun:60 };
+const DIG_BALA_HOUSE = { Sun:10, Mars:10, Jupiter:1, Mercury:1, Moon:4, Venus:4, Saturn:7 };
+/* Mean sidereal daily motion (deg/day) used only as a reference speed for Chesta Bala's ratio */
+const MEAN_DAILY_MOTION = { Mars:0.524, Mercury:1.383, Jupiter:0.0831, Venus:1.602, Saturn:0.0335 };
+/* Classical exaltation degree-in-sign; debilitation point uses the same numeric degree in the opposite sign */
+const EXALT_DEG = { Sun:10, Moon:3, Mars:28, Mercury:15, Jupiter:5, Venus:27, Saturn:20, Rahu:20, Ketu:20 };
+/* Moolatrikona sign + degree range (checked only in the D1 rashi, per classical rule) */
+const MOOLATRIKONA = {
+  Sun:{rashi:4, from:0, to:20}, Moon:{rashi:1, from:4, to:20}, Mars:{rashi:0, from:0, to:12},
+  Mercury:{rashi:5, from:16, to:20}, Jupiter:{rashi:8, from:0, to:10}, Venus:{rashi:6, from:0, to:15},
+  Saturn:{rashi:10, from:0, to:20}
+};
+
+function varDignityPoints(name, rashiIdx, degInSign, isD1){
+  const mt = MOOLATRIKONA[name];
+  if (isD1 && mt && rashiIdx===mt.rashi && degInSign>=mt.from && degInSign<mt.to) return 45;
+  if (EXALTATION[name]===rashiIdx) return 45;
+  if (DEBILITATION[name]===rashiIdx) return 0;
+  if (OWN_SIGNS[name] && OWN_SIGNS[name].includes(rashiIdx)) return 30;
+  const lord = RASHI[rashiIdx][1];
+  if (NATURAL_FRIENDS[name] && NATURAL_FRIENDS[name].includes(lord)) return 15;
+  if (NATURAL_ENEMIES[name] && NATURAL_ENEMIES[name].includes(lord)) return 3.75;
+  return 7.5;
+}
+function saptavargaBala(name, d1Rashi, degInSign){
+  return [1,2,3,7,9,12,30].reduce((sum, n)=>{
+    const vRashi = VARGA_FUNCS[n](d1Rashi, degInSign);
+    return sum + varDignityPoints(name, vRashi, degInSign, n===1);
+  }, 0);
+}
+function ojayugmaBala(name, d1Rashi, degInSign){
+  if (name==="Mercury") return 30; // classically always gets full Ojayugma strength
+  const d9Rashi = vargaD9(d1Rashi, degInSign);
+  const oddStrong = ["Sun","Mars","Jupiter"].includes(name);
+  const rashiOdd = isOddSign(d1Rashi), navamsaOdd = isOddSign(d9Rashi);
+  let total = 0;
+  if (oddStrong){ if (rashiOdd) total+=15; if (navamsaOdd) total+=15; }
+  else { if (!rashiOdd) total+=15; if (!navamsaOdd) total+=15; }
+  return total;
+}
+function kendradiBala(house){
+  if ([1,4,7,10].includes(house)) return 60;
+  if ([2,5,8,11].includes(house)) return 30;
+  return 15;
+}
+function drekkanaBala(name, degInSign){
+  const part = Math.min(2, Math.floor(degInSign/10));
+  if (part===0 && ["Sun","Mars","Jupiter"].includes(name)) return 15;
+  if (part===1 && ["Moon","Venus"].includes(name)) return 15;
+  if (part===2 && ["Mercury","Saturn"].includes(name)) return 15;
+  return 0;
+}
+function uchchaBala(name, longitude){
+  const debLon = DEBILITATION[name]*30 + (EXALT_DEG[name]||0);
+  return angDiff(longitude, debLon)/3;
+}
+function digBala(name, house){
+  const target = DIG_BALA_HOUSE[name];
+  if (target===undefined) return 0;
+  let diff = Math.abs(house-target);
+  if (diff>6) diff = 12-diff;
+  return 60*(1-diff/6);
+}
+function pakshaBala(name, moonLon, sunLon){
+  const elong = norm360(moonLon-sunLon);
+  const phase = elong<=180 ? elong : 360-elong; // 0=new moon, 180=full moon
+  const benefic = ["Moon","Mercury","Jupiter","Venus"].includes(name);
+  return benefic ? (phase/180)*60 : ((180-phase)/180)*60;
+}
+function chestaBala(name, retro, speed){
+  if (name==="Sun" || name==="Moon") return null; // not applicable classically
+  if (retro) return 60;
+  const mean = MEAN_DAILY_MOTION[name];
+  if (!mean) return null;
+  const ratio = Math.abs(speed)/mean;
+  return Math.max(0, Math.min(60, 60*(1-ratio)));
+}
+function drishtiVirupas(name, houseDistance){
+  let base = 0;
+  if (houseDistance===7) base=60;
+  else if (houseDistance===4||houseDistance===8) base=45;
+  else if (houseDistance===5||houseDistance===9) base=30;
+  else if (houseDistance===3||houseDistance===10) base=15;
+  if (name==="Mars" && (houseDistance===4||houseDistance===8)) base=60;
+  if (name==="Jupiter" && (houseDistance===5||houseDistance===9)) base=60;
+  if (name==="Saturn" && (houseDistance===3||houseDistance===10)) base=60;
+  return base;
+}
+function houseDistanceFromTo(fromHouse, toHouse){ return ((toHouse-fromHouse+12)%12)+1; }
+function netDrishtiBala(targetHouse, byName, excludeName){
+  let sum = 0;
+  SHADBALA_PLANETS.forEach(name=>{
+    if (name===excludeName) return;
+    const dist = houseDistanceFromTo(byName[name].house, targetHouse);
+    const v = drishtiVirupas(name, dist);
+    if (!v) return;
+    if (BENEFIC_GRAHAS.includes(name)) sum += v;
+    else if (MALEFIC_GRAHAS.includes(name)) sum -= v;
+  });
+  return sum/4;
+}
+
+/* d1vdata must be a D1 (varga=1) applyVarga() result, so .house reflects whole-sign
+   houses from the Ascendant and .rashi/.longitude are the true natal values. */
+function computeShadbala(d1vdata){
+  const byName = {}; d1vdata.planets.forEach(p=> byName[p.name]=p);
+  const sun = byName.Sun, moon = byName.Moon;
+
+  return SHADBALA_PLANETS.map(name=>{
+    const p = byName[name];
+    const degInSign = p.longitude % 30;
+
+    const uccha = uchchaBala(name, p.longitude);
+    const sapta = saptavargaBala(name, p.rashi, degInSign);
+    const ojayugma = ojayugmaBala(name, p.rashi, degInSign);
+    const kendradi = kendradiBala(p.house);
+    const drekkana = drekkanaBala(name, degInSign);
+    const sthanaTotal = uccha+sapta+ojayugma+kendradi+drekkana;
+
+    const dig = digBala(name, p.house);
+    const kala = pakshaBala(name, moon.longitude, sun.longitude);
+    const chesta = chestaBala(name, p.retro, p.speed);
+    const naisargika = NAISARGIKA_BALA[name];
+    const drik = netDrishtiBala(p.house, byName, name);
+
+    const totalVirupas = sthanaTotal + dig + kala + (chesta||0) + naisargika + drik;
+    return {
+      name, house:p.house,
+      sthana:{uccha,sapta,ojayugma,kendradi,drekkana,total:sthanaTotal},
+      dig, kala, chesta, naisargika, drik,
+      totalVirupas, totalRupas: totalVirupas/60
+    };
+  });
+}
+
+function renderShadbala(results){
+  el('shadbalaBody').innerHTML = results.map(r=>{
+    const req = REQUIRED_RUPAS[r.name];
+    const verdict = r.totalRupas>=req ? '<span class="direct-tag">Strong</span>' : '<span class="combust-yes">Weak</span>';
+    return `<tr>
+      <td><b>${r.name}</b></td>
+      <td>${r.sthana.uccha.toFixed(1)}</td><td>${r.sthana.sapta.toFixed(1)}</td><td>${r.sthana.ojayugma.toFixed(1)}</td>
+      <td>${r.sthana.kendradi.toFixed(1)}</td><td>${r.sthana.drekkana.toFixed(1)}</td><td>${r.sthana.total.toFixed(1)}</td>
+      <td>${r.dig.toFixed(1)}</td><td>${r.kala.toFixed(1)}</td><td>${r.chesta===null?'—':r.chesta.toFixed(1)}</td>
+      <td>${r.naisargika.toFixed(1)}</td><td>${r.drik.toFixed(1)}</td>
+      <td>${r.totalVirupas.toFixed(1)}</td><td><b>${r.totalRupas.toFixed(2)}</b></td><td>${req.toFixed(1)}</td><td>${verdict}</td>
+    </tr>`;
+  }).join('');
+}
+
+/* ===================== BHAVABALA (HOUSE STRENGTH) =====================
+   Also always computed from the D1 chart. Bhavadhipati Bala reuses each house lord's
+   Shadbala total (its dominant, classically-expected component); Bhava Dig Bala reuses
+   the Kendra/Panapara/Apoklima scale applied to the house itself; Bhava Drishti Bala is
+   the same simplified net-aspect formula used for Drik Bala, aimed at the house point. */
+function computeBhavabala(d1vdata, shadbalaResults){
+  const shadbalaByName = {}; shadbalaResults.forEach(r=> shadbalaByName[r.name]=r);
+  const byName = {}; d1vdata.planets.forEach(p=> byName[p.name]=p);
+  const ascRashi = d1vdata.ascendant.vargaRashi;
+
+  const results = [];
+  for (let h=1; h<=12; h++){
+    const rashiIdx = (ascRashi + h - 1) % 12;
+    const lord = RASHI[rashiIdx][1];
+    const bhavadhipati = shadbalaByName[lord] ? shadbalaByName[lord].totalVirupas : 0;
+    const dig = kendradiBala(h);
+    const drishti = netDrishtiBala(h, byName, null);
+    const totalVirupas = bhavadhipati + dig + drishti;
+    results.push({ house:h, rashi:rashiIdx, lord, bhavadhipati, dig, drishti, totalVirupas, totalRupas: totalVirupas/60 });
+  }
+  return results;
+}
+
+function renderBhavabala(results){
+  el('bhavabalaBody').innerHTML = results.map(r=>`<tr>
+    <td><b>${r.house}</b></td><td>${RASHI[r.rashi][0]}</td><td>${r.lord}</td>
+    <td>${r.bhavadhipati.toFixed(1)}</td><td>${r.dig.toFixed(1)}</td><td>${r.drishti.toFixed(1)}</td>
+    <td>${r.totalVirupas.toFixed(1)}</td><td><b>${r.totalRupas.toFixed(2)}</b></td>
+  </tr>`).join('');
+}
+
 function renderSummary(base, vdata, labelPrefix){
   el('sumAsc').textContent = RASHI[vdata.ascendant.vargaRashi][0];
   el('sumAscLord').textContent = RASHI[vdata.ascendant.vargaRashi][1];
@@ -903,6 +1143,9 @@ function renderDailyResult(){
   renderTable(vdata);
   renderPlanetAspects(vdata);
   renderHouseAspects(vdata);
+  const dailyShadbala = computeShadbala(vdata);
+  renderShadbala(dailyShadbala);
+  renderBhavabala(computeBhavabala(vdata, dailyShadbala));
   renderSummary(dailyBaseData, vdata, "");
   renderDashaTable(selectedDateTime, dailyBaseData.planets.find(p=>p.name==="Moon").longitude);
 }
@@ -939,6 +1182,9 @@ function renderBirthResult(){
   renderBirthChartAndTable();
   const d1 = applyVarga(birthBaseData, 1);
   renderSummary(birthBaseData, d1, "Birth ");
+  const birthShadbala = computeShadbala(d1);
+  renderShadbala(birthShadbala);
+  renderBhavabala(computeBhavabala(d1, birthShadbala));
   renderDashaTable(birthDateTime, birthBaseData.planets.find(p=>p.name==="Moon").longitude);
 }
 

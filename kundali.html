@@ -115,23 +115,14 @@
 
   .soon-panel{text-align:center;padding:50px 20px;font-size:20px;font-weight:700;color:var(--gold-light);}
 
-  .yoga-category-label{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:.5px;font-weight:700;margin:14px 0 6px;padding-left:2px;}
-  .yoga-category-label:first-child{margin-top:0;}
-  .yoga-row{background:var(--card-bg2);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);margin-bottom:7px;overflow:hidden;}
-  .yoga-row-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;gap:8px;}
-  .yoga-name{font-weight:700;font-size:13px;}
-  .yoga-badge{font-size:10px;font-weight:700;border-radius:6px;padding:3px 7px;white-space:nowrap;}
-  .yoga-badge.strong{background:rgba(123,216,143,0.18);color:var(--ok);}
-  .yoga-badge.moderate{background:rgba(246,207,107,0.18);color:var(--neutral);}
-  .yoga-badge.weak{background:rgba(255,138,128,0.18);color:var(--warn);}
-  .yoga-chevron{font-size:11px;color:var(--gold);margin-left:4px;transition:transform .25s ease;}
-  .yoga-row.open .yoga-chevron{transform:rotate(180deg);}
-  .yoga-detail-wrap{max-height:0;overflow:hidden;transition:max-height .3s ease;}
-  .yoga-row.open .yoga-detail-wrap{max-height:600px;}
-  .yoga-detail{padding:2px 12px 12px;font-size:12px;color:var(--text-sub);line-height:1.5;}
-  .yoga-detail .yd-row{margin-bottom:7px;}
-  .yoga-detail .yd-label{color:var(--gold-light);font-weight:700;font-size:10px;text-transform:uppercase;letter-spacing:.4px;margin-bottom:2px;}
-  .yoga-empty{text-align:center;font-size:12.5px;color:var(--text-sub);padding:16px 4px;}
+  .cs-overall{text-align:center;padding:6px 0 12px;}
+  .cs-overall-label{font-size:11px;color:var(--text-sub);text-transform:uppercase;letter-spacing:.6px;margin-bottom:4px;}
+  .cs-overall-value{font-size:36px;font-weight:800;letter-spacing:.3px;
+    background:linear-gradient(90deg,var(--gold-light),var(--saffron));-webkit-background-clip:text;background-clip:text;color:transparent;}
+  .cs-divider{height:1px;background:var(--card-border);margin:4px 0 10px;}
+  .cs-row{display:flex;justify-content:space-between;align-items:center;padding:6px 2px;font-size:13.5px;font-weight:700;}
+  .cs-row .cs-name{display:flex;align-items:center;gap:8px;color:var(--text-main);}
+  .cs-row .cs-value{color:var(--gold-light);}
 
   footer{text-align:center;font-size:10px;color:var(--text-sub);opacity:.6;padding:14px 20px 0;line-height:1.5;}
 
@@ -321,10 +312,18 @@
     </div>
 
     <div class="section">
-      <div class="sec-header"><span class="hicon">✨</span> Yogas &amp; Doshas</div>
+      <div class="sec-header"><span class="hicon">💠</span> Chart Strength</div>
       <div class="sec-body">
-        <div class="dasha-hint">Based on the Rashi (D1) chart · tap an item to expand · only applicable Yogas/Doshas are shown</div>
-        <div id="yogaList"></div>
+        <div class="cs-overall">
+          <div class="cs-overall-label">Overall Strength</div>
+          <div class="cs-overall-value" id="csOverall">--%</div>
+        </div>
+        <div class="cs-divider"></div>
+        <div id="csPlanetRows"></div>
+        <div class="cs-divider"></div>
+        <div id="csGroupRows"></div>
+        <div class="cs-divider"></div>
+        <div id="csBalaRows"></div>
       </div>
     </div>
 
@@ -1108,379 +1107,58 @@ function renderBhavabala(results){
   </tr>`).join('');
 }
 
-/* ===================== YOGAS & DOSHAS =====================
-   Always computed from the Rashi (D1) chart, like Shadbala/Bhavabala. 50 classical
-   combinations are checked; only ones actually PRESENT in the chart are returned.
-   Many classical yogas have several variant definitions across texts — this engine
-   picks one standard/commonly-cited version per yoga and states it plainly in each
-   entry's "rule" field, so the exact criterion used is always visible, not hidden.
-   Strength (🟢 Strong / 🟡 Moderate / 🔴 Weak) reflects how strongly the *causing*
-   planets are placed (exalted/own-sign → Strong, debilitated → Weak, else Moderate),
-   not whether the result is fortunate or unfortunate — this applies uniformly to
-   auspicious Yogas and inauspicious Doshas alike. */
+/* ===================== CHART STRENGTH (SUMMARY DASHBOARD) =====================
+   A compact, at-a-glance rollup built directly from the Shadbala/Bhavabala numbers
+   already computed above — no new astrological rules, just a normalized percentage
+   view of the same figures. A planet/house's percent = its Rupas measured against
+   1.5x its classical required minimum (so meeting the requirement exactly reads as
+   ~67%, comfortably exceeding it approaches 100%). Bhava benchmark uses 7 Rupas, a
+   commonly-cited general adequacy threshold (no single classical figure is universal
+   here, so treat it as a reasonable reference point rather than scripture). */
+const BHAVA_REQUIRED_RUPAS = 7;
+function csPct(rupas, required){ return Math.max(0, Math.min(100, Math.round((rupas/(required*1.5))*100))); }
+function csEmoji(pct){ return pct>=75 ? '\u{1F7E2}' : (pct>=50 ? '\u{1F7E1}' : '\u{1F534}'); }
+function csLabel(pct){ return pct>=75 ? 'Strong' : (pct>=50 ? 'Moderate' : 'Weak'); }
 
-function computeYogas(d1vdata){
-  const byName = {}; d1vdata.planets.forEach(p=> byName[p.name]=p);
-  const ascRashi = d1vdata.ascendant.vargaRashi;
-  const yogas = [];
-  const push = (id,category,name,present,strength,rule,cause)=>{
-    yogas.push({ id, category, name, present:!!present, strength: strength||'Moderate', rule, cause: (cause&&cause.length)?cause:'—' });
+function computeChartStrength(shadbalaResults, bhavabalaResults){
+  const planetPct = {}; shadbalaResults.forEach(r=> planetPct[r.name] = csPct(r.totalRupas, REQUIRED_RUPAS[r.name]));
+  const bhavaPct = bhavabalaResults.map(r=> csPct(r.totalRupas, BHAVA_REQUIRED_RUPAS)); // index 0 = house 1
+
+  const lagnaPct = bhavaPct[0];
+  const moonPct = planetPct.Moon, sunPct = planetPct.Sun;
+
+  const avg = arr => arr.reduce((s,v)=>s+v,0)/arr.length;
+  const kendraPct = avg([1,4,7,10].map(h=>bhavaPct[h-1]));
+  const trikonaPct = avg([1,5,9].map(h=>bhavaPct[h-1]));
+  const dusthanaPct = avg([6,8,12].map(h=>bhavaPct[h-1]));
+
+  const shadbalaOverall = Math.round(avg(SHADBALA_PLANETS.map(n=>planetPct[n])));
+  const bhavabalaOverall = Math.round(avg(bhavaPct));
+
+  const overall = Math.round(avg([lagnaPct, moonPct, sunPct, shadbalaOverall, bhavabalaOverall]));
+
+  return {
+    overall,
+    lagna: lagnaPct, moon: moonPct, sun: sunPct,
+    kendra: Math.round(kendraPct), trikona: Math.round(trikonaPct), dusthana: Math.round(dusthanaPct),
+    shadbalaOverall, bhavabalaOverall
   };
-
-  const houseLord = h => { const rashi=(ascRashi+h-1)%12; return RASHI[rashi][1]; };
-  const hOf = name => byName[name].house;
-  const dignity = name => getPlanetStatus(name, byName[name].rashi);
-  const isConjunct = (a,b) => hOf(a)===hOf(b);
-  const aspectsHouse = (name,house) => ASPECT_RULES[name].some(n=>aspectHouse(hOf(name),n)===house);
-  const isAspecting = (a,b) => aspectsHouse(a,hOf(b));
-  const isConnected = (a,b) => isConjunct(a,b) || isAspecting(a,b) || isAspecting(b,a);
-  const isKendra = h => [1,4,7,10].includes(h);
-  const isTrikona = h => [1,5,9].includes(h);
-  const isDusthana = h => [6,8,12].includes(h);
-  const isUpachaya = h => [3,6,10,11].includes(h);
-  const strengthFrom = (...names) => {
-    const digs = names.map(dignity);
-    if (digs.includes('Exalted') || digs.includes('Own Sign')) return 'Strong';
-    if (digs.includes('Debilitated')) return 'Weak';
-    return 'Moderate';
-  };
-  const distFromMoon = name => houseDistanceFromTo(hOf('Moon'), hOf(name));
-  const distFromSun = name => houseDistanceFromTo(hOf('Sun'), hOf(name));
-  const NON_LUMINARY = ["Mars","Mercury","Jupiter","Venus","Saturn"];
-  const BENEFICS3 = ["Jupiter","Venus","Mercury"];
-  const lord1=houseLord(1), lord2=houseLord(2), lord4=houseLord(4), lord5=houseLord(5),
-        lord6=houseLord(6), lord7=houseLord(7), lord9=houseLord(9), lord10=houseLord(10), lord11=houseLord(11);
-
-  /* ---------- RAJ YOGAS ---------- */
-  const kendraLords = [...new Set([1,4,7,10].map(houseLord))];
-  const trikonaLords = [...new Set([1,5,9].map(houseLord))];
-
-  let rajFound=false, rajCauses=[], rajPlanets=[];
-  kendraLords.forEach(kL=> trikonaLords.forEach(tL=>{
-    if (kL===tL){ rajFound=true; rajCauses.push(`${kL} rules both a Kendra and a Trikona house (Yogakaraka)`); rajPlanets.push(kL); }
-    else if (isConnected(kL,tL)){ rajFound=true; rajCauses.push(`${kL} (Kendra lord, H${hOf(kL)}) \u2194 ${tL} (Trikona lord, H${hOf(tL)})`); rajPlanets.push(kL,tL); }
-  }));
-  push('rajyoga','Raj Yogas','Raj Yoga', rajFound, strengthFrom(...rajPlanets),
-    'A lord of a Kendra house (1,4,7,10) is connected — by conjunction, mutual aspect, or by a single planet ruling both — with a lord of a Trikona house (1,5,9).',
-    rajCauses.join('; '));
-
-  const dkConnected = lord9===lord10 || isConnected(lord9,lord10);
-  push('dharmakarma','Raj Yogas','Dharma-Karma Adhipati Yoga', dkConnected, strengthFrom(lord9,lord10),
-    '9th lord (Dharma) and 10th lord (Karma) are connected by conjunction, mutual aspect, or a single planet rules both.',
-    lord9===lord10 ? `${lord9} rules both the 9th and 10th houses` : `9th lord ${lord9} (H${hOf(lord9)}) \u2194 10th lord ${lord10} (H${hOf(lord10)})`);
-
-  const lord9dig = dignity(lord9);
-  const lakshmi = (lord9dig==='Own Sign'||lord9dig==='Exalted') && [1,4,5,7,9,10].includes(hOf(lord9)) && dignity(lord1)!=='Debilitated';
-  push('lakshmi','Raj Yogas','Lakshmi Yoga', lakshmi, lord9dig==='Exalted'?'Strong':'Moderate',
-    'The 9th lord is in its own sign or exalted, placed in a Kendra or Trikona house, and the Lagna lord is not debilitated.',
-    `9th lord ${lord9} (${lord9dig}) in house ${hOf(lord9)}`);
-
-  let rsFound=false, rsCauses=[], rsPlanets=[];
-  kendraLords.forEach(kL=> trikonaLords.forEach(tL=>{ if (kL!==tL && isConjunct(kL,tL)){ rsFound=true; rsCauses.push(`${kL} conjunct ${tL} in house ${hOf(kL)}`); rsPlanets.push(kL,tL); } }));
-  push('rajasambandha','Raj Yogas','Raja Sambandha Yoga', rsFound, strengthFrom(...rsPlanets),
-    'A Kendra lord and a Trikona lord are conjunct in the same house — a direct planetary relationship (stricter than the general Raj Yoga, which also allows aspects).',
-    rsCauses.join('; '));
-
-  let mrFound=false, mrCauses=[];
-  kendraLords.forEach(kL=> trikonaLords.forEach(tL=>{
-    if (kL!==tL && isConjunct(kL,tL) && (dignity(kL)==='Exalted'||dignity(tL)==='Exalted')){
-      mrFound=true; mrCauses.push(`${kL} & ${tL} conjunct in house ${hOf(kL)}, at least one exalted`);
-    }
-  }));
-  push('maharaj','Raj Yogas','Maha Raj Yoga', mrFound, 'Strong',
-    'A Kendra lord and Trikona lord are conjunct in the same house, with at least one of them exalted — an especially powerful Raj Yoga.',
-    mrCauses.join('; '));
-
-  let nbFound=false, nbCauses=[];
-  ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"].forEach(name=>{
-    if (dignity(name)!=='Debilitated') return;
-    const dispositor = RASHI[byName[name].rashi][1];
-    const dispositorHouse = hOf(dispositor);
-    const exaltHere = Object.keys(EXALTATION).find(pl=>EXALTATION[pl]===byName[name].rashi && byName[pl]);
-    const cond1 = isKendra(dispositorHouse);
-    const cond2 = exaltHere && isKendra(hOf(exaltHere));
-    if (cond1 || cond2){
-      nbFound=true;
-      nbCauses.push(`${name} debilitated in H${hOf(name)} — cancelled: ${cond1?`dispositor ${dispositor} in Kendra`:`${exaltHere} (exalts here) in Kendra`}`);
-    }
-  });
-  push('neechabhanga','Raj Yogas','Neechabhanga Raja Yoga', nbFound, 'Strong',
-    'A debilitated planet\u2019s debilitation is cancelled — its sign dispositor (or the planet that exalts in that same sign) is placed in a Kendra from the Lagna — turning weakness into a Raja Yoga.',
-    nbCauses.join('; '));
-
-  let vrCauses=[]; const vrLabels={6:'Harsha',8:'Sarala',12:'Vimala'};
-  [6,8,12].forEach(h=>{ const lord=houseLord(h), lh=hOf(lord); if ([6,8,12].includes(lh) && lh!==h) vrCauses.push(`${vrLabels[h]}: ${h}th lord ${lord} placed in ${lh}th house`); });
-  push('vipareeta','Raj Yogas','Vipareeta Raja Yoga', vrCauses.length>0, vrCauses.length>=2?'Strong':'Moderate',
-    'A lord of a Dusthana house (6th/8th/12th) is placed in a different Dusthana house — reversing misfortune into unexpected gain (Harsha/Sarala/Vimala sub-types).',
-    vrCauses.join('; '));
-
-  let pCauses=[]; const seenPairs=new Set();
-  for (let h1=1; h1<=12; h1++){
-    const l1=houseLord(h1), h2=hOf(l1), l2=houseLord(h2);
-    if (l1!==l2 && hOf(l2)===h1){
-      const key=[h1,h2].sort().join('-'); if (seenPairs.has(key)) continue; seenPairs.add(key);
-      if ([1,4,5,7,9,10].includes(h1) || [1,4,5,7,9,10].includes(h2)) pCauses.push(`${l1} (${h1}th lord) \u2194 ${l2} (${h2}th lord) sign exchange`);
-    }
-  }
-  push('parivartanaraj','Raj Yogas','Parivartana Raj Yoga', pCauses.length>0, pCauses.length>=2?'Strong':'Moderate',
-    'The lords of two houses exchange signs (each sits in the sign the other rules), with at least one of the two houses being a Kendra or Trikona.',
-    pCauses.join('; '));
-
-  /* ---------- DHANA YOGAS ---------- */
-  const dhanaConnected = lord2===lord11 || isConnected(lord2,lord11);
-  push('dhanayoga','Dhana Yogas','Dhana Yoga', dhanaConnected, strengthFrom(lord2,lord11),
-    '2nd lord (wealth) and 11th lord (gains) are connected by conjunction, mutual aspect, or a single planet rules both.',
-    lord2===lord11 ? `${lord2} rules both the 2nd and 11th houses` : `2nd lord ${lord2} \u2194 11th lord ${lord11}`);
-
-  const benefic2 = BENEFICS3.filter(b=>hOf(b)===2), benefic11 = BENEFICS3.filter(b=>hOf(b)===11);
-  push('mahadhana','Dhana Yogas','Maha Dhana Yoga', benefic2.length>0 && benefic11.length>0, strengthFrom(...benefic2,...benefic11),
-    'Natural benefics (Jupiter/Venus/Mercury) occupy BOTH the 2nd house and the 11th house.',
-    (benefic2.length>0 && benefic11.length>0) ? `${benefic2.join(',')} in H2; ${benefic11.join(',')} in H11` : '');
-
-  push('chandramangala','Dhana Yogas','Chandra Mangala Yoga', isConjunct('Moon','Mars'), strengthFrom('Moon','Mars'),
-    'Moon and Mars are conjunct in the same house — a wealth-through-enterprise combination.',
-    isConjunct('Moon','Mars') ? `Moon & Mars conjunct in house ${hOf('Moon')}` : '');
-
-  const gkDist = distFromMoon('Jupiter');
-  push('gajakesari','Dhana Yogas','Gaja Kesari Yoga', [1,4,7,10].includes(gkDist), dignity('Jupiter')==='Exalted'||dignity('Jupiter')==='Own Sign'?'Strong':'Moderate',
-    'Jupiter is in a Kendra (1st/4th/7th/10th house) counted from the Moon.',
-    [1,4,7,10].includes(gkDist) ? `Jupiter is ${gkDist===1?'conjunct':((gkDist-1)+'th')} from Moon (H${hOf('Jupiter')})` : '');
-
-  const upachayaBenefics = ["Jupiter","Venus","Mercury","Moon"].filter(b=>isUpachaya(hOf(b)));
-  push('vasumati','Dhana Yogas','Vasumati Yoga', upachayaBenefics.length>=3, upachayaBenefics.length>=4?'Strong':'Moderate',
-    'Three or more natural benefics (Jupiter, Venus, Mercury, Moon) occupy Upachaya houses (3rd, 6th, 10th, 11th) from the Lagna.',
-    upachayaBenefics.length>=3 ? `${upachayaBenefics.join(', ')} in Upachaya houses` : '');
-
-  const adhiHousesFromMoon = new Set(BENEFICS3.map(b=>distFromMoon(b)).filter(d=>[6,7,8].includes(d)));
-  push('adhiyoga','Dhana Yogas','Adhi Yoga', adhiHousesFromMoon.size>=1 && adhiHousesFromMoon.size<3, adhiHousesFromMoon.size===2?'Strong':'Moderate',
-    'Natural benefics (Jupiter, Venus, Mercury) occupy one or two of the 6th/7th/8th houses counted from the Moon (all three houses occupied is the fuller Chandra Adhi Yoga instead).',
-    adhiHousesFromMoon.size ? `Benefic(s) in house(s) ${[...adhiHousesFromMoon].join(', ')} from Moon` : '');
-
-  push('bhagyayoga','Dhana Yogas','Bhagya Yoga', (lord9dig==='Own Sign'||lord9dig==='Exalted') && [1,4,5,7,9,10].includes(hOf(lord9)),
-    lord9dig==='Exalted'?'Strong':'Moderate',
-    'The 9th lord (fortune) is in its own sign or exalted, and placed in a Kendra or Trikona house from the Lagna.',
-    `9th lord ${lord9} (${lord9dig}) in house ${hOf(lord9)}`);
-
-  /* ---------- PANCH MAHAPURUSHA YOGAS ---------- */
-  const mahapurush = (name)=>{ const d=dignity(name); return (d==='Own Sign'||d==='Exalted') && isKendra(hOf(name)); };
-  const mpLabel = { Mars:['ruchaka','Ruchaka Yoga'], Mercury:['bhadra','Bhadra Yoga'], Jupiter:['hamsa','Hamsa Yoga'], Venus:['malavya','Malavya Yoga'], Saturn:['sasa','Sasa Yoga'] };
-  Object.keys(mpLabel).forEach(name=>{
-    const [id,label] = mpLabel[name];
-    const present = mahapurush(name);
-    push(id,'Panch Mahapurusha Yogas',label, present, dignity(name)==='Exalted'?'Strong':'Moderate',
-      `${name} is in its own sign or exalted, placed in a Kendra house (1st/4th/7th/10th) from the Lagna.`,
-      present ? `${name} (${dignity(name)}) in house ${hOf(name)}` : '');
-  });
-
-  /* ---------- GRAHA YOGAS ---------- */
-  push('budhaditya','Graha Yogas','Budhaditya Yoga', isConjunct('Sun','Mercury'), byName.Mercury.combust?'Weak':strengthFrom('Sun','Mercury'),
-    'Sun and Mercury are conjunct in the same house (an intellect/status combination).',
-    isConjunct('Sun','Mercury') ? `Sun & Mercury conjunct in house ${hOf('Sun')}${byName.Mercury.combust?' (Mercury combust)':''}` : '');
-
-  const amalaBenefic = BENEFICS3.find(b=>hOf(b)===10);
-  push('amala','Graha Yogas','Amala Yoga', !!amalaBenefic, amalaBenefic?strengthFrom(amalaBenefic):'Moderate',
-    'A natural benefic (Jupiter/Venus/Mercury) occupies the 10th house from the Lagna.',
-    amalaBenefic ? `${amalaBenefic} in house 10` : '');
-
-  const secondFromMoon = NON_LUMINARY.filter(p=>distFromMoon(p)===2);
-  const twelfthFromMoon = NON_LUMINARY.filter(p=>distFromMoon(p)===12);
-  const hasSunapha = secondFromMoon.length>0, hasAnapha = twelfthFromMoon.length>0, isDurudhara = hasSunapha && hasAnapha;
-  push('sunapha','Graha Yogas','Sunapha Yoga', hasSunapha && !isDurudhara, strengthFrom(...secondFromMoon),
-    'A planet other than the Sun occupies the 2nd house counted from the Moon.',
-    hasSunapha ? `${secondFromMoon.join(', ')} in the 2nd house from Moon` : '');
-  push('anapha','Graha Yogas','Anapha Yoga', hasAnapha && !isDurudhara, strengthFrom(...twelfthFromMoon),
-    'A planet other than the Sun occupies the 12th house counted from the Moon.',
-    hasAnapha ? `${twelfthFromMoon.join(', ')} in the 12th house from Moon` : '');
-  push('durudhara','Graha Yogas','Durudhara Yoga', isDurudhara, strengthFrom(...secondFromMoon,...twelfthFromMoon),
-    'Planets occupy BOTH the 2nd and 12th houses from the Moon at once — supersedes Sunapha/Anapha.',
-    isDurudhara ? `${secondFromMoon.join(',')} (2nd from Moon); ${twelfthFromMoon.join(',')} (12th from Moon)` : '');
-
-  const secondFromSun = NON_LUMINARY.filter(p=>distFromSun(p)===2);
-  const twelfthFromSun = NON_LUMINARY.filter(p=>distFromSun(p)===12);
-  const hasVesi = secondFromSun.length>0, hasVasi = twelfthFromSun.length>0, isUbhaya = hasVesi && hasVasi;
-  push('vesi','Graha Yogas','Vesi Yoga', hasVesi && !isUbhaya, strengthFrom(...secondFromSun),
-    'A planet other than the Moon occupies the 2nd house counted from the Sun.',
-    hasVesi ? `${secondFromSun.join(', ')} in the 2nd house from Sun` : '');
-  push('vasi','Graha Yogas','Vasi Yoga', hasVasi && !isUbhaya, strengthFrom(...twelfthFromSun),
-    'A planet other than the Moon occupies the 12th house counted from the Sun.',
-    hasVasi ? `${twelfthFromSun.join(', ')} in the 12th house from Sun` : '');
-  push('ubhayachari','Graha Yogas','Ubhayachari Yoga', isUbhaya, strengthFrom(...secondFromSun,...twelfthFromSun),
-    'Planets flank the Sun on both sides — the 2nd AND 12th houses from the Sun are both occupied.',
-    isUbhaya ? `${secondFromSun.join(',')} (2nd from Sun); ${twelfthFromSun.join(',')} (12th from Sun)` : '');
-
-  push('chandradhi','Graha Yogas','Chandra Adhi Yoga', adhiHousesFromMoon.size===3, 'Strong',
-    'Natural benefics (Jupiter, Venus, Mercury) occupy ALL THREE of the 6th/7th/8th houses counted from the Moon — the complete form of Adhi Yoga.',
-    adhiHousesFromMoon.size===3 ? 'Jupiter, Venus & Mercury together occupy houses 6, 7 & 8 from Moon' : '');
-
-  /* ---------- DOSHAS ---------- */
-  push('mangaldosha','Doshas','Mangal Dosha', [1,2,4,7,8,12].includes(hOf('Mars')), dignity('Mars')==='Debilitated'?'Weak':(isDusthana(hOf('Mars'))?'Strong':'Moderate'),
-    'Mars is placed in the 1st, 2nd, 4th, 7th, 8th, or 12th house from the Lagna (checked from Lagna only in this engine).',
-    `Mars in house ${hOf('Mars')}`);
-
-  const rahuH=hOf('Rahu'), ketuH=hOf('Ketu');
-  const classicalSeven=["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"];
-  const distsFromRahu = classicalSeven.map(p=>houseDistanceFromTo(rahuH,hOf(p)));
-  const kaalSarp = distsFromRahu.every(d=>d>=2&&d<=6) || distsFromRahu.every(d=>d>=8&&d<=12);
-  push('kaalsarp','Doshas','Kaal Sarp Yoga', kaalSarp, 'Strong',
-    'All seven classical planets (Sun through Saturn) fall on one side of the Rahu-Ketu axis, hemmed between the two nodes.',
-    kaalSarp ? `Rahu H${rahuH}, Ketu H${ketuH}, all 7 planets on one side` : '');
-
-  let pitruCauses=[];
-  if (isConjunct('Sun','Rahu')) pitruCauses.push('Sun conjunct Rahu');
-  if (isConjunct('Sun','Ketu')) pitruCauses.push('Sun conjunct Ketu');
-  if (isConjunct('Sun','Saturn')) pitruCauses.push('Sun conjunct Saturn');
-  if (hOf('Rahu')===9) pitruCauses.push('Rahu in the 9th house');
-  push('pitrudosha','Doshas','Pitru Dosha', pitruCauses.length>0, pitruCauses.length>=2?'Strong':'Moderate',
-    'The Sun is afflicted by Rahu, Ketu, or Saturn, or Rahu occupies the 9th house — classical indicators of ancestral affliction.',
-    pitruCauses.join('; '));
-
-  push('guruchandal','Doshas','Guru Chandal Yoga', isConjunct('Jupiter','Rahu')||isConjunct('Jupiter','Ketu'), 'Strong',
-    'Jupiter is conjunct with Rahu or Ketu in the same house.',
-    isConjunct('Jupiter','Rahu') ? `Jupiter & Rahu conjunct in house ${hOf('Jupiter')}` : (isConjunct('Jupiter','Ketu') ? `Jupiter & Ketu conjunct in house ${hOf('Jupiter')}` : ''));
-
-  let grahanCauses=[];
-  if (isConjunct('Sun','Rahu')) grahanCauses.push('Sun conjunct Rahu');
-  if (isConjunct('Sun','Ketu')) grahanCauses.push('Sun conjunct Ketu');
-  if (isConjunct('Moon','Rahu')) grahanCauses.push('Moon conjunct Rahu');
-  if (isConjunct('Moon','Ketu')) grahanCauses.push('Moon conjunct Ketu');
-  push('grahanyoga','Doshas','Grahan Yoga', grahanCauses.length>0, 'Strong',
-    'Sun or Moon is conjunct with Rahu or Ketu (eclipse combination).',
-    grahanCauses.join('; '));
-
-  push('shrapit','Doshas','Shrapit Yoga', isConjunct('Saturn','Rahu'), 'Strong',
-    'Saturn is conjunct with Rahu in the same house.',
-    isConjunct('Saturn','Rahu') ? `Saturn & Rahu conjunct in house ${hOf('Saturn')}` : '');
-
-  const kemadruma = !hasSunapha && !hasAnapha && NON_LUMINARY.every(p=>hOf(p)!==hOf('Moon'));
-  push('kemadruma','Doshas','Kemadruma Yoga', kemadruma, 'Weak',
-    'No planet (other than the Sun) occupies the 2nd or 12th house from the Moon, and no planet is conjunct with the Moon — an isolated Moon.',
-    kemadruma ? `Moon isolated in house ${hOf('Moon')}` : '');
-
-  const daridraCauses=[];
-  if (isDusthana(hOf(lord11))) daridraCauses.push(`11th lord ${lord11} in Dusthana house ${hOf(lord11)}`);
-  if (isDusthana(hOf(lord2))) daridraCauses.push(`2nd lord ${lord2} in Dusthana house ${hOf(lord2)}`);
-  push('daridra','Doshas','Daridra Yoga', daridraCauses.length>0, daridraCauses.length>=2?'Strong':'Moderate',
-    'The 2nd lord or 11th lord is placed in a Dusthana house (6th, 8th, or 12th), weakening wealth and gains.',
-    daridraCauses.join('; '));
-
-  const moonAfflicted = ["Sun","Mars","Saturn","Rahu","Ketu"].some(m=> isConjunct('Moon',m)||isAspecting(m,'Moon'));
-  const balarishta = isDusthana(hOf('Moon')) && moonAfflicted;
-  push('balarishta','Doshas','Balarishta Yoga', balarishta, 'Weak',
-    'The Moon is in a Dusthana house (6th, 8th, or 12th) from the Lagna and is conjunct with or aspected by a malefic.',
-    balarishta ? `Moon in house ${hOf('Moon')}, afflicted` : '');
-
-  const inGandanta = (rashi,deg)=>{ const pairs=[[11,0],[3,4],[7,8]]; return pairs.some(([w,f])=> (rashi===w&&deg>=26.6667)||(rashi===f&&deg<3.3333)); };
-  const moonG = inGandanta(byName.Moon.rashi, byName.Moon.longitude%30);
-  const ascG = inGandanta(d1vdata.ascendant.rashi, d1vdata.ascendant.longitude%30);
-  push('gandanta','Doshas','Gandanta Dosha', moonG||ascG, 'Weak',
-    'The Moon (or Ascendant) falls within the critical junction degrees (last 3\u00b020\u2032 of a water sign, or first 3\u00b020\u2032 of the following fire sign) — Pisces/Aries, Cancer/Leo, Scorpio/Sagittarius.',
-    [moonG?'Moon in Gandanta zone':null, ascG?'Ascendant in Gandanta zone':null].filter(Boolean).join('; '));
-
-  /* ---------- SPECIAL YOGAS ---------- */
-  const saraswati = BENEFICS3.every(p=>[1,2,4,5,7,9,10].includes(hOf(p)));
-  push('saraswati','Special Yogas','Saraswati Yoga', saraswati, strengthFrom(...BENEFICS3),
-    'Jupiter, Venus, and Mercury all occupy Kendra, Trikona, or the 2nd house from the Lagna.',
-    saraswati ? `Jupiter H${hOf('Jupiter')}, Venus H${hOf('Venus')}, Mercury H${hOf('Mercury')}` : '');
-
-  const parijataDispositor = RASHI[byName[lord1].rashi][1];
-  const parijataDig = dignity(parijataDispositor);
-  const parijata = (parijataDig==='Own Sign'||parijataDig==='Exalted') && [1,4,5,7,9,10].includes(hOf(parijataDispositor));
-  push('parijata','Special Yogas','Parijata Yoga', parijata, parijataDig==='Exalted'?'Strong':'Moderate',
-    'The dispositor of the Lagna lord (the lord of the sign the Lagna lord occupies) is itself in its own sign or exalted, and placed in a Kendra or Trikona.',
-    parijata ? `Lagna lord ${lord1} \u2192 dispositor ${parijataDispositor} (${parijataDig}) in house ${hOf(parijataDispositor)}` : '');
-
-  const kahalaDist = houseDistanceFromTo(hOf(lord4), hOf(lord9));
-  const kahala = [1,4,7,10].includes(kahalaDist) && dignity('Jupiter')!=='Debilitated';
-  push('kahala','Special Yogas','Kahala Yoga', kahala, dignity('Jupiter')==='Exalted'?'Strong':'Moderate',
-    'The 4th lord and 9th lord are in mutual Kendra positions from each other, and Jupiter is not debilitated.',
-    kahala ? `4th lord ${lord4} (H${hOf(lord4)}) & 9th lord ${lord9} (H${hOf(lord9)})` : '');
-
-  const chamara = dignity(lord1)==='Exalted' && isKendra(hOf(lord1)) && (isConjunct(lord1,'Jupiter')||isAspecting('Jupiter',lord1));
-  push('chamara','Special Yogas','Chamara Yoga', chamara, 'Strong',
-    'The Lagna lord is exalted, placed in a Kendra house, and is conjunct with or aspected by Jupiter.',
-    chamara ? `Lagna lord ${lord1} exalted in H${hOf(lord1)}, linked with Jupiter` : '');
-
-  const shankhaDist = houseDistanceFromTo(hOf(lord5), hOf(lord6));
-  const shankha = [1,4,7,10].includes(shankhaDist) && dignity(lord1)!=='Debilitated';
-  push('shankha','Special Yogas','Shankha Yoga', shankha, dignity(lord1)==='Exalted'?'Strong':'Moderate',
-    'The 5th lord and 6th lord are in mutual Kendra positions from each other, and the Lagna lord is not debilitated.',
-    shankha ? `5th lord ${lord5} (H${hOf(lord5)}) & 6th lord ${lord6} (H${hOf(lord6)})` : '');
-
-  const bheri = lord1!==lord9 && isConjunct(lord1,lord9) && (['Own Sign','Exalted'].includes(dignity(lord1)) || ['Own Sign','Exalted'].includes(dignity(lord9)));
-  push('bheri','Special Yogas','Bheri Yoga', bheri, strengthFrom(lord1,lord9),
-    'The Lagna lord and 9th lord are conjunct, and at least one of them is in its own sign or exalted.',
-    bheri ? `Lagna lord ${lord1} & 9th lord ${lord9} conjunct in house ${hOf(lord1)}` : '');
-
-  const lagnaLordD1Dig = dignity(lord1);
-  const lagnaLordNavRashi = vargaD9(byName[lord1].rashi, byName[lord1].longitude%30);
-  const lagnaLordNavDig = getPlanetStatus(lord1, lagnaLordNavRashi);
-  const mridanga = ['Own Sign','Exalted'].includes(lagnaLordD1Dig) && (isKendra(hOf(lord1))||isTrikona(hOf(lord1))) && ['Own Sign','Exalted'].includes(lagnaLordNavDig);
-  push('mridanga','Special Yogas','Mridanga Yoga', mridanga, 'Strong',
-    'The Lagna lord is in its own sign or exalted in both the Rashi (D1) AND Navamsa (D9) charts, placed in a Kendra or Trikona in D1.',
-    mridanga ? `Lagna lord ${lord1}: D1 ${lagnaLordD1Dig} (H${hOf(lord1)}), D9 ${lagnaLordNavDig}` : '');
-
-  const gauri = dignity(lord7)==='Exalted' && isKendra(hOf(lord7));
-  push('gauri','Special Yogas','Gauri Yoga', gauri, 'Strong',
-    'The 7th lord is exalted and placed in a Kendra house from the Lagna.',
-    gauri ? `7th lord ${lord7} exalted in house ${hOf(lord7)}` : '');
-
-  const chatussagara = [1,4,7,10].every(h=> d1vdata.planets.some(p=>p.house===h));
-  push('chatussagara','Special Yogas','Chatussagara Yoga', chatussagara, 'Moderate',
-    'All four Kendra houses (1st, 4th, 7th, 10th) are occupied by at least one planet — none of them empty.',
-    chatussagara ? 'Every Kendra house (1,4,7,10) holds at least one planet' : '');
-
-  const moonNavRashi = vargaD9(byName.Moon.rashi, byName.Moon.longitude%30);
-  const navMoonLord = RASHI[moonNavRashi][1];
-  const pushkala = navMoonLord===lord1 || isConjunct(navMoonLord,lord1) || (isAspecting(navMoonLord,lord1)&&isAspecting(lord1,navMoonLord));
-  push('pushkala','Special Yogas','Pushkala Yoga', pushkala, strengthFrom(navMoonLord,lord1),
-    'The lord of the Moon\u2019s Navamsa (D9) sign is conjunct with, mutually aspects, or is the same planet as the Lagna lord.',
-    pushkala ? `Navamsa-Moon lord ${navMoonLord} \u2194 Lagna lord ${lord1}` : '');
-
-  push('neechabhangaSpecial','Special Yogas','Neecha Bhanga Yoga', nbFound, 'Strong',
-    'Same classical combination as Neechabhanga Raja Yoga above (a debilitated planet\u2019s weakness is cancelled) — listed here under its alternate common name.',
-    nbCauses.join('; '));
-
-  return yogas;
 }
 
-function renderYogas(yogas){
-  const present = yogas.filter(y=>y.present);
-  if (!present.length){
-    el('yogaList').innerHTML = '<div class="yoga-empty">No major Yogas or Doshas detected in this chart.</div>';
-    return;
-  }
-  const categories = ["Raj Yogas","Dhana Yogas","Panch Mahapurusha Yogas","Graha Yogas","Doshas","Special Yogas"];
-  let html = '';
-  categories.forEach(cat=>{
-    const items = present.filter(y=>y.category===cat);
-    if (!items.length) return;
-    html += `<div class="yoga-category-label">${cat}</div>`;
-    items.forEach(y=>{
-      const cls = y.strength.toLowerCase();
-      const emoji = y.strength==='Strong' ? '\u{1F7E2}' : (y.strength==='Moderate' ? '\u{1F7E1}' : '\u{1F534}');
-      html += `<div class="yoga-row" id="yoga-${y.id}">
-        <div class="yoga-row-head">
-          <div class="yoga-name">${y.name}</div>
-          <div style="display:flex;align-items:center;">
-            <span class="yoga-badge ${cls}">${emoji} ${y.strength}</span>
-            <span class="yoga-chevron">\u25be</span>
-          </div>
-        </div>
-        <div class="yoga-detail-wrap"><div class="yoga-detail">
-          <div class="yd-row"><div class="yd-label">Name</div>${y.name}</div>
-          <div class="yd-row"><div class="yd-label">Status</div>Present</div>
-          <div class="yd-row"><div class="yd-label">Strength</div>${emoji} ${y.strength}</div>
-          <div class="yd-row"><div class="yd-label">Classical Formation Rule</div>${y.rule}</div>
-          <div class="yd-row"><div class="yd-label">Cause (Planets / Houses)</div>${y.cause}</div>
-        </div></div>
-      </div>`;
-    });
-  });
-  el('yogaList').innerHTML = html;
-  present.forEach(y=>{
-    const row = document.getElementById('yoga-'+y.id);
-    row.querySelector('.yoga-row-head').addEventListener('click', ()=> row.classList.toggle('open'));
-  });
+function renderChartStrength(cs){
+  el('csOverall').textContent = cs.overall + '%';
+
+  const planetRow = (label, pct) => `<div class="cs-row"><div class="cs-name">${csEmoji(pct)} ${label}</div><div class="cs-value">${pct}%</div></div>`;
+  el('csPlanetRows').innerHTML =
+    planetRow('Lagna', cs.lagna) + planetRow('Moon', cs.moon) + planetRow('Sun', cs.sun);
+
+  const groupRow = (label, pct) => `<div class="cs-row"><div class="cs-name">${csEmoji(pct)} ${label}</div><div class="cs-value">${csLabel(pct)}</div></div>`;
+  el('csGroupRows').innerHTML =
+    groupRow('Kendras', cs.kendra) + groupRow('Trikonas', cs.trikona) + groupRow('Dusthanas', cs.dusthana);
+
+  el('csBalaRows').innerHTML =
+    `<div class="cs-row"><div class="cs-name">Shadbala</div><div class="cs-value">${cs.shadbalaOverall}%</div></div>` +
+    `<div class="cs-row"><div class="cs-name">Bhavabala</div><div class="cs-value">${cs.bhavabalaOverall}%</div></div>`;
 }
 
 function renderSummary(base, vdata, labelPrefix){
@@ -1546,8 +1224,9 @@ function renderDailyResult(){
   renderHouseAspects(vdata);
   const dailyShadbala = computeShadbala(vdata);
   renderShadbala(dailyShadbala);
-  renderBhavabala(computeBhavabala(vdata, dailyShadbala));
-  renderYogas(computeYogas(vdata));
+  const dailyBhavabala = computeBhavabala(vdata, dailyShadbala);
+  renderBhavabala(dailyBhavabala);
+  renderChartStrength(computeChartStrength(dailyShadbala, dailyBhavabala));
   renderSummary(dailyBaseData, vdata, "");
   renderDashaTable(selectedDateTime, dailyBaseData.planets.find(p=>p.name==="Moon").longitude);
 }
@@ -1586,8 +1265,9 @@ function renderBirthResult(){
   renderSummary(birthBaseData, d1, "Birth ");
   const birthShadbala = computeShadbala(d1);
   renderShadbala(birthShadbala);
-  renderBhavabala(computeBhavabala(d1, birthShadbala));
-  renderYogas(computeYogas(d1));
+  const birthBhavabala = computeBhavabala(d1, birthShadbala);
+  renderBhavabala(birthBhavabala);
+  renderChartStrength(computeChartStrength(birthShadbala, birthBhavabala));
   renderDashaTable(birthDateTime, birthBaseData.planets.find(p=>p.name==="Moon").longitude);
 }
 

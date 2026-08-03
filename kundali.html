@@ -150,6 +150,7 @@
   <symbol id="icon-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></symbol>
   <symbol id="icon-columns" viewBox="0 0 24 24"><path d="M4 21h16"/><path d="M5 21V9M9 21V9M15 21V9M19 21V9"/><path d="M3 9l9-6 9 6"/></symbol>
   <symbol id="icon-cycle" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14.5-4.5"/><path d="M18.5 4v4h-4"/><path d="M20 12a8 8 0 0 1-14.5 4.5"/><path d="M5.5 20v-4h4"/></symbol>
+  <symbol id="icon-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></symbol>
 </defs>
 </svg>
 <div id="loaderOverlay">
@@ -359,6 +360,11 @@
         <div id="dashaTable"></div>
       </div>
     </div>
+
+    <button id="downloadPdfBtn" class="loc-btn primary" style="margin-bottom:6px;">
+      <svg class="btn-icon"><use href="#icon-download"/></svg>Download PDF
+    </button>
+    <div class="loc-detail" style="padding-bottom:4px;">Includes the chart, all tables & Dasha details for the current mode</div>
 
   </div><!-- /resultContainer -->
 
@@ -1156,7 +1162,7 @@ function renderSummary(base, vdata, labelPrefix){
 /* ===================== LOADER / CONTROL STATE ===================== */
 
 let activeRequestId = 0;
-const CONTROL_IDS = ['dailyDatePicker','dailyTimePicker','prevDayBtn','todayBtn','nextDayBtn','birthDatePicker','birthTimePicker','myLocationBtn','enterLocationBtn','enterLocationBtn2','retryLocationBtn','manualLocSubmit','modeDailyBtn','modeBirthBtn','modeMarriageBtn'];
+const CONTROL_IDS = ['dailyDatePicker','dailyTimePicker','prevDayBtn','todayBtn','nextDayBtn','birthDatePicker','birthTimePicker','myLocationBtn','enterLocationBtn','enterLocationBtn2','retryLocationBtn','manualLocSubmit','modeDailyBtn','modeBirthBtn','modeMarriageBtn','downloadPdfBtn'];
 function showLoader(){ el('loaderOverlay').classList.add('show'); }
 function hideLoader(){ el('loaderOverlay').classList.remove('show'); }
 function setControlsDisabled(disabled){
@@ -1435,6 +1441,102 @@ async function watchGeolocationAvailability(){
   }
   showLocChooser();
 }
+
+/* ===================== PDF EXPORT ===================== */
+/* Loads html2canvas + jsPDF from CDN on demand (only when the button is first
+   clicked), captures a de-scrolled clone of the current results (so wide,
+   horizontally-scrollable tables render in full rather than being clipped),
+   and assembles a multi-page A4 PDF from the resulting image. Requires an
+   internet connection since this page is statically hosted (GitHub Pages) and
+   these libraries aren't bundled locally, unlike the self-hosted Swiss Ephemeris. */
+
+function loadScriptOnce(src){
+  return new Promise((resolve, reject)=>{
+    if (document.querySelector('script[src="'+src+'"]')){ resolve(); return; }
+    const s = document.createElement('script');
+    s.src = src; s.onload = ()=>resolve(); s.onerror = ()=>reject(new Error('Failed to load '+src));
+    document.head.appendChild(s);
+  });
+}
+let pdfLibsPromise = null;
+function ensurePdfLibs(){
+  if (!pdfLibsPromise){
+    pdfLibsPromise = Promise.all([
+      loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+      loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+    ]);
+  }
+  return pdfLibsPromise;
+}
+
+async function downloadPdf(){
+  if (el('resultContainer').style.display==='none') return;
+  const loaderText = el('loaderOverlay').querySelector('.loader-text');
+  const loaderSub = el('loaderOverlay').querySelector('.loader-sub');
+  loaderText.textContent = 'Generating PDF...';
+  loaderSub.textContent = 'Loading PDF engine...';
+  showLoader(); setControlsDisabled(true);
+  await nextFrame();
+
+  let clone = null;
+  try{
+    await ensurePdfLibs();
+    loaderSub.textContent = 'Rendering charts & tables...';
+    await nextFrame();
+
+    const source = el('resultContainer');
+    clone = source.cloneNode(true);
+    clone.removeAttribute('style');
+    clone.style.position = 'fixed';
+    clone.style.top = '0';
+    clone.style.left = '-99999px';
+    clone.style.display = 'block';
+    clone.style.width = '560px';
+    const bg = getComputedStyle(document.body).backgroundColor || '#0b0514';
+    clone.style.background = bg;
+    clone.style.padding = '14px 12px';
+
+    const changeLocBtn = clone.querySelector('#changeLocBtn');
+    if (changeLocBtn && changeLocBtn.closest('.info-item')) changeLocBtn.closest('.info-item').remove();
+    clone.querySelectorAll('.table-scroll').forEach(t=>{ t.style.overflow = 'visible'; });
+    clone.querySelectorAll('table.ptable').forEach(t=>{ t.style.width = 'max-content'; });
+
+    document.body.appendChild(clone);
+    await nextFrame();
+
+    const canvas = await window.html2canvas(clone, { backgroundColor: bg, scale: 2, useCORS: true, windowWidth: clone.scrollWidth });
+    const { jsPDF } = window.jspdf;
+    const pdf = new jsPDF('p', 'mm', 'a4');
+    const pageWidth = pdf.internal.pageSize.getWidth();
+    const pageHeight = pdf.internal.pageSize.getHeight();
+    const imgWidth = pageWidth;
+    const imgHeight = canvas.height * imgWidth / canvas.width;
+    const imgData = canvas.toDataURL('image/png');
+
+    let heightLeft = imgHeight, position = 0;
+    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+    heightLeft -= pageHeight;
+    while (heightLeft > 0){
+      position = heightLeft - imgHeight;
+      pdf.addPage();
+      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+    }
+
+    const modeLabel = currentMode === 'birth' ? 'Birth' : 'Daily';
+    const refDate = currentMode === 'birth' ? birthDateTime : selectedDateTime;
+    pdf.save('Kundali-' + modeLabel + '-' + dateToInputValue(refDate) + '.pdf');
+  }catch(err){
+    console.error(err);
+    alert('Could not generate the PDF. Please check your internet connection (the PDF engine loads from a CDN) and try again.');
+  }finally{
+    if (clone) clone.remove();
+    hideLoader(); setControlsDisabled(false);
+    loaderText.textContent = 'Calculating Kundali...';
+    loaderSub.textContent = 'Computing planetary positions...';
+  }
+}
+el('downloadPdfBtn').addEventListener('click', downloadPdf);
 
 /* ===================== INIT ===================== */
 

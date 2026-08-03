@@ -243,6 +243,34 @@
     </div>
 
     <div class="section">
+      <div class="sec-header"><span class="hicon">🎯</span> Planet Aspects</div>
+      <div class="sec-body">
+        <div class="table-scroll">
+          <table class="ptable" id="planetAspectsTable">
+            <thead><tr>
+              <th>Planet</th><th>House</th><th>Aspects (Houses)</th><th>Aspected Planets</th><th>Aspected Signs</th>
+            </tr></thead>
+            <tbody id="planetAspectsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="sec-header"><span class="hicon">🏠</span> House Aspects</div>
+      <div class="sec-body">
+        <div class="table-scroll">
+          <table class="ptable" id="houseAspectsTable">
+            <thead><tr>
+              <th>House</th><th>Sign</th><th>Planets Placed</th><th>Aspected By</th>
+            </tr></thead>
+            <tbody id="houseAspectsBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="section">
       <div class="sec-header"><span class="hicon">📝</span> <span id="summarySectionTitle">Daily Summary</span></div>
       <div class="sec-body">
         <div class="summary-grid">
@@ -276,7 +304,7 @@
   </div><!-- /resultContainer -->
 
   <footer>
-    Sun/Moon/Planet positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Ayanamsa: Lahiri (Sidereal) · House System: Whole Sign · Rahu: Mean Node, Ketu: Rahu + 180° · Divisional charts: Parashari Shodasavarga rules
+    Sun/Moon/Planet positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Ayanamsa: Lahiri (Sidereal) · House System: Whole Sign · Rahu: Mean Node, Ketu: Rahu + 180° · Divisional charts: Parashari Shodasavarga rules · Aspects: Parashari graha drishti (7th house full aspect for all grahas; Mars also 4th/8th, Jupiter also 5th/9th, Saturn also 3rd/10th; Rahu/Ketu shown on the common Jupiter-style 5th/7th/9th convention)
   </footer>
 </div>
 
@@ -751,6 +779,69 @@ function renderTable(vdata){
   }).join('');
 }
 
+/* ===================== GRAHA DRISHTI (PLANETARY ASPECTS) =====================
+   Standard Parashari full-aspect (drishti) rules. Every graha aspects the house 7th
+   from itself; Mars, Jupiter and Saturn additionally cast special aspects. Rahu/Ketu
+   are given here on the widely-used Jupiter-style convention (5th/7th/9th) — classical
+   texts differ on this point, so treat their entries as one common convention rather
+   than an undisputed rule. Ascendant is a point, not a graha, so it casts no aspect. */
+const ASPECT_RULES = {
+  Sun:[7], Moon:[7], Mars:[4,7,8], Mercury:[7], Jupiter:[5,7,9], Venus:[7], Saturn:[3,7,10],
+  Rahu:[5,7,9], Ketu:[5,7,9]
+};
+/* aspectNum counts the target house inclusively from the planet's own house (7th aspect => aspectNum 7) */
+function aspectHouse(fromHouse, aspectNum){ return ((fromHouse - 1 + (aspectNum - 1)) % 12) + 1; }
+
+function renderPlanetAspects(vdata){
+  const order = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn","Rahu","Ketu"];
+  const ascRashi = vdata.ascendant.vargaRashi;
+  const byHouse = {}; for(let h=1;h<=12;h++) byHouse[h]=[];
+  vdata.planets.forEach(p=> byHouse[p.house].push(p.name));
+
+  el('planetAspectsBody').innerHTML = order.map(name=>{
+    const p = vdata.planets.find(pl=>pl.name===name);
+    const houses = ASPECT_RULES[name].map(n=>aspectHouse(p.house, n));
+    const aspectedPlanets = houses.flatMap(h=>byHouse[h]);
+    const aspectedSigns = houses.map(h=>{
+      const rashiIdx = (ascRashi + h - 1) % 12;
+      return RASHI[rashiIdx][0];
+    });
+    return `<tr>
+      <td><b>${name}</b></td><td>${p.house}</td>
+      <td>${houses.map(h=>'H'+h).join(', ')}</td>
+      <td>${aspectedPlanets.length ? aspectedPlanets.join(', ') : '—'}</td>
+      <td>${aspectedSigns.join(', ')}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderHouseAspects(vdata){
+  const order = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn","Rahu","Ketu"];
+  const ascRashi = vdata.ascendant.vargaRashi;
+  const byHouse = {}; for(let h=1;h<=12;h++) byHouse[h]=[];
+  vdata.planets.forEach(p=> byHouse[p.house].push(p.name));
+
+  const aspectedBy = {}; for(let h=1;h<=12;h++) aspectedBy[h]=[];
+  order.forEach(name=>{
+    const p = vdata.planets.find(pl=>pl.name===name);
+    ASPECT_RULES[name].forEach(n=>{
+      const h = aspectHouse(p.house, n);
+      aspectedBy[h].push(name);
+    });
+  });
+
+  let rows = '';
+  for(let h=1;h<=12;h++){
+    const rashiIdx = (ascRashi + h - 1) % 12;
+    rows += `<tr>
+      <td><b>${h}</b></td><td>${RASHI[rashiIdx][0]}</td>
+      <td>${byHouse[h].length ? byHouse[h].join(', ') : '—'}</td>
+      <td>${aspectedBy[h].length ? aspectedBy[h].join(', ') : '—'}</td>
+    </tr>`;
+  }
+  el('houseAspectsBody').innerHTML = rows;
+}
+
 function renderSummary(base, vdata, labelPrefix){
   el('sumAsc').textContent = RASHI[vdata.ascendant.vargaRashi][0];
   el('sumAscLord').textContent = RASHI[vdata.ascendant.vargaRashi][1];
@@ -810,6 +901,8 @@ function renderDailyResult(){
   renderBasicInfo(selectedDateTime, userLat, userLon);
   renderChart(vdata);
   renderTable(vdata);
+  renderPlanetAspects(vdata);
+  renderHouseAspects(vdata);
   renderSummary(dailyBaseData, vdata, "");
   renderDashaTable(selectedDateTime, dailyBaseData.planets.find(p=>p.name==="Moon").longitude);
 }
@@ -834,6 +927,8 @@ function renderBirthChartAndTable(){
   el('chartSectionTitle').textContent = 'North Indian Kundali (' + cur.label + ')';
   renderChart(vdata);
   renderTable(vdata);
+  renderPlanetAspects(vdata);
+  renderHouseAspects(vdata);
   renderVargaSelector();
 }
 

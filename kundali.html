@@ -96,6 +96,23 @@
   .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .summary-grid .info-item .ival{font-size:13.5px;}
 
+  .dasha-hint{font-size:11px;color:var(--text-sub);margin-bottom:8px;text-align:center;}
+  .dasha-row{background:var(--card-bg2);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);margin-bottom:7px;overflow:hidden;}
+  .dasha-row-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;}
+  .dasha-row.current{border-color:var(--gold);}
+  .dasha-planet{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:7px;}
+  .dasha-planet .now-tag{font-size:9px;font-weight:700;color:#241206;background:var(--gold);border-radius:5px;padding:1px 5px;}
+  .dasha-range{font-size:11px;color:var(--text-sub);text-align:right;}
+  .dasha-chevron{font-size:11px;color:var(--gold);margin-left:8px;transition:transform .25s ease;}
+  .dasha-row.open .dasha-chevron{transform:rotate(180deg);}
+  .antardasha-wrap{max-height:0;overflow:hidden;transition:max-height .3s ease;}
+  .dasha-row.open .antardasha-wrap{max-height:900px;}
+  .antardasha-list{padding:0 12px 10px;}
+  .antardasha-item{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;font-size:11.5px;border-top:1px dashed rgba(255,255,255,0.07);}
+  .antardasha-item.current{color:var(--gold-light);font-weight:700;}
+  .antardasha-item .ad-name{display:flex;align-items:center;gap:6px;}
+  .antardasha-item .now-tag{font-size:8.5px;font-weight:700;color:#241206;background:var(--gold);border-radius:4px;padding:1px 4px;}
+
   .soon-panel{text-align:center;padding:50px 20px;font-size:20px;font-weight:700;color:var(--gold-light);}
 
   footer{text-align:center;font-size:10px;color:var(--text-sub);opacity:.6;padding:14px 20px 0;line-height:1.5;}
@@ -248,6 +265,14 @@
       </div>
     </div>
 
+    <div class="section">
+      <div class="sec-header"><span class="hicon">🕉️</span> Vimshottari Dasha</div>
+      <div class="sec-body">
+        <div class="dasha-hint">Tap a Mahadasha to view its Antardashas</div>
+        <div id="dashaTable"></div>
+      </div>
+    </div>
+
   </div><!-- /resultContainer -->
 
   <footer>
@@ -275,6 +300,112 @@ const COMBUST_ORB = { Moon:12, Mars:17, Mercury:14, Jupiter:11, Venus:10, Saturn
 /* Nakshatra lord: standard Vimshottari Dasha planet sequence, repeating 3x across 27 nakshatras */
 const VIMSHOTTARI_SEQUENCE = ["Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury"];
 function nakshatraLord(nakIdx){ return VIMSHOTTARI_SEQUENCE[nakIdx%9]; }
+
+/* ===================== VIMSHOTTARI DASHA ===================== */
+
+const VIMSHOTTARI_YEARS = { Ketu:7, Venus:20, Sun:6, Moon:10, Mars:7, Rahu:18, Jupiter:16, Saturn:19, Mercury:17 };
+const DAYS_PER_YEAR = 365.25; // standard convention for Vimshottari date arithmetic
+function addYears(date, years){ return new Date(date.getTime() + years*DAYS_PER_YEAR*86400000); }
+
+/* Computes the 9 Mahadashas starting from birth/reference moment, based on the Moon's
+   nakshatra at that moment. The first Mahadasha is the nakshatra lord's balance period
+   (proportional to how much of that nakshatra remains); the following 8 run at full
+   classical length, cycling through the fixed Vimshottari sequence. */
+function computeMahadashas(moonLongitude, referenceDate){
+  const nakSpan = 360/27;
+  const lon = norm360(moonLongitude);
+  const nakIdx = Math.floor(lon/nakSpan);
+  const posInNak = lon % nakSpan;
+  const fractionElapsed = posInNak / nakSpan;
+  const startIdx = nakIdx % 9;
+  const startPlanet = VIMSHOTTARI_SEQUENCE[startIdx];
+  const fullYears = VIMSHOTTARI_YEARS[startPlanet];
+  const balanceYears = fullYears * (1 - fractionElapsed);
+  const alreadyElapsed = fullYears - balanceYears;
+
+  const mahadashas = [];
+  let cursor = new Date(referenceDate.getTime());
+  for (let i=0; i<9; i++){
+    const planet = VIMSHOTTARI_SEQUENCE[(startIdx+i)%9];
+    const years = i===0 ? balanceYears : VIMSHOTTARI_YEARS[planet];
+    const start = new Date(cursor.getTime());
+    const end = addYears(start, years);
+    mahadashas.push({ planet, start, end, years, alreadyElapsedBefore: i===0 ? alreadyElapsed : 0 });
+    cursor = end;
+  }
+  return mahadashas;
+}
+
+/* Computes the 9 Antardashas within a given Mahadasha. Uses the standard proportional
+   formula AD(years) = fullMahaYears * fullAntarYears / 120, then — for a Mahadasha that
+   itself starts partway through its own full classical span (only ever true for the very
+   first, birth-balance Mahadasha) — trims off whatever Antardasha portion would have
+   already elapsed before the reference moment, so the visible Antardashas sum exactly to
+   that Mahadasha's actual (possibly partial) duration. */
+function computeAntardashas(maha){
+  const fullMahaYears = VIMSHOTTARI_YEARS[maha.planet];
+  const startIdx = VIMSHOTTARI_SEQUENCE.indexOf(maha.planet);
+  const alreadyElapsed = maha.alreadyElapsedBefore || 0;
+  const antardashas = [];
+  let virtualCursor = 0;
+  let realCursor = new Date(maha.start.getTime());
+  for (let i=0; i<9; i++){
+    const planet = VIMSHOTTARI_SEQUENCE[(startIdx+i)%9];
+    const adFullYears = (fullMahaYears * VIMSHOTTARI_YEARS[planet]) / 120;
+    const virtualStart = virtualCursor;
+    const virtualEnd = virtualCursor + adFullYears;
+    virtualCursor = virtualEnd;
+    if (virtualEnd <= alreadyElapsed) continue;
+    const visibleYears = virtualEnd - Math.max(virtualStart, alreadyElapsed);
+    const start = new Date(realCursor.getTime());
+    const end = addYears(start, visibleYears);
+    antardashas.push({ planet, start, end, years: visibleYears });
+    realCursor = end;
+  }
+  return antardashas;
+}
+
+function fmtDashaDate(d){ return d.toLocaleDateString('en-IN',{year:'numeric',month:'short',day:'2-digit'}); }
+
+function renderDashaTable(referenceDate, moonLongitude){
+  const now = new Date();
+  const mahadashas = computeMahadashas(moonLongitude, referenceDate);
+  el('dashaTable').innerHTML = mahadashas.map((m, idx)=>{
+    const isCurrent = now>=m.start && now<m.end;
+    const rowId = 'dasha-row-'+idx;
+    return `<div class="dasha-row ${isCurrent?'current':''}" id="${rowId}">
+      <div class="dasha-row-head">
+        <div class="dasha-planet">${m.planet}${isCurrent?'<span class="now-tag">NOW</span>':''}</div>
+        <div class="dasha-range">${fmtDashaDate(m.start)} – ${fmtDashaDate(m.end)}<span class="dasha-chevron">▾</span></div>
+      </div>
+      <div class="antardasha-wrap"><div class="antardasha-list" data-idx="${idx}"></div></div>
+    </div>`;
+  }).join('');
+
+  mahadashas.forEach((m, idx)=>{
+    const row = document.getElementById('dasha-row-'+idx);
+    const head = row.querySelector('.dasha-row-head');
+    const listEl = row.querySelector('.antardasha-list');
+    let built = false;
+    head.addEventListener('click', ()=>{
+      const opening = !row.classList.contains('open');
+      row.classList.toggle('open');
+      if (opening && !built){
+        const antardashas = computeAntardashas(m);
+        listEl.innerHTML = antardashas.map(a=>{
+          const adCurrent = now>=a.start && now<a.end;
+          return `<div class="antardasha-item ${adCurrent?'current':''}">
+            <div class="ad-name">${a.planet}${adCurrent?'<span class="now-tag">NOW</span>':''}</div>
+            <div>${fmtDashaDate(a.start)} – ${fmtDashaDate(a.end)}</div>
+          </div>`;
+        }).join('');
+        built = true;
+      }
+    });
+    if (isCurrentRow(m, now)) head.click();
+  });
+}
+function isCurrentRow(m, now){ return now>=m.start && now<m.end; }
 
 /* Yoni (instinctive-nature animal symbol per nakshatra) — source: classical 14-animal Ashtakoot table */
 const YONI_TABLE = [
@@ -680,6 +811,7 @@ function renderDailyResult(){
   renderChart(vdata);
   renderTable(vdata);
   renderSummary(dailyBaseData, vdata, "");
+  renderDashaTable(selectedDateTime, dailyBaseData.planets.find(p=>p.name==="Moon").longitude);
 }
 
 function renderVargaSelector(){
@@ -712,6 +844,7 @@ function renderBirthResult(){
   renderBirthChartAndTable();
   const d1 = applyVarga(birthBaseData, 1);
   renderSummary(birthBaseData, d1, "Birth ");
+  renderDashaTable(birthDateTime, birthBaseData.planets.find(p=>p.name==="Moon").longitude);
 }
 
 /* Single entry point for every recalculation trigger. Always builds a fresh Julian Day

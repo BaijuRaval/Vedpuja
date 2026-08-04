@@ -1444,13 +1444,16 @@ async function watchGeolocationAvailability(){
 
 /* ===================== PDF EXPORT ===================== */
 /* Builds a proper structured PDF (native text tables, not a page screenshot),
-   loading jsPDF + jsPDF-AutoTable + html2canvas from CDN on first use. Each
-   chart gets its own image (captured tightly from just the SVG, not the whole
-   page) followed by ITS OWN Planetary Positions / Planet Aspects / House
-   Aspects tables. In Birth mode, every divisional chart (D1 through D60) gets
-   this treatment, each starting on a fresh page. Requires an internet
-   connection since this page is statically hosted (GitHub Pages) and these
-   libraries aren't bundled locally, unlike the self-hosted Swiss Ephemeris. */
+   loading jsPDF + jsPDF-AutoTable from CDN on first use. The North Indian chart
+   is drawn natively with jsPDF's own line/text primitives (same geometry as the
+   on-screen SVG), not captured via html2canvas — SVG rasterization was fragile
+   (raw <svg> with no explicit width/height, CSS custom properties for colors)
+   and was the actual cause of PDF generation failing. Each chart is followed by
+   ITS OWN Planetary Positions / Planet Aspects / House Aspects tables. In Birth
+   mode, every divisional chart (D1 through D60) gets this treatment, each
+   starting on a fresh page. Still requires an internet connection for jsPDF
+   itself, since this page is statically hosted (GitHub Pages) and that library
+   isn't bundled locally, unlike the self-hosted Swiss Ephemeris. */
 
 function loadScriptOnce(src){
   return new Promise((resolve, reject)=>{
@@ -1464,10 +1467,7 @@ let pdfLibsPromise = null;
 function ensurePdfLibs(){
   if (!pdfLibsPromise){
     pdfLibsPromise = (async ()=>{
-      await Promise.all([
-        loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
-        loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
-      ]);
+      await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
       await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
     })();
   }
@@ -1538,15 +1538,44 @@ async function downloadPdf(){
         headStyles:{fillColor:GOLD_RGB, textColor:DARK_RGB, fontSize:(fontSize||7)}, theme:'grid' });
       cursorY = pdf.lastAutoTable.finalY + 8;
     };
-    const addChartImage = async (title, desc)=>{
+    const addChartVector = (vdata, title, desc)=>{
       addHeading(title, 12);
       if (desc) addSubtext(desc);
-      const canvas = await window.html2canvas(el('chartSvg'), { backgroundColor:'#150a24', scale:3 });
-      const imgData = canvas.toDataURL('image/png');
-      const imgSize = 78;
-      ensureSpace(imgSize + 6);
-      pdf.addImage(imgData, 'PNG', margin, cursorY, imgSize, imgSize);
-      cursorY += imgSize + 8;
+      const boxSize = 78;
+      ensureSpace(boxSize + 6);
+      const bx = margin, by = cursorY;
+      const scale = boxSize / 400;
+      const mapX = x => bx + x*scale;
+      const mapY = y => by + y*scale;
+
+      pdf.setDrawColor(...GOLD_RGB); pdf.setLineWidth(0.15);
+      const chartLines = [
+        [0,0,400,0],[400,0,400,400],[400,400,0,400],[0,400,0,0],
+        [0,0,400,400],[400,0,0,400],
+        [200,0,400,200],[400,200,200,400],[200,400,0,200],[0,200,200,0]
+      ];
+      chartLines.forEach(([x1,y1,x2,y2])=> pdf.line(mapX(x1),mapY(y1),mapX(x2),mapY(y2)));
+
+      const ascRashi = vdata.ascendant.vargaRashi;
+      const byHouse = {}; for(let h=1;h<=12;h++) byHouse[h]=[];
+      vdata.planets.forEach(p=> byHouse[p.house].push(p));
+      byHouse[1].unshift(vdata.ascendant);
+
+      pdf.setFontSize(7);
+      for(let h=1;h<=12;h++){
+        const rashiNum = ((ascRashi+h-1)%12)+1;
+        const [cx,cy] = HOUSE_POS[h];
+        pdf.setFont(undefined,'bold'); pdf.setTextColor(...GOLD_RGB);
+        pdf.text(String(rashiNum), mapX(cx), mapY(cy-16), {align:'center'});
+        pdf.setFont(undefined,'normal');
+        byHouse[h].forEach((p,i)=>{
+          const label = CHART_ABBR[p.name] + (p.retro ? "(R)" : "");
+          pdf.setTextColor(...(p.retro ? [200,60,60] : [0,0,0]));
+          pdf.text(label, mapX(cx), mapY(cy+i*15), {align:'center'});
+        });
+      }
+      pdf.setTextColor(0,0,0);
+      cursorY = by + boxSize + 8;
     };
     const addDashaTable = (refDate, moonLon)=>{
       const mahadashas = computeMahadashas(moonLon, refDate);
@@ -1581,7 +1610,7 @@ async function downloadPdf(){
       pdf.addPage(); cursorY = margin;
       const vdata = applyVarga(dailyBaseData, 1);
       renderChart(vdata); renderTable(vdata); renderPlanetAspects(vdata); renderHouseAspects(vdata);
-      await addChartImage('North Indian Kundali (D1)', VARGA_DESCRIPTIONS[1]);
+      addChartVector(vdata, 'North Indian Kundali (D1)', VARGA_DESCRIPTIONS[1]);
       addHtmlTable('Planetary Positions', '#planetTable', 6.5);
       addHtmlTable('Planet Aspects', '#planetAspectsTable', 7.5);
       addHtmlTable('House Aspects', '#houseAspectsTable', 7.5);
@@ -1591,7 +1620,7 @@ async function downloadPdf(){
         pdf.addPage(); cursorY = margin;
         const vdata = applyVarga(birthBaseData, v.n);
         renderChart(vdata); renderTable(vdata); renderPlanetAspects(vdata); renderHouseAspects(vdata);
-        await addChartImage('North Indian Kundali (' + v.full + ')', VARGA_DESCRIPTIONS[v.n]);
+        addChartVector(vdata, 'North Indian Kundali (' + v.full + ')', VARGA_DESCRIPTIONS[v.n]);
         addHtmlTable('Planetary Positions', '#planetTable', 6.5);
         addHtmlTable('Planet Aspects', '#planetAspectsTable', 7.5);
         addHtmlTable('House Aspects', '#houseAspectsTable', 7.5);
@@ -1603,7 +1632,7 @@ async function downloadPdf(){
     pdf.save('Kundali-' + (currentMode==='birth'?'Birth':'Daily') + '-' + dateToInputValue(refDate) + '.pdf');
   }catch(err){
     console.error(err);
-    alert('Could not generate the PDF. Please check your internet connection (the PDF engine loads from a CDN) and try again.');
+    alert('Could not generate the PDF.\n\nReason: ' + (err && err.message ? err.message : err) + '\n\nThis usually means either your connection to the CDN (cdnjs.cloudflare.com) failed, or a browser popup/download blocker stopped the file from saving. Check the browser console for full details.');
   }finally{
     hideLoader(); setControlsDisabled(false);
     loaderText.textContent = 'Calculating Kundali...';

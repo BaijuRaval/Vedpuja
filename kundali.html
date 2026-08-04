@@ -1443,12 +1443,14 @@ async function watchGeolocationAvailability(){
 }
 
 /* ===================== PDF EXPORT ===================== */
-/* Loads html2canvas + jsPDF from CDN on demand (only when the button is first
-   clicked), captures a de-scrolled clone of the current results (so wide,
-   horizontally-scrollable tables render in full rather than being clipped),
-   and assembles a multi-page A4 PDF from the resulting image. Requires an
-   internet connection since this page is statically hosted (GitHub Pages) and
-   these libraries aren't bundled locally, unlike the self-hosted Swiss Ephemeris. */
+/* Builds a proper structured PDF (native text tables, not a page screenshot),
+   loading jsPDF + jsPDF-AutoTable + html2canvas from CDN on first use. Each
+   chart gets its own image (captured tightly from just the SVG, not the whole
+   page) followed by ITS OWN Planetary Positions / Planet Aspects / House
+   Aspects tables. In Birth mode, every divisional chart (D1 through D60) gets
+   this treatment, each starting on a fresh page. Requires an internet
+   connection since this page is statically hosted (GitHub Pages) and these
+   libraries aren't bundled locally, unlike the self-hosted Swiss Ephemeris. */
 
 function loadScriptOnce(src){
   return new Promise((resolve, reject)=>{
@@ -1461,12 +1463,35 @@ function loadScriptOnce(src){
 let pdfLibsPromise = null;
 function ensurePdfLibs(){
   if (!pdfLibsPromise){
-    pdfLibsPromise = Promise.all([
-      loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
-      loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
-    ]);
+    pdfLibsPromise = (async ()=>{
+      await Promise.all([
+        loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'),
+        loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js')
+      ]);
+      await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
+    })();
   }
   return pdfLibsPromise;
+}
+
+const GOLD_RGB = [230,180,90], DARK_RGB = [40,25,10], MUTED_RGB = [110,110,110];
+
+function pdfBasicInfoPairs(){
+  return [
+    ['Date', el('biDate').textContent], ['Time', el('biTime').textContent],
+    ['Weekday', el('biWeekday').textContent], ['Location', el('biLocation').textContent],
+    ['Time Zone', el('biTz').textContent], ['Latitude', el('biLat').textContent], ['Longitude', el('biLon').textContent]
+  ];
+}
+function pdfSummaryPairs(){
+  return [
+    ['Ascendant', el('sumAsc').textContent], ['Ascendant Lord', el('sumAscLord').textContent],
+    ['Moon Sign', el('sumMoonSign').textContent], ['Sun Sign', el('sumSunSign').textContent],
+    [el('sumNakLabel').textContent, el('sumNak').textContent], [el('sumPadaLabel').textContent, el('sumPada').textContent],
+    ['Varna', el('sumVarna').textContent], ['Vashya', el('sumVashya').textContent], ['Yoni', el('sumYoni').textContent],
+    ['Gana', el('sumGana').textContent], ['Nadi', el('sumNadi').textContent], ['Moon Sign Lord', el('sumMoonLord').textContent],
+    ['Tatva (Element)', el('sumTatva').textContent], ['Name Alphabet', el('sumNameAlpha').textContent], ['Paya', el('sumPaya').textContent]
+  ];
 }
 
 async function downloadPdf(){
@@ -1478,59 +1503,108 @@ async function downloadPdf(){
   showLoader(); setControlsDisabled(true);
   await nextFrame();
 
-  let clone = null;
   try{
     await ensurePdfLibs();
-    loaderSub.textContent = 'Rendering charts & tables...';
-    await nextFrame();
-
-    const source = el('resultContainer');
-    clone = source.cloneNode(true);
-    clone.removeAttribute('style');
-    clone.style.position = 'fixed';
-    clone.style.top = '0';
-    clone.style.left = '-99999px';
-    clone.style.display = 'block';
-    clone.style.width = '560px';
-    const bg = getComputedStyle(document.body).backgroundColor || '#0b0514';
-    clone.style.background = bg;
-    clone.style.padding = '14px 12px';
-
-    const changeLocBtn = clone.querySelector('#changeLocBtn');
-    if (changeLocBtn && changeLocBtn.closest('.info-item')) changeLocBtn.closest('.info-item').remove();
-    clone.querySelectorAll('.table-scroll').forEach(t=>{ t.style.overflow = 'visible'; });
-    clone.querySelectorAll('table.ptable').forEach(t=>{ t.style.width = 'max-content'; });
-
-    document.body.appendChild(clone);
-    await nextFrame();
-
-    const canvas = await window.html2canvas(clone, { backgroundColor: bg, scale: 2, useCORS: true, windowWidth: clone.scrollWidth });
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF('p', 'mm', 'a4');
+    const margin = 12;
     const pageWidth = pdf.internal.pageSize.getWidth();
     const pageHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = pageWidth;
-    const imgHeight = canvas.height * imgWidth / canvas.width;
-    const imgData = canvas.toDataURL('image/png');
+    let cursorY = margin;
 
-    let heightLeft = imgHeight, position = 0;
-    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
-    while (heightLeft > 0){
-      position = heightLeft - imgHeight;
-      pdf.addPage();
-      pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+    const ensureSpace = (neededMM)=>{ if (cursorY + neededMM > pageHeight - margin){ pdf.addPage(); cursorY = margin; } };
+    const addHeading = (text, size)=>{
+      ensureSpace(9);
+      pdf.setFont(undefined,'bold'); pdf.setFontSize(size||13); pdf.setTextColor(...DARK_RGB);
+      pdf.text(text, margin, cursorY); cursorY += size>=16 ? 7 : 6;
+      pdf.setFont(undefined,'normal');
+    };
+    const addSubtext = (text)=>{
+      ensureSpace(6);
+      pdf.setFontSize(9); pdf.setTextColor(...MUTED_RGB);
+      pdf.text(text, margin, cursorY); cursorY += 6;
+      pdf.setTextColor(0,0,0);
+    };
+    const addKvTable = (title, pairs)=>{
+      addHeading(title, 12);
+      pdf.autoTable({ startY: cursorY, margin:{left:margin,right:margin}, body: pairs,
+        styles:{fontSize:8.5, cellPadding:2}, headStyles:{fillColor:GOLD_RGB, textColor:DARK_RGB}, theme:'grid' });
+      cursorY = pdf.lastAutoTable.finalY + 8;
+    };
+    const addHtmlTable = (title, selector, fontSize)=>{
+      addHeading(title, 12);
+      pdf.autoTable({ html: selector, startY: cursorY, margin:{left:margin,right:margin},
+        styles:{fontSize: fontSize||7, cellPadding:1.3, overflow:'linebreak'},
+        headStyles:{fillColor:GOLD_RGB, textColor:DARK_RGB, fontSize:(fontSize||7)}, theme:'grid' });
+      cursorY = pdf.lastAutoTable.finalY + 8;
+    };
+    const addChartImage = async (title, desc)=>{
+      addHeading(title, 12);
+      if (desc) addSubtext(desc);
+      const canvas = await window.html2canvas(el('chartSvg'), { backgroundColor:'#150a24', scale:3 });
+      const imgData = canvas.toDataURL('image/png');
+      const imgSize = 78;
+      ensureSpace(imgSize + 6);
+      pdf.addImage(imgData, 'PNG', margin, cursorY, imgSize, imgSize);
+      cursorY += imgSize + 8;
+    };
+    const addDashaTable = (refDate, moonLon)=>{
+      const mahadashas = computeMahadashas(moonLon, refDate);
+      const body = mahadashas.map(m=>[m.planet, fmtDashaDate(m.start), fmtDashaDate(m.end)]);
+      addHeading('Vimshottari Mahadasha', 12);
+      pdf.autoTable({ startY: cursorY, margin:{left:margin,right:margin}, head:[['Planet','Start','End']], body,
+        styles:{fontSize:8.5, cellPadding:2}, headStyles:{fillColor:GOLD_RGB, textColor:DARK_RGB}, theme:'grid' });
+      cursorY = pdf.lastAutoTable.finalY + 8;
+    };
+
+    // ---- Title ----
+    pdf.setFont(undefined,'bold'); pdf.setFontSize(19); pdf.setTextColor(...DARK_RGB);
+    pdf.text('Kundali Report', margin, cursorY); cursorY += 7;
+    pdf.setFont(undefined,'normal'); pdf.setFontSize(9); pdf.setTextColor(...MUTED_RGB);
+    const modeLabel = currentMode === 'birth' ? 'Birth Kundali' : 'Daily Kundali';
+    pdf.text(modeLabel + ' \u00b7 Generated ' + new Date().toLocaleString(), margin, cursorY); cursorY += 9;
+    pdf.setTextColor(0,0,0);
+
+    // ---- Shared, mode-level data (not varga-specific) ----
+    addKvTable('Basic Information', pdfBasicInfoPairs());
+    addKvTable(modeLabel + ' Summary', pdfSummaryPairs());
+    addHtmlTable('Shadbala (Rashi / D1)', '#shadbalaTable', 6);
+    addHtmlTable('Bhavabala (Rashi / D1)', '#bhavabalaTable', 7);
+    if (currentMode === 'daily'){
+      addDashaTable(selectedDateTime, dailyBaseData.planets.find(p=>p.name==="Moon").longitude);
+    } else {
+      addDashaTable(birthDateTime, birthBaseData.planets.find(p=>p.name==="Moon").longitude);
     }
 
-    const modeLabel = currentMode === 'birth' ? 'Birth' : 'Daily';
+    // ---- Per-chart sections ----
+    if (currentMode === 'daily'){
+      pdf.addPage(); cursorY = margin;
+      const vdata = applyVarga(dailyBaseData, 1);
+      renderChart(vdata); renderTable(vdata); renderPlanetAspects(vdata); renderHouseAspects(vdata);
+      await addChartImage('North Indian Kundali (D1)', VARGA_DESCRIPTIONS[1]);
+      addHtmlTable('Planetary Positions', '#planetTable', 6.5);
+      addHtmlTable('Planet Aspects', '#planetAspectsTable', 7.5);
+      addHtmlTable('House Aspects', '#houseAspectsTable', 7.5);
+      renderDailyResult(); // restore live view
+    } else {
+      for (const v of VARGA_LIST){
+        pdf.addPage(); cursorY = margin;
+        const vdata = applyVarga(birthBaseData, v.n);
+        renderChart(vdata); renderTable(vdata); renderPlanetAspects(vdata); renderHouseAspects(vdata);
+        await addChartImage('North Indian Kundali (' + v.full + ')', VARGA_DESCRIPTIONS[v.n]);
+        addHtmlTable('Planetary Positions', '#planetTable', 6.5);
+        addHtmlTable('Planet Aspects', '#planetAspectsTable', 7.5);
+        addHtmlTable('House Aspects', '#houseAspectsTable', 7.5);
+      }
+      renderBirthChartAndTable(); // restore live view to whichever varga was selected
+    }
+
     const refDate = currentMode === 'birth' ? birthDateTime : selectedDateTime;
-    pdf.save('Kundali-' + modeLabel + '-' + dateToInputValue(refDate) + '.pdf');
+    pdf.save('Kundali-' + (currentMode==='birth'?'Birth':'Daily') + '-' + dateToInputValue(refDate) + '.pdf');
   }catch(err){
     console.error(err);
     alert('Could not generate the PDF. Please check your internet connection (the PDF engine loads from a CDN) and try again.');
   }finally{
-    if (clone) clone.remove();
     hideLoader(); setControlsDisabled(false);
     loaderText.textContent = 'Calculating Kundali...';
     loaderSub.textContent = 'Computing planetary positions...';

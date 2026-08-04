@@ -1579,10 +1579,29 @@ async function downloadPdf(){
     };
     const addDashaTable = (refDate, moonLon)=>{
       const mahadashas = computeMahadashas(moonLon, refDate);
-      const body = mahadashas.map(m=>[m.planet, fmtDashaDate(m.start), fmtDashaDate(m.end)]);
-      addHeading('Vimshottari Mahadasha', 12);
+      const body = [];
+      const headerRowIndices = new Set();
+      mahadashas.forEach(m=>{
+        headerRowIndices.add(body.length);
+        body.push([m.planet, fmtDashaDate(m.start), fmtDashaDate(m.end)]);
+        computeAntardashas(m).forEach(a=>{
+          body.push(['    ' + a.planet, fmtDashaDate(a.start), fmtDashaDate(a.end)]);
+        });
+      });
+      addHeading('Vimshottari Mahadasha & Antardasha', 12);
       pdf.autoTable({ startY: cursorY, margin:{left:margin,right:margin}, head:[['Planet','Start','End']], body,
-        styles:{fontSize:8.5, cellPadding:2}, headStyles:{fillColor:GOLD_RGB, textColor:DARK_RGB}, theme:'grid' });
+        styles:{fontSize:7.5, cellPadding:1.6}, headStyles:{fillColor:GOLD_RGB, textColor:DARK_RGB}, theme:'grid',
+        didParseCell: (data)=>{
+          if (data.section!=='body') return;
+          if (headerRowIndices.has(data.row.index)){
+            data.cell.styles.fontStyle = 'bold';
+            data.cell.styles.fillColor = [250,240,220];
+            data.cell.styles.textColor = DARK_RGB;
+          } else {
+            data.cell.styles.textColor = MUTED_RGB;
+          }
+        }
+      });
       cursorY = pdf.lastAutoTable.finalY + 8;
     };
 

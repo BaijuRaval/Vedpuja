@@ -519,15 +519,21 @@ const NADI_TABLE = [
   "Aadi","Madhya","Antya","Antya","Madhya","Aadi","Aadi","Madhya","Antya","Antya","Madhya","Aadi",
   "Aadi","Madhya","Antya"
 ];
-/* Naming syllable per nakshatra pada (108 total) — classical Namakarana table */
-const NAME_ALPHABET_TABLE = [
-  ["Chu","Che","Cho","La"],["Lee","Lu","Le","Lo"],["Aa","Ee","U","E"],["O","Va","Vi","Vu"],
-  ["Ve","Vo","Ka","Ke"],["Ku","Gha","Na","Chha"],["Ke","Ko","Ha","Hi"],["Hu","He","Ho","Da"],
-  ["Di","Du","De","Do"],["Ma","Mi","Mu","Me"],["Mo","Ta","Ti","Tu"],["Te","To","Pa","Pi"],
-  ["Pu","Sha","Na","Tha"],["Pe","Po","Ra","Re"],["Ru","Re","Ro","Ta"],["Ti","Te","Tu","To"],
-  ["Na","Ni","Nu","Ne"],["No","Ya","Yi","Yu"],["Ye","Yo","Ba","Bi"],["Bu","Dha","Bha","Pha"],
-  ["Bhe","Bho","Ja","Ji"],["Khi","Khu","Khe","Kho"],["Ga","Gi","Gu","Ge"],["Go","Sa","Si","Su"],
-  ["Se","So","Da","Di"],["Du","Tha","Jha","Na"],["De","Do","Cha","Chi"]
+/* Naming starting-letters per Moon Rashi — commonly used simplified naming convention
+   (distinct from, and simpler than, the Nakshatra-Pada based Namakarana system) */
+const NAME_ALPHABET_BY_RASHI = [
+  "A, L, E/I",          // Mesha (Aries)
+  "B, V, U",            // Vrishabha (Taurus)
+  "K, Chh, Gh",         // Mithuna (Gemini)
+  "D, H",               // Karka (Cancer)
+  "M, T",               // Simha (Leo)
+  "P, Th, N",           // Kanya (Virgo)
+  "R, T",               // Tula (Libra)
+  "N, Y",               // Vrishchika (Scorpio)
+  "Bh, Dh, Ph/F, Dhh",  // Dhanu (Sagittarius)
+  "Kh, J, G",           // Makara (Capricorn)
+  "G, S, Sh",           // Kumbha (Aquarius)
+  "D, Ch, Jh, Th"       // Meena (Pisces)
 ];
 /* Varna — from Moon rashi's element (classical caste-like classification) */
 function getVarna(rashiIdx){
@@ -1156,7 +1162,7 @@ function renderSummary(base, vdata, labelPrefix){
   el('sumNadi').textContent = NADI_TABLE[moonBase.nak];
   el('sumMoonLord').textContent = RASHI[moonBase.rashi][1];
   el('sumTatva').textContent = getTatva(moonBase.rashi);
-  el('sumNameAlpha').textContent = NAME_ALPHABET_TABLE[moonBase.nak][moonBase.pada-1];
+  el('sumNameAlpha').textContent = NAME_ALPHABET_BY_RASHI[moonBase.rashi];
   el('sumPaya').textContent = getPaya(moonVarga.house);
 }
 

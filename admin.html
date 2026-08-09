@@ -188,16 +188,9 @@
         color: var(--on-surface); letter-spacing: 0.5px; word-break: break-all;
     }
 
-    .status-badge {
-        font-size: 9px; font-weight: 800; padding: 4px 10px; border-radius: 12px;
-        text-transform: uppercase; letter-spacing: 0.5px; display: inline-flex;
-        align-items: center; gap: 4px; white-space: nowrap; flex-shrink: 0;
-    }
-    .status-badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
-
-    .status-badge.available { background-color: var(--success-container); color: var(--on-success-container); }
-    .status-badge.used { background-color: var(--primary-container); color: var(--on-primary-container); }
-    .status-badge.expired { background-color: var(--danger-container); color: var(--on-danger-container); }
+    .key-card.available { background-color: var(--success-container); }
+    .key-card.used { background-color: var(--warning-container); }
+    .key-card.expired { background-color: var(--danger-container); }
 
     .key-meta { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
 
@@ -208,16 +201,17 @@
     .key-meta-row .material-icons-round { font-size: 13px; }
 
     .key-card-actions {
-        display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;
+        display: flex; flex-wrap: wrap; justify-content: flex-start; gap: 8px; margin-top: 12px;
         padding-top: 12px; border-top: 1px solid #F5F5EE;
     }
 
     .btn-action {
-        display: inline-flex; align-items: center; gap: 4px; padding: 8px 12px;
+        display: inline-flex; align-items: center; justify-content: center; gap: 4px; padding: 8px 10px;
         border-radius: 12px; font-size: 11px; font-weight: 700; border: none;
         cursor: pointer; transition: var(--transition-smooth);
+        flex: 1 1 calc(50% - 4px); min-width: 0; white-space: nowrap;
     }
-    .btn-action .material-icons-round { font-size: 14px; }
+    .btn-action .material-icons-round { font-size: 14px; flex-shrink: 0; }
     .btn-action:active { transform: scale(0.95); }
 
     .btn-copy { background-color: #F5F5EE; color: var(--on-surface-variant); }
@@ -237,6 +231,9 @@
 
     .btn-reset { background-color: var(--warning-container); color: var(--on-warning-container); }
     .btn-reset:active { background-color: #F3DCB0; }
+
+    .btn-delete { background-color: var(--danger); color: #fff; }
+    .btn-delete:active { background-color: #8C2E24; }
 
     .btn-action:disabled { opacity: 0.5; cursor: default; }
 
@@ -437,6 +434,19 @@
         </div>
     </div>
 
+    <!-- Delete Modal -->
+    <div id="delete-modal" class="app-modal-overlay hidden">
+        <div class="app-modal-card">
+            <div class="app-modal-icon-wrap danger"><span class="material-icons-round">delete</span></div>
+            <h3 class="app-modal-title">Delete This Key?</h3>
+            <p class="app-modal-message" id="delete-modal-key">This permanently removes the key from the database. This cannot be undone.</p>
+            <div class="app-modal-actions">
+                <button class="app-modal-btn app-modal-btn-cancel" onclick="closeDeleteModal()">Cancel</button>
+                <button class="app-modal-btn app-modal-btn-confirm danger" onclick="confirmDelete()">Delete</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast">
         <span class="material-icons-round">check_circle</span>
         <span id="toast-text">Copied</span>
@@ -447,7 +457,7 @@
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-app.js";
 import {
-    getFirestore, doc, setDoc, getDocs, collection, Timestamp, deleteField
+    getFirestore, doc, setDoc, getDocs, collection, Timestamp, deleteField, deleteDoc
 } from "https://www.gstatic.com/firebasejs/12.16.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -581,10 +591,9 @@ window.renderKeys = function () {
         const isExpired = k.status === 'expired';
 
         return `
-        <div class="key-card fade-in">
+        <div class="key-card fade-in ${k.status}">
             <div class="key-card-header">
                 <div class="key-value">${k.key}</div>
-                <span class="status-badge ${k.status}">${k.status}</span>
             </div>
             ${k.name ? `<div class="key-meta-row" style="font-weight:700; color:var(--on-surface); margin-bottom:2px;"><span class="material-icons-round">badge</span>${k.name}</div>` : ''}
             <div class="key-meta">
@@ -616,6 +625,9 @@ window.renderKeys = function () {
                 <button class="btn-action btn-reset" onclick="openResetModal('${k.key}')">
                     <span class="material-icons-round">restart_alt</span>Reset
                 </button>` : ''}`}
+                <button class="btn-action btn-delete" onclick="openDeleteModal('${k.key}')">
+                    <span class="material-icons-round">delete</span>Delete
+                </button>
             </div>
         </div>`;
     }).join('');
@@ -739,6 +751,25 @@ window.confirmReset = async function () {
     showToast('Key reset to available');
     loadKeys();
 };
+window.openDeleteModal = function (key) {
+    pendingKey = key;
+    document.getElementById('delete-modal-key').textContent = `This permanently removes ${key} from the database. This cannot be undone.`;
+    document.getElementById('delete-modal').classList.remove('hidden');
+};
+
+window.closeDeleteModal = function () {
+    pendingKey = null;
+    document.getElementById('delete-modal').classList.add('hidden');
+};
+
+window.confirmDelete = async function () {
+    if (!pendingKey) return;
+    await deleteDoc(doc(db, "licenses", pendingKey));
+    closeDeleteModal();
+    showToast('Key deleted');
+    loadKeys();
+};
+
 window.openReactivateModal = function (key) {
     pendingKey = key;
     document.getElementById('reactivate-modal-key').textContent = `This clears the scheduled expiry date on ${key} and sets its status back to used.`;

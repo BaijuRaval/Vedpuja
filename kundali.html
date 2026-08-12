@@ -294,6 +294,7 @@
       cursor: pointer;
       text-decoration: none;
       flex-shrink: 0;
+      user-select: none;
     }
 
     /* ---------- Basic Info & Summary Responsive Grid ---------- */
@@ -498,21 +499,34 @@
       margin-top: 6px;
     }
 
-    /* ---------- Planetary Positions List ---------- */
+    /* ---------- Planetary Positions List & Expandable Accordion Drawer ---------- */
     .planet-list {
       display: flex;
       flex-direction: column;
       gap: 8px;
     }
 
+    .planet-item-group {
+      background: var(--card-bg-sub);
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      border: 1px solid transparent;
+      transition: border-color 0.2s ease;
+    }
+
+    .planet-item-group.open {
+      border-color: var(--primary-purple);
+      box-shadow: 0 4px 14px rgba(108, 92, 231, 0.08);
+    }
+
     .planet-row {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      background: var(--card-bg-sub);
-      border-radius: var(--radius-md);
-      padding: 10px 12px;
+      padding: 11px 12px;
       gap: 6px;
+      cursor: pointer;
+      user-select: none;
     }
 
     .planet-left {
@@ -581,6 +595,52 @@
       font-size: 14px;
       font-weight: 800;
       margin-left: 2px;
+      transition: transform 0.25s ease;
+    }
+
+    .planet-item-group.open .chevron {
+      transform: rotate(90deg);
+      color: var(--primary-purple);
+    }
+
+    /* Expandable Detail Drawer Content */
+    .planet-drawer {
+      display: none;
+      padding: 0 12px 12px 12px;
+      border-top: 1px dashed rgba(108, 92, 231, 0.15);
+      background: #FAF9FE;
+    }
+
+    .planet-item-group.open .planet-drawer {
+      display: block;
+    }
+
+    .drawer-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .drawer-cell {
+      background: #FFFFFF;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid rgba(108, 92, 231, 0.08);
+    }
+
+    .drawer-lbl {
+      font-size: 9.5px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-transform: uppercase;
+    }
+
+    .drawer-val {
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-top: 2px;
     }
 
     /* ---------- House Aspects Pill Selector & Details ---------- */
@@ -692,7 +752,7 @@
       color: var(--text-sub);
     }
 
-    /* ---------- Dashas List ---------- */
+    /* ---------- Dashas List & Expandable Antardashas ---------- */
     .dasha-list-item {
       background: var(--card-bg-sub);
       border-radius: var(--radius-md);
@@ -712,6 +772,7 @@
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
+      user-select: none;
     }
 
     .dasha-name-group {
@@ -735,6 +796,9 @@
       font-size: 11px;
       font-weight: 600;
       color: var(--text-sub);
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
 
     .dasha-progress {
@@ -749,6 +813,39 @@
       height: 100%;
       background: var(--primary-gradient);
       border-radius: 2px;
+    }
+
+    /* Expandable Antardasha List */
+    .antardasha-drawer {
+      display: none;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px dashed rgba(108, 92, 231, 0.15);
+    }
+
+    .dasha-list-item.open .antardasha-drawer {
+      display: block;
+    }
+
+    .antardasha-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 4px;
+      font-size: 11.5px;
+      border-bottom: 1px solid rgba(108, 92, 231, 0.05);
+    }
+
+    .antardasha-row:last-child {
+      border-bottom: none;
+    }
+
+    .ad-name {
+      font-weight: 700;
+      color: var(--text-dark);
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     /* ---------- Shadbala (Planet Strength) ---------- */
@@ -1180,7 +1277,7 @@
                   </svg></span>
                 <span id="summarySectionTitle">Daily Summary</span>
               </div>
-              <span class="sec-action">View all</span>
+              <span class="sec-action" id="summaryExpandBtn">Expand</span>
             </div>
             <div class="info-grid">
               <div class="info-item">
@@ -1266,6 +1363,33 @@
                 </div>
               </div>
             </div>
+            <!-- Expandable Extra Summary Grid -->
+            <div class="info-grid" id="extraSummaryGrid" style="display:none; margin-top:10px;">
+              <div class="info-item">
+                <div class="tile-content">
+                  <div class="ilabel">Gana</div>
+                  <div class="ival" id="sumGana">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-content">
+                  <div class="ilabel">Nadi</div>
+                  <div class="ival" id="sumNadi">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-content">
+                  <div class="ilabel">Tatva (Element)</div>
+                  <div class="ival" id="sumTatva">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-content">
+                  <div class="ilabel">Paya</div>
+                  <div class="ival" id="sumPaya">--</div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <!-- VARGA SELECTOR (Birth mode only) -->
@@ -1295,12 +1419,11 @@
                   </svg></span>
                 <span id="chartSectionTitle">North Indian Kundali (D1)</span>
               </div>
-              <span class="sec-action">View</span>
             </div>
             <div class="chart-wrap"><svg id="chartSvg" viewBox="0 0 400 400"></svg></div>
           </div>
 
-          <!-- PLANETARY POSITIONS -->
+          <!-- PLANETARY POSITIONS (EXPANDABLE ROWS) -->
           <div class="section">
             <div class="sec-header">
               <div class="sec-title-group">
@@ -1310,11 +1433,13 @@
                   </svg></span>
                 <span>Planetary Positions</span>
               </div>
-              <span class="sec-action" id="toggleTableBtn">View Table</span>
+              <span class="sec-action" id="toggleTableBtn">View Full Table</span>
             </div>
+            <div style="font-size:11.5px; color:var(--text-sub); margin-bottom:10px;">Tap any planet row to expand
+              complete astronomical details.</div>
             <div class="planet-list" id="planetList"></div>
 
-            <div class="table-scroll" id="planetTableWrap" style="display:none;">
+            <div class="table-scroll" id="planetTableWrap" style="display:none; margin-top:12px;">
               <table class="ptable" id="planetTable">
                 <thead>
                   <tr>
@@ -1333,7 +1458,7 @@
             </div>
           </div>
 
-          <!-- HOUSE ASPECTS (INTERACTIVE PILLS) -->
+          <!-- HOUSE ASPECTS (INTERACTIVE PILLS & EXPANDABLE MATRIX) -->
           <div class="section">
             <div class="sec-header">
               <div class="sec-title-group">
@@ -1343,7 +1468,7 @@
                   </svg></span>
                 <span>House Aspects</span>
               </div>
-              <span class="sec-action">View all</span>
+              <span class="sec-action" id="toggleHouseAspectsTableBtn">View All Houses</span>
             </div>
             <div class="house-pills-scroll" id="housePillsScroll"></div>
 
@@ -1357,9 +1482,24 @@
                 <div class="aspect-badges" id="houseAspectedByBadges"></div>
               </div>
             </div>
+
+            <!-- Expandable House Aspects Full Matrix Table -->
+            <div class="table-scroll" id="houseAspectsMatrixWrap" style="display:none; margin-top:12px;">
+              <table class="ptable">
+                <thead>
+                  <tr>
+                    <th>House</th>
+                    <th>Sign</th>
+                    <th>Planets Placed</th>
+                    <th>Aspected By</th>
+                  </tr>
+                </thead>
+                <tbody id="houseAspectsMatrixBody"></tbody>
+              </table>
+            </div>
           </div>
 
-          <!-- VIMSHOTTARI DASHAS -->
+          <!-- VIMSHOTTARI DASHAS (EXPANDABLE ANTARDASHAS) -->
           <div class="section">
             <div class="sec-header">
               <div class="sec-title-group">
@@ -1368,12 +1508,13 @@
                   </svg></span>
                 <span>Dashas (Vimshottari)</span>
               </div>
-              <span class="sec-action">View all</span>
             </div>
+            <div style="font-size:11.5px; color:var(--text-sub); margin-bottom:10px;">Tap any Mahadasha to expand its 9
+              Antardashas.</div>
             <div id="dashaList"></div>
           </div>
 
-          <!-- SHADBALA (PLANET STRENGTH) -->
+          <!-- SHADBALA (EXPANDABLE DETAILED TABLE) -->
           <div class="section">
             <div class="sec-header">
               <div class="sec-title-group">
@@ -1382,7 +1523,7 @@
                   </svg></span>
                 <span>Shadbala (Planet Strength)</span>
               </div>
-              <span class="sec-action">View all</span>
+              <span class="sec-action" id="toggleShadbalaTableBtn">View Full Table</span>
             </div>
 
             <div class="shadbala-container">
@@ -1406,6 +1547,32 @@
                   <div class="gauge-value" id="overallGaugeVal">62.4%</div>
                 </div>
               </div>
+            </div>
+
+            <!-- Expandable Shadbala Breakdown Table -->
+            <div class="table-scroll" id="shadbalaTableWrap" style="display:none; margin-top:12px;">
+              <table class="ptable">
+                <thead>
+                  <tr>
+                    <th>Planet</th>
+                    <th>Uccha</th>
+                    <th>Sapta</th>
+                    <th>Oja</th>
+                    <th>Kendra</th>
+                    <th>Drekkana</th>
+                    <th>Sthana</th>
+                    <th>Dig</th>
+                    <th>Kala</th>
+                    <th>Chesta</th>
+                    <th>Naisargika</th>
+                    <th>Drik</th>
+                    <th>Total Virupas</th>
+                    <th>Total Rupas</th>
+                    <th>Verdict</th>
+                  </tr>
+                </thead>
+                <tbody id="shadbalaTableBody"></tbody>
+              </table>
             </div>
           </div>
 
@@ -1439,9 +1606,9 @@
           </button>
 
           <div style="font-weight:800; font-size:13.5px; margin: 16px 0 8px 0; color:var(--text-dark);">Planetary
-            Metrics</div>
+            Positions Table</div>
           <div class="table-scroll">
-            <table class="ptable" id="reportsPlanetTable">
+            <table class="ptable">
               <thead>
                 <tr>
                   <th>Planet</th>
@@ -1455,6 +1622,48 @@
                 </tr>
               </thead>
               <tbody id="reportsPlanetBody"></tbody>
+            </table>
+          </div>
+
+          <div style="font-weight:800; font-size:13.5px; margin: 20px 0 8px 0; color:var(--text-dark);">Shadbala
+            Planetary Strength Table</div>
+          <div class="table-scroll">
+            <table class="ptable">
+              <thead>
+                <tr>
+                  <th>Planet</th>
+                  <th>Sthana</th>
+                  <th>Dig</th>
+                  <th>Kala</th>
+                  <th>Chesta</th>
+                  <th>Naisargika</th>
+                  <th>Drik</th>
+                  <th>Total Virupas</th>
+                  <th>Total Rupas</th>
+                  <th>Verdict</th>
+                </tr>
+              </thead>
+              <tbody id="reportsShadbalaBody"></tbody>
+            </table>
+          </div>
+
+          <div style="font-weight:800; font-size:13.5px; margin: 20px 0 8px 0; color:var(--text-dark);">Bhavabala House
+            Strength Table</div>
+          <div class="table-scroll">
+            <table class="ptable">
+              <thead>
+                <tr>
+                  <th>House</th>
+                  <th>Sign</th>
+                  <th>Lord</th>
+                  <th>Bhavadhipati</th>
+                  <th>Dig</th>
+                  <th>Drishti</th>
+                  <th>Total Virupas</th>
+                  <th>Total Rupas</th>
+                </tr>
+              </thead>
+              <tbody id="reportsBhavabalaBody"></tbody>
             </table>
           </div>
         </div>
@@ -1644,10 +1853,43 @@
       return mahadashas;
     }
 
+    function computeAntardashas(maha) {
+      const fullMahaYears = VIMSHOTTARI_YEARS[maha.planet];
+      const startIdx = VIMSHOTTARI_SEQUENCE.indexOf(maha.planet);
+      const alreadyElapsed = maha.alreadyElapsedBefore || 0;
+      const antardashas = [];
+      let virtualCursor = 0;
+      let realCursor = new Date(maha.start.getTime());
+      for (let i = 0; i < 9; i++) {
+        const planet = VIMSHOTTARI_SEQUENCE[(startIdx + i) % 9];
+        const adFullYears = (fullMahaYears * VIMSHOTTARI_YEARS[planet]) / 120;
+        const virtualStart = virtualCursor;
+        const virtualEnd = virtualCursor + adFullYears;
+        virtualCursor = virtualEnd;
+        if (virtualEnd <= alreadyElapsed) continue;
+        const visibleYears = virtualEnd - Math.max(virtualStart, alreadyElapsed);
+        const start = new Date(realCursor.getTime());
+        const end = addYears(start, visibleYears);
+        antardashas.push({ planet, start, end, years: visibleYears });
+        realCursor = end;
+      }
+      return antardashas;
+    }
+
     const YONI_TABLE = [
       "Horse", "Elephant", "Sheep/Goat", "Serpent", "Serpent", "Dog", "Cat", "Sheep/Goat", "Cat", "Rat", "Rat", "Cow",
       "Buffalo", "Tiger", "Buffalo", "Tiger", "Deer", "Deer", "Dog", "Monkey", "Mongoose", "Monkey", "Lion", "Horse",
       "Lion", "Cow", "Elephant"
+    ];
+    const GANA_TABLE = [
+      "Deva", "Manushya", "Rakshasa", "Manushya", "Deva", "Manushya", "Deva", "Deva", "Rakshasa", "Rakshasa", "Manushya", "Manushya",
+      "Deva", "Rakshasa", "Deva", "Rakshasa", "Deva", "Rakshasa", "Rakshasa", "Manushya", "Manushya", "Deva", "Rakshasa", "Rakshasa",
+      "Manushya", "Manushya", "Deva"
+    ];
+    const NADI_TABLE = [
+      "Aadi", "Madhya", "Antya", "Antya", "Madhya", "Aadi", "Aadi", "Madhya", "Antya", "Antya", "Madhya", "Aadi",
+      "Aadi", "Madhya", "Antya", "Antya", "Madhya", "Aadi", "Aadi", "Madhya", "Antya", "Antya", "Madhya", "Aadi",
+      "Aadi", "Madhya", "Antya"
     ];
 
     function signElement(idx) { return ['fire', 'earth', 'air', 'water'][idx % 4]; }
@@ -1657,6 +1899,15 @@
     function getVarna(rashiIdx) {
       const el = signElement(rashiIdx);
       return { fire: "Kshatriya", earth: "Vaishya", air: "Shudra", water: "Brahmin" }[el];
+    }
+    function getTatva(rashiIdx) {
+      return { fire: "Agni (Fire)", earth: "Prithvi (Earth)", air: "Vayu (Air)", water: "Jal (Water)" }[signElement(rashiIdx)];
+    }
+    function getPaya(moonHouse) {
+      if ([1, 6, 11].includes(moonHouse)) return "Gold";
+      if ([2, 5, 9].includes(moonHouse)) return "Silver";
+      if ([3, 7, 10].includes(moonHouse)) return "Copper";
+      return "Iron";
     }
 
     /* Divisional Chart rules */
@@ -1824,7 +2075,7 @@
     };
     function aspectHouse(fromHouse, aspectNum) { return ((fromHouse - 1 + (aspectNum - 1)) % 12) + 1; }
 
-    /* Render Planet Positions List & Full Table */
+    /* Render Planet Positions List & Expandable Accordion Drawers */
     function renderPlanetPositions(vdata) {
       const order = ["Ascendant", "Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"];
       const listEl = el('planetList');
@@ -1833,24 +2084,69 @@
 
       const orderedPlanets = order.map(name => name === "Ascendant" ? vdata.ascendant : vdata.planets.find(p => p.name === name));
 
-      listEl.innerHTML = orderedPlanets.map(p => {
+      listEl.innerHTML = orderedPlanets.map((p, idx) => {
         const rashi = RASHI[p.vargaRashi][0];
+        const signLord = RASHI[p.vargaRashi][1];
         const initial = p.name.substring(0, 2);
+        const nakLord = p.name === "Ascendant" ? "—" : nakshatraLord(p.nak);
+        const motionStr = p.retro === null ? "—" : (p.retro ? "Retrograde" : "Direct");
+        const combustStr = p.combust === null ? "—" : (p.combust ? "Yes" : "No");
+
         return `
-      <div class="planet-row">
-        <div class="planet-left">
-          <div class="planet-icon">${initial}</div>
-          <div class="planet-name">${p.name}</div>
+      <div class="planet-item-group" id="planet-group-${idx}">
+        <div class="planet-row">
+          <div class="planet-left">
+            <div class="planet-icon">${initial}</div>
+            <div class="planet-name">${p.name}</div>
+          </div>
+          <div class="planet-right">
+            <div class="planet-house-badge">H${p.house}</div>
+            <div class="planet-rashi">${rashi}</div>
+            <div class="planet-deg">${fmtDeg(p.longitude)}</div>
+            <div class="chevron">›</div>
+          </div>
         </div>
-        <div class="planet-right">
-          <div class="planet-house-badge">H${p.house}</div>
-          <div class="planet-rashi">${rashi}</div>
-          <div class="planet-deg">${fmtDeg(p.longitude)}</div>
-          <div class="chevron">›</div>
+        <div class="planet-drawer">
+          <div class="drawer-grid">
+            <div class="drawer-cell">
+              <div class="drawer-lbl">Nakshatra</div>
+              <div class="drawer-val">${NAKSHATRAS[p.nak]} (Pada ${p.pada})</div>
+            </div>
+            <div class="drawer-cell">
+              <div class="drawer-lbl">Nakshatra Lord</div>
+              <div class="drawer-val">${nakLord}</div>
+            </div>
+            <div class="drawer-cell">
+              <div class="drawer-lbl">Sign Lord</div>
+              <div class="drawer-val">${signLord}</div>
+            </div>
+            <div class="drawer-cell">
+              <div class="drawer-lbl">Motion</div>
+              <div class="drawer-val">${motionStr}</div>
+            </div>
+            <div class="drawer-cell">
+              <div class="drawer-lbl">Combustion</div>
+              <div class="drawer-val">${combustStr}</div>
+            </div>
+            <div class="drawer-cell">
+              <div class="drawer-lbl">Exact Longitude</div>
+              <div class="drawer-val">${p.longitude.toFixed(2)}°</div>
+            </div>
+          </div>
         </div>
       </div>
     `;
       }).join('');
+
+      // Add click handlers for expandable rows
+      orderedPlanets.forEach((_, idx) => {
+        const group = el(`planet-group-${idx}`);
+        if (group) {
+          group.querySelector('.planet-row').addEventListener('click', () => {
+            group.classList.toggle('open');
+          });
+        }
+      });
 
       const tableRowsHtml = orderedPlanets.map(p => {
         const rashi = RASHI[p.vargaRashi][0];
@@ -1866,7 +2162,7 @@
       if (reportsBody) reportsBody.innerHTML = tableRowsHtml;
     }
 
-    /* Render Interactive House Aspect Selector & Badges */
+    /* Render Interactive House Aspect Selector & Full Matrix Table */
     function renderHouseAspectsUI(vdata) {
       const ascRashi = vdata.ascendant.vargaRashi;
       const pillsContainer = el('housePillsScroll');
@@ -1922,9 +2218,32 @@
       } else {
         aspectedByEl.innerHTML = `<span class="badge gray">None</span>`;
       }
+
+      // Full Matrix Table for House Aspects
+      let matrixRows = '';
+      for (let h = 1; h <= 12; h++) {
+        const sIdx = (ascRashi + h - 1) % 12;
+        const pInH = vdata.planets.filter(p => p.house === h).map(p => p.name);
+        if (h === 1) pInH.unshift("Ascendant");
+
+        const aspBy = [];
+        order.forEach(name => {
+          const p = vdata.planets.find(pl => pl.name === name);
+          ASPECT_RULES[name].forEach(n => {
+            if (aspectHouse(p.house, n) === h && !aspBy.includes(name)) aspBy.push(name);
+          });
+        });
+
+        matrixRows += `<tr>
+      <td><b>House ${h}</b></td><td>${RASHI[sIdx][0]}</td>
+      <td>${pInH.length ? pInH.join(', ') : '—'}</td>
+      <td>${aspBy.length ? aspBy.join(', ') : '—'}</td>
+    </tr>`;
+      }
+      el('houseAspectsMatrixBody').innerHTML = matrixRows;
     }
 
-    /* Render Vimshottari Dashas with active progress bar */
+    /* Render Vimshottari Dashas with Expandable Antardashas */
     function renderDashaUI(referenceDate, moonLongitude) {
       const now = new Date();
       const mahadashas = computeMahadashas(moonLongitude, referenceDate);
@@ -1941,46 +2260,84 @@
           progressPct = 100;
         }
 
+        const antardashas = computeAntardashas(m);
+        const antardashaHtml = antardashas.map(ad => {
+          const isAdCurrent = now >= ad.start && now < ad.end;
+          return `
+        <div class="antardasha-row">
+          <div class="ad-name">${ad.planet} ${isAdCurrent ? '<span class="now-tag">Now</span>' : ''}</div>
+          <div style="font-size:11px; color:var(--text-sub);">${fmtDashaDate(ad.start)} – ${fmtDashaDate(ad.end)}</div>
+        </div>
+      `;
+        }).join('');
+
         return `
-      <div class="dasha-list-item ${isCurrent ? 'current' : ''}">
+      <div class="dasha-list-item ${isCurrent ? 'current' : ''}" id="dasha-item-${idx}">
         <div class="dasha-item-head">
           <div class="dasha-name-group">
             <span>${m.planet}</span>
             ${isCurrent ? '<span class="now-tag">Now</span>' : ''}
           </div>
-          <div class="dasha-dates">${fmtDashaDate(m.start)} – ${fmtDashaDate(m.end)}</div>
+          <div class="dasha-dates">
+            <span>${fmtDashaDate(m.start)} – ${fmtDashaDate(m.end)}</span>
+            <span style="font-size:12px; margin-left:4px;">▾</span>
+          </div>
         </div>
         <div class="dasha-progress">
           <div class="dasha-progress-fill" style="width: ${progressPct}%"></div>
         </div>
+        <div class="antardasha-drawer">
+          <div style="font-size:10px; font-weight:800; color:var(--primary-purple); text-transform:uppercase; margin-bottom:6px;">Antardashas (${m.planet})</div>
+          ${antardashaHtml}
+        </div>
       </div>
     `;
       }).join('');
+
+      // Add click handlers for expandable dashas
+      mahadashas.forEach((m, idx) => {
+        const item = el(`dasha-item-${idx}`);
+        if (item) {
+          const isCurrent = now >= m.start && now < m.end;
+          if (isCurrent) item.classList.add('open');
+          item.querySelector('.dasha-item-head').addEventListener('click', () => {
+            item.classList.toggle('open');
+          });
+        }
+      });
     }
 
-    /* Shadbala Calculation & Bar + Gauge Render */
+    /* Shadbala Calculation & Detailed Breakdown */
     const SHADBALA_PLANETS = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
 
     function computeShadbalaApprox(vdata) {
       const totalRupas = {};
+      const breakdown = {};
+
       SHADBALA_PLANETS.forEach(name => {
         const p = vdata.planets.find(pl => pl.name === name);
-        let score = 55;
-        if ([1, 4, 7, 10].includes(p.house)) score += 15;
-        else if ([5, 9].includes(p.house)) score += 10;
-        if (!p.combust) score += 5;
-        if (p.retro) score += 8;
-        totalRupas[name] = Math.min(95, Math.max(35, score));
+        let sthana = 35, dig = 10, kala = 10, chesta = p.retro ? 15 : 5, naisargika = 10, drik = 5;
+        if ([1, 4, 7, 10].includes(p.house)) dig += 10;
+        if (!p.combust) sthana += 10;
+
+        const totalVirupas = sthana + dig + kala + chesta + naisargika + drik;
+        const totalRupasVal = (totalVirupas / 10).toFixed(1);
+
+        totalRupas[name] = Math.min(95, Math.max(35, totalVirupas));
+        breakdown[name] = { sthana, dig, kala, chesta, naisargika, drik, totalVirupas, totalRupasVal, verdict: totalVirupas >= 50 ? '<span style="color:#00B894;font-weight:700">Strong</span>' : '<span style="color:#FF7675;font-weight:700">Weak</span>' };
       });
-      return totalRupas;
+
+      return { strengths: totalRupas, breakdown };
     }
 
     function renderShadbalaUI(vdata) {
-      const strengths = computeShadbalaApprox(vdata);
+      const { strengths, breakdown } = computeShadbalaApprox(vdata);
       const colors = { Sun: "#FF7675", Moon: "#74B9FF", Mars: "#FF6B6B", Mercury: "#55E6C1", Jupiter: "#F8C291", Venus: "#FD79A8", Saturn: "#A29BFE" };
 
       let sum = 0, count = 0;
       let barsHtml = '';
+      let tableHtml = '';
+
       SHADBALA_PLANETS.forEach(name => {
         const val = strengths[name] || 50;
         sum += val; count++;
@@ -1991,15 +2348,46 @@
         <div class="s-val">${val.toFixed(1)}%</div>
       </div>
     `;
+
+        const b = breakdown[name];
+        tableHtml += `<tr>
+      <td><b>${name}</b></td><td>${b.sthana}</td><td>${b.dig}</td><td>${b.kala}</td>
+      <td>${b.chesta}</td><td>${b.naisargika}</td><td>${b.drik}</td>
+      <td><b>${b.totalVirupas}</b></td><td><b>${b.totalRupasVal}</b></td><td>${b.verdict}</td>
+    </tr>`;
       });
 
       el('shadbalaBars').innerHTML = barsHtml;
+      el('shadbalaTableBody').innerHTML = tableHtml;
+      const reportsShadbala = el('reportsShadbalaBody'); if (reportsShadbala) reportsShadbala.innerHTML = tableHtml;
+
       const avg = (sum / count).toFixed(1);
       el('overallGaugeVal').textContent = `${avg}%`;
 
       const dashVal = (avg * 1.0).toFixed(1);
       const gaugePath = el('gaugePath');
       if (gaugePath) gaugePath.setAttribute('stroke-dasharray', `${dashVal}, 100`);
+    }
+
+    /* Bhavabala Calculation for Reports Tab */
+    function renderBhavabalaReportUI(vdata) {
+      const ascRashi = vdata.ascendant.vargaRashi;
+      let rows = '';
+      for (let h = 1; h <= 12; h++) {
+        const rIdx = (ascRashi + h - 1) % 12;
+        const lord = RASHI[rIdx][1];
+        const bhavadhipati = ([1, 4, 7, 10].includes(h) ? 65 : 45).toFixed(1);
+        const dig = (h * 4.5).toFixed(1);
+        const drishti = (15).toFixed(1);
+        const totalV = (parseFloat(bhavadhipati) + parseFloat(dig) + parseFloat(drishti)).toFixed(1);
+        const totalR = (totalV / 60).toFixed(2);
+
+        rows += `<tr>
+      <td><b>House ${h}</b></td><td>${RASHI[rIdx][0]}</td><td>${lord}</td>
+      <td>${bhavadhipati}</td><td>${dig}</td><td>${drishti}</td><td>${totalV}</td><td><b>${totalR}</b></td>
+    </tr>`;
+      }
+      const reportsBhava = el('reportsBhavabalaBody'); if (reportsBhava) reportsBhava.innerHTML = rows;
     }
 
     /* Render Summary Information */
@@ -2020,6 +2408,13 @@
 
       el('sumVarna').textContent = getVarna(moonBase.rashi);
       el('sumYoni').textContent = YONI_TABLE[moonBase.nak];
+
+      // Extra summary elements
+      el('sumGana').textContent = GANA_TABLE[moonBase.nak];
+      el('sumNadi').textContent = NADI_TABLE[moonBase.nak];
+      el('sumTatva').textContent = getTatva(moonBase.rashi);
+      const moonVarga = vdata.planets.find(p => p.name === "Moon");
+      el('sumPaya').textContent = getPaya(moonVarga.house);
     }
 
     /* Basic Info Renderer */
@@ -2087,6 +2482,7 @@
         renderPlanetPositions(vdata);
         renderHouseAspectsUI(vdata);
         renderShadbalaUI(vdata);
+        renderBhavabalaReportUI(vdata);
         renderSummaryUI(dailyBaseData, vdata);
         renderDashaUI(selectedDateTime, dailyBaseData.planets.find(p => p.name === "Moon").longitude);
 
@@ -2103,6 +2499,7 @@
         const d1 = applyVarga(birthBaseData, 1);
         renderSummaryUI(birthBaseData, d1);
         renderShadbalaUI(d1);
+        renderBhavabalaReportUI(d1);
         renderDashaUI(birthDateTime, birthBaseData.planets.find(p => p.name === "Moon").longitude);
       }
 
@@ -2182,7 +2579,7 @@
       if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(
           pos => useLocation(pos.coords.latitude, pos.coords.longitude),
-          err => useLocation(20.9262, 70.3595) // default fallback
+          err => useLocation(20.9262, 70.3595)
         );
       } else {
         useLocation(20.9262, 70.3595);
@@ -2195,12 +2592,33 @@
     });
     el('changeLocBtn').addEventListener('click', () => { el('resultContainer').style.display = 'none'; el('locationSection').style.display = 'block'; });
 
-    /* Toggle Table View */
+    /* Action Toggles for Full Table Views */
     el('toggleTableBtn').addEventListener('click', () => {
       const wrap = el('planetTableWrap');
       const isHidden = wrap.style.display === 'none';
       wrap.style.display = isHidden ? 'block' : 'none';
-      el('toggleTableBtn').textContent = isHidden ? 'Hide Table' : 'View Table';
+      el('toggleTableBtn').textContent = isHidden ? 'Hide Full Table' : 'View Full Table';
+    });
+
+    el('toggleHouseAspectsTableBtn').addEventListener('click', () => {
+      const wrap = el('houseAspectsMatrixWrap');
+      const isHidden = wrap.style.display === 'none';
+      wrap.style.display = isHidden ? 'block' : 'none';
+      el('toggleHouseAspectsTableBtn').textContent = isHidden ? 'Hide All Houses' : 'View All Houses';
+    });
+
+    el('toggleShadbalaTableBtn').addEventListener('click', () => {
+      const wrap = el('shadbalaTableWrap');
+      const isHidden = wrap.style.display === 'none';
+      wrap.style.display = isHidden ? 'block' : 'none';
+      el('toggleShadbalaTableBtn').textContent = isHidden ? 'Hide Full Table' : 'View Full Table';
+    });
+
+    el('summaryExpandBtn').addEventListener('click', () => {
+      const extra = el('extraSummaryGrid');
+      const isHidden = extra.style.display === 'none';
+      extra.style.display = isHidden ? 'grid' : 'none';
+      el('summaryExpandBtn').textContent = isHidden ? 'Collapse' : 'Expand';
     });
 
     /* PDF Download Action */

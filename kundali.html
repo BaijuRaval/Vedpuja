@@ -3,7 +3,8 @@
 
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="viewport"
+    content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Kundali</title>
   <!-- Google Fonts: Plus Jakarta Sans -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,6 +13,7 @@
     rel="stylesheet">
   <style>
     :root {
+      --app-max-width: 480px;
       --bg-main: #ECECFA;
       --header-bg: #1A173B;
       --card-bg: #FFFFFF;
@@ -31,47 +33,65 @@
       --radius-md: 14px;
       --radius-sm: 10px;
       --shadow-card: 0 8px 24px rgba(26, 23, 59, 0.05);
-      --shadow-float: 0 10px 28px rgba(108, 92, 231, 0.3);
+      --shadow-float: 0 8px 24px rgba(108, 92, 231, 0.35);
     }
 
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
+      -webkit-tap-highlight-color: transparent;
     }
 
-    html,
-    body {
+    html {
+      background-color: #121026;
       min-height: 100%;
+    }
+
+    body {
+      min-height: 100vh;
       background-color: var(--bg-main);
       color: var(--text-dark);
       font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
       -webkit-font-smoothing: antialiased;
-      padding-bottom: 90px;
-      font-size: 14px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      margin: 0;
+      padding: 0;
     }
 
-    .wrap {
-      max-width: 480px;
-      margin: 0 auto;
-      padding: 0 12px 20px;
+    /* ---------- Mobile First Device Frame Container ---------- */
+    .app-container {
+      width: 100%;
+      max-width: var(--app-max-width);
+      min-height: 100vh;
+      background: var(--bg-main);
+      position: relative;
+      padding-bottom: calc(90px + env(safe-area-inset-bottom, 12px));
+      box-shadow: 0 0 50px rgba(0, 0, 0, 0.15);
+      overflow-x: hidden;
+    }
+
+    .content-pad {
+      padding: 0 14px 20px 14px;
     }
 
     /* ---------- Top Dark Header & Branding ---------- */
     .top-container {
       background-color: var(--header-bg);
-      margin: 0 -12px 14px -12px;
-      padding: 16px 16px 18px 16px;
-      border-bottom-left-radius: 28px;
-      border-bottom-right-radius: 28px;
-      box-shadow: 0 10px 30px rgba(26, 23, 59, 0.15);
+      padding: calc(14px + env(safe-area-inset-top, 0px)) 16px 18px 16px;
+      border-bottom-left-radius: 26px;
+      border-bottom-right-radius: 26px;
+      box-shadow: 0 10px 28px rgba(26, 23, 59, 0.18);
+      margin-bottom: 14px;
     }
 
     header.top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 4px 4px 14px 4px;
+      padding-bottom: 14px;
     }
 
     header.top .brand {
@@ -98,12 +118,17 @@
       width: 36px;
       height: 36px;
       border-radius: 50%;
-      background: rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.12);
       display: flex;
       align-items: center;
       justify-content: center;
       color: #FFFFFF;
       cursor: pointer;
+      transition: background 0.2s ease;
+    }
+
+    header.top .head-icon:active {
+      background: rgba(255, 255, 255, 0.25);
     }
 
     header.top .head-icon svg {
@@ -115,29 +140,33 @@
       stroke-linecap: round;
     }
 
-    /* ---------- Mode Switcher ---------- */
+    /* ---------- Mode Switcher (Pill Bar) ---------- */
     .mode-bar {
       display: flex;
-      gap: 6px;
+      gap: 4px;
       background: rgba(255, 255, 255, 0.08);
       border: 1px solid rgba(255, 255, 255, 0.12);
       border-radius: var(--radius-md);
-      padding: 5px;
+      padding: 4px;
     }
 
     .mode-btn {
       flex: 1;
-      padding: 9px 4px;
+      min-width: 0;
+      padding: 10px 2px;
       border: none;
       border-radius: 10px;
       background: transparent;
       color: rgba(255, 255, 255, 0.7);
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
       text-align: center;
       cursor: pointer;
       transition: all 0.25s ease;
       font-family: inherit;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .mode-btn.active {
@@ -148,7 +177,7 @@
 
     .mode-btn .soon {
       display: block;
-      font-size: 9px;
+      font-size: 8.5px;
       font-weight: 500;
       opacity: 0.85;
     }
@@ -171,13 +200,14 @@
     .date-bar input[type=time] {
       flex: 1;
       min-width: 0;
+      height: 42px;
       background: rgba(255, 255, 255, 0.95);
       border: 1px solid rgba(255, 255, 255, 0.3);
       border-radius: 10px;
       color: var(--text-dark);
       font-size: 12.5px;
       font-weight: 600;
-      padding: 8px 10px;
+      padding: 0 10px;
       font-family: inherit;
       outline: none;
     }
@@ -189,10 +219,11 @@
 
     .nav-bar button {
       flex: 1;
-      padding: 8px 6px;
+      min-width: 0;
+      height: 38px;
       border: none;
       border-radius: 10px;
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
       background: rgba(255, 255, 255, 0.15);
       color: #FFFFFF;
@@ -214,6 +245,7 @@
       margin-bottom: 14px;
       box-shadow: var(--shadow-card);
       border: 1px solid var(--card-border);
+      overflow: hidden;
     }
 
     .sec-header {
@@ -227,7 +259,7 @@
       display: flex;
       align-items: center;
       gap: 10px;
-      font-size: 15px;
+      font-size: 14.5px;
       font-weight: 800;
       color: var(--text-dark);
       letter-spacing: -0.2px;
@@ -242,6 +274,7 @@
       align-items: center;
       justify-content: center;
       color: var(--primary-purple);
+      flex-shrink: 0;
     }
 
     .sec-title-group .hicon svg {
@@ -260,27 +293,29 @@
       color: var(--primary-purple);
       cursor: pointer;
       text-decoration: none;
+      flex-shrink: 0;
     }
 
-    /* ---------- Basic Info Grid ---------- */
+    /* ---------- Basic Info & Summary Responsive Grid ---------- */
     .info-grid {
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 10px;
     }
 
     .info-item {
       background: var(--card-bg-sub);
       border-radius: var(--radius-md);
-      padding: 11px 12px;
+      padding: 10px 10px;
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 8px;
+      min-width: 0;
     }
 
     .info-item .tile-icon {
-      width: 30px;
-      height: 30px;
+      width: 28px;
+      height: 28px;
       border-radius: 8px;
       background: rgba(108, 92, 231, 0.08);
       display: flex;
@@ -291,8 +326,8 @@
     }
 
     .info-item .tile-icon svg {
-      width: 16px;
-      height: 16px;
+      width: 15px;
+      height: 15px;
       fill: none;
       stroke: currentColor;
       stroke-width: 2;
@@ -306,18 +341,18 @@
     }
 
     .info-item .ilabel {
-      font-size: 10px;
-      font-weight: 600;
+      font-size: 9.5px;
+      font-weight: 700;
       color: var(--text-sub);
       text-transform: uppercase;
-      letter-spacing: 0.4px;
+      letter-spacing: 0.3px;
     }
 
     .info-item .ival {
-      font-size: 13px;
-      font-weight: 700;
+      font-size: 12.5px;
+      font-weight: 800;
       color: var(--text-dark);
-      margin-top: 2px;
+      margin-top: 1px;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -330,7 +365,8 @@
     .loc-btn {
       display: block;
       width: 100%;
-      padding: 11px;
+      min-height: 42px;
+      padding: 10px;
       border-radius: var(--radius-md);
       font-size: 13px;
       font-weight: 700;
@@ -367,7 +403,8 @@
 
     #locManualForm input {
       width: 100%;
-      padding: 10px 12px;
+      height: 42px;
+      padding: 0 12px;
       border-radius: var(--radius-sm);
       border: 1px solid var(--card-border);
       background: var(--card-bg-sub);
@@ -377,20 +414,24 @@
       font-family: inherit;
     }
 
-    /* ---------- North Indian Chart (SVG) ---------- */
+    /* ---------- North Indian Chart (SVG Container) ---------- */
     .chart-wrap {
+      width: 100%;
+      aspect-ratio: 1 / 1;
       display: flex;
       justify-content: center;
-      padding: 6px 0;
+      align-items: center;
       background: #FAF9FE;
       border-radius: var(--radius-md);
       border: 1px solid rgba(108, 92, 231, 0.08);
+      padding: 6px;
     }
 
     .chart-wrap svg {
       width: 100%;
-      max-width: 360px;
-      height: auto;
+      height: 100%;
+      max-width: 380px;
+      max-height: 380px;
     }
 
     .chart-house-num {
@@ -423,6 +464,11 @@
       overflow-x: auto;
       padding-bottom: 6px;
       -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .varga-scroll::-webkit-scrollbar {
+      display: none;
     }
 
     .varga-btn {
@@ -466,12 +512,14 @@
       background: var(--card-bg-sub);
       border-radius: var(--radius-md);
       padding: 10px 12px;
+      gap: 6px;
     }
 
     .planet-left {
       display: flex;
       align-items: center;
       gap: 10px;
+      min-width: 0;
     }
 
     .planet-icon {
@@ -483,44 +531,48 @@
       align-items: center;
       justify-content: center;
       color: var(--primary-purple);
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 800;
+      flex-shrink: 0;
     }
 
     .planet-name {
-      font-size: 13.5px;
-      font-weight: 700;
+      font-size: 13px;
+      font-weight: 800;
       color: var(--text-dark);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .planet-right {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 8px;
+      flex-shrink: 0;
     }
 
     .planet-house-badge {
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 700;
       color: var(--text-sub);
       background: #FFFFFF;
-      padding: 3px 8px;
+      padding: 3px 7px;
       border-radius: 6px;
+      border: 1px solid rgba(108, 92, 231, 0.1);
     }
 
     .planet-rashi {
-      font-size: 12.5px;
+      font-size: 12px;
       font-weight: 600;
       color: var(--text-sub);
-      width: 70px;
       text-align: right;
     }
 
     .planet-deg {
-      font-size: 12.5px;
-      font-weight: 700;
+      font-size: 12px;
+      font-weight: 800;
       color: var(--text-dark);
-      width: 60px;
       text-align: right;
     }
 
@@ -528,27 +580,37 @@
       color: var(--text-muted);
       font-size: 14px;
       font-weight: 800;
+      margin-left: 2px;
     }
 
-    /* ---------- House Aspects Pill Selector & Card ---------- */
+    /* ---------- House Aspects Pill Selector & Details ---------- */
     .house-pills-scroll {
       display: flex;
       gap: 6px;
       overflow-x: auto;
-      padding-bottom: 10px;
+      padding-bottom: 8px;
       -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .house-pills-scroll::-webkit-scrollbar {
+      display: none;
     }
 
     .house-pill {
-      flex: 0 0 auto;
-      min-width: 56px;
-      padding: 8px 6px;
+      flex: 0 0 54px;
+      height: 54px;
+      padding: 6px;
       text-align: center;
       border-radius: var(--radius-sm);
       background: var(--card-bg-sub);
       border: 1px solid var(--card-border);
       cursor: pointer;
       transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
 
     .house-pill.active {
@@ -559,20 +621,26 @@
     }
 
     .house-pill .h-num {
-      font-size: 14px;
+      font-size: 15px;
       font-weight: 800;
+      line-height: 1;
     }
 
     .house-pill .h-sign {
-      font-size: 9.5px;
+      font-size: 9px;
       font-weight: 600;
       opacity: 0.85;
+      margin-top: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 46px;
     }
 
     .aspect-details-card {
       background: var(--card-bg-sub);
       border-radius: var(--radius-md);
-      padding: 14px;
+      padding: 12px;
       margin-top: 4px;
     }
 
@@ -585,7 +653,7 @@
     }
 
     .aspect-label {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       color: var(--text-sub);
       text-transform: uppercase;
@@ -600,9 +668,9 @@
     }
 
     .badge {
-      padding: 6px 12px;
+      padding: 5px 10px;
       border-radius: 20px;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
       display: inline-flex;
       align-items: center;
@@ -624,7 +692,7 @@
       color: var(--text-sub);
     }
 
-    /* ---------- Dashas (Vimshottari) List ---------- */
+    /* ---------- Dashas List ---------- */
     .dasha-list-item {
       background: var(--card-bg-sub);
       border-radius: var(--radius-md);
@@ -651,7 +719,7 @@
       align-items: center;
       gap: 8px;
       font-weight: 800;
-      font-size: 13.5px;
+      font-size: 13px;
     }
 
     .now-tag {
@@ -664,7 +732,7 @@
     }
 
     .dasha-dates {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 600;
       color: var(--text-sub);
     }
@@ -686,15 +754,16 @@
     /* ---------- Shadbala (Planet Strength) ---------- */
     .shadbala-container {
       display: flex;
+      flex-wrap: wrap;
       gap: 16px;
       align-items: center;
     }
 
     .shadbala-bars {
-      flex: 1;
+      flex: 1 1 200px;
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 9px;
     }
 
     .shadbala-bar-row {
@@ -704,9 +773,9 @@
     }
 
     .s-name {
-      font-size: 11.5px;
+      font-size: 11px;
       font-weight: 700;
-      width: 50px;
+      width: 48px;
       color: var(--text-dark);
     }
 
@@ -727,16 +796,17 @@
     .s-val {
       font-size: 11px;
       font-weight: 700;
-      width: 42px;
+      width: 40px;
       text-align: right;
       color: var(--text-dark);
     }
 
     .overall-gauge {
-      width: 105px;
-      height: 105px;
+      width: 95px;
+      height: 95px;
       flex-shrink: 0;
       position: relative;
+      margin: 0 auto;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -755,14 +825,14 @@
     }
 
     .gauge-label {
-      font-size: 10px;
+      font-size: 9px;
       font-weight: 700;
       color: var(--text-sub);
       text-transform: uppercase;
     }
 
     .gauge-value {
-      font-size: 15px;
+      font-size: 14px;
       font-weight: 800;
       color: var(--text-dark);
       margin-top: 1px;
@@ -797,23 +867,23 @@
       white-space: nowrap;
     }
 
-    /* ---------- Bottom Navigation Bar ---------- */
+    /* ---------- Fixed Mobile Bottom Navigation Bar ---------- */
     .bottom-nav {
       position: fixed;
       bottom: 0;
       left: 50%;
       transform: translateX(-50%);
       width: 100%;
-      max-width: 480px;
+      max-width: var(--app-max-width);
       background: #FFFFFF;
-      border-top-left-radius: 20px;
-      border-top-right-radius: 20px;
-      box-shadow: 0 -4px 20px rgba(26, 23, 59, 0.08);
+      border-top-left-radius: 22px;
+      border-top-right-radius: 22px;
+      box-shadow: 0 -6px 25px rgba(26, 23, 59, 0.09);
       display: flex;
-      justify-style: space-around;
+      justify-content: space-around;
       align-items: center;
-      padding: 8px 10px 12px;
-      z-index: 900;
+      padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 8px)) 8px;
+      z-index: 1000;
     }
 
     .nav-item {
@@ -826,6 +896,8 @@
       font-weight: 700;
       text-decoration: none;
       cursor: pointer;
+      flex: 1;
+      min-width: 0;
     }
 
     .nav-item.active {
@@ -843,8 +915,8 @@
     }
 
     .nav-item.center-btn {
-      width: 48px;
-      height: 48px;
+      width: 46px;
+      height: 46px;
       border-radius: 50%;
       background: var(--primary-gradient);
       color: #FFFFFF;
@@ -853,11 +925,12 @@
       justify-content: center;
       margin-top: -24px;
       box-shadow: var(--shadow-float);
+      flex: 0 0 46px;
     }
 
     .nav-item.center-btn svg {
-      width: 24px;
-      height: 24px;
+      width: 22px;
+      height: 22px;
       fill: #FFFFFF;
       stroke: none;
     }
@@ -866,13 +939,13 @@
     #loaderOverlay {
       position: fixed;
       inset: 0;
-      z-index: 999;
+      z-index: 9999;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: rgba(26, 23, 59, 0.7);
-      backdrop-filter: blur(4px);
+      background: rgba(26, 23, 59, 0.75);
+      backdrop-filter: blur(5px);
       opacity: 0;
       visibility: hidden;
       transition: opacity .25s ease;
@@ -921,12 +994,12 @@
     <div class="loader-sub">Computing astronomical positions...</div>
   </div>
 
-  <div class="wrap">
+  <div class="app-container">
 
     <!-- ============ TOP HEADER SECTION ============ -->
     <div class="top-container">
       <header class="top">
-        <div class="head-icon">
+        <div class="head-icon" id="headCloudIcon">
           <svg viewBox="0 0 24 24">
             <path
               d="M17.5 19C19.9853 19 22 16.9853 22 14.5C22 12.1564 20.206 10.2312 17.9001 10.0235C17.4392 6.58156 14.4735 3.9 10.8889 3.9C7.8188 3.9 5.21327 5.79586 4.31688 8.44146C2.42194 9.07342 1 10.8711 1 13C1 15.7614 3.23858 18 6 18H17.5Z" />
@@ -936,7 +1009,7 @@
           <div class="om">ॐ</div>
           <h1>Kundali</h1>
         </div>
-        <div class="head-icon">
+        <div class="head-icon" id="headMenuIcon">
           <svg viewBox="0 0 24 24">
             <line x1="3" y1="6" x2="21" y2="6" />
             <line x1="3" y1="12" x2="21" y2="12" />
@@ -948,7 +1021,7 @@
       <div class="mode-bar">
         <button class="mode-btn active" id="modeDailyBtn">Daily Kundali</button>
         <button class="mode-btn" id="modeBirthBtn">Birth Kundali</button>
-        <button class="mode-btn" id="modeMarriageBtn">Marriage Match<span class="soon">(Coming Soon)</span></button>
+        <button class="mode-btn" id="modeMarriageBtn">Marriage Match<span class="soon">(Soon)</span></button>
       </div>
 
       <!-- DAILY PANEL CONTROLS -->
@@ -958,7 +1031,7 @@
           <input type="time" id="dailyTimePicker" step="60">
         </div>
         <div class="nav-bar">
-          <button id="prevDayBtn">◀ Previous Day</button>
+          <button id="prevDayBtn">◀ Prev Day</button>
           <button id="todayBtn" class="primary">Today</button>
           <button id="nextDayBtn">Next Day ▶</button>
         </div>
@@ -973,411 +1046,541 @@
       </div>
     </div><!-- /top-container -->
 
-    <!-- ============ LOCATION SECTION ============ -->
-    <div class="section" id="locationSection">
-      <div class="sec-header">
-        <div class="sec-title-group">
-          <span class="hicon"><svg viewBox="0 0 24 24">
-              <path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z" />
-              <circle cx="12" cy="10" r="2.5" />
-            </svg></span>
-          <span>Location Access</span>
-        </div>
-      </div>
-      <div class="sec-body">
-        <div id="locGpsOff" class="loc-state" style="display:none;">
-          <div class="loc-msg">Please enable GPS or enter location manually.</div>
-        </div>
-        <div id="locChooser" class="loc-state">
-          <button id="myLocationBtn" class="loc-btn primary" style="margin-bottom:8px;">Use Current Location</button>
-          <button id="enterLocationBtn" class="loc-btn">Enter Coordinates Manually</button>
-        </div>
-        <div id="locError" class="loc-state" style="display:none;">
-          <div class="loc-msg">Location Error</div>
-          <div class="loc-detail" id="locErrorDetail"></div>
-          <button id="retryLocationBtn" class="loc-btn primary" style="margin-bottom:8px;">Retry Location</button>
-          <button id="enterLocationBtn2" class="loc-btn">Enter Coordinates</button>
-        </div>
-        <div id="locManualForm" class="loc-state" style="display:none;">
-          <input type="text" id="manualLat" placeholder="Latitude e.g. 20.9262">
-          <input type="text" id="manualLon" placeholder="Longitude e.g. 70.3595">
-          <button id="manualLocSubmit" class="loc-btn primary">Save Location</button>
-        </div>
-      </div>
-    </div>
+    <div class="content-pad">
 
-    <!-- ============ MARRIAGE PANEL ============ -->
-    <div id="marriagePanel" style="display:none;" class="section">
-      <div style="text-align:center; padding:40px 10px; font-weight:700; color:var(--text-sub);">Marriage Matchmaking
-        Feature Coming Soon</div>
-    </div>
-
-    <!-- ============ RESULTS CONTAINER ============ -->
-    <div id="resultContainer" style="display:none;">
-
-      <!-- BASIC INFORMATION -->
-      <div class="section">
+      <!-- ============ LOCATION SECTION ============ -->
+      <div class="section" id="locationSection">
         <div class="sec-header">
           <div class="sec-title-group">
             <span class="hicon"><svg viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M16 2v4M8 2v4M3 10h18" />
-              </svg></span>
-            <span>Basic Information</span>
-          </div>
-        </div>
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <rect x="3" y="4" width="18" height="18" rx="2" />
-                <path d="M16 2v4M8 2v4M3 10h18" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Date</div>
-              <div class="ival" id="biDate">--</div>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M12 7v5l3 2" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Time</div>
-              <div class="ival" id="biTime">--</div>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <path
-                  d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Weekday</div>
-              <div class="ival" id="biWeekday">--</div>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="9" />
-                <path d="M2 12h20M12 2a15 15 0 0 1 0 20a15 15 0 0 1 0-20z" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Time Zone</div>
-              <div class="ival" id="biTz">--</div>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
                 <path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z" />
                 <circle cx="12" cy="10" r="2.5" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Location</div>
-              <div class="ival" id="biLocation">--</div>
-            </div>
-          </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <path d="M3 12h18M12 3v18" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Lat / Long</div>
-              <div class="ival" id="biLatLon">--</div>
-            </div>
-          </div>
-          <div class="info-item span2" style="background:transparent; padding:4px 0 0 0;">
-            <button id="changeLocBtn" class="loc-btn">Change Location</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- DAILY / BIRTH SUMMARY -->
-      <div class="section">
-        <div class="sec-header">
-          <div class="sec-title-group">
-            <span class="hicon"><svg viewBox="0 0 24 24">
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-                <polyline points="14 2 14 8 20 8" />
               </svg></span>
-            <span id="summarySectionTitle">Daily Summary</span>
+            <span>Location Access</span>
           </div>
-          <span class="sec-action">View all</span>
         </div>
-        <div class="info-grid">
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <circle cx="12" cy="7" r="4" />
-                <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Ascendant</div>
-              <div class="ival" id="sumAsc">--</div>
+        <div class="sec-body">
+          <div id="locGpsOff" class="loc-state" style="display:none;">
+            <div class="loc-msg">Please enable GPS or enter location.</div>
+          </div>
+          <div id="locChooser" class="loc-state">
+            <button id="myLocationBtn" class="loc-btn primary" style="margin-bottom:8px;">Use Current Location</button>
+            <button id="enterLocationBtn" class="loc-btn">Enter Coordinates Manually</button>
+          </div>
+          <div id="locError" class="loc-state" style="display:none;">
+            <div class="loc-msg">Location Error</div>
+            <div class="loc-detail" id="locErrorDetail"></div>
+            <button id="retryLocationBtn" class="loc-btn primary" style="margin-bottom:8px;">Retry Location</button>
+            <button id="enterLocationBtn2" class="loc-btn">Enter Coordinates</button>
+          </div>
+          <div id="locManualForm" class="loc-state" style="display:none;">
+            <input type="text" id="manualLat" placeholder="Latitude e.g. 20.9262">
+            <input type="text" id="manualLon" placeholder="Longitude e.g. 70.3595">
+            <button id="manualLocSubmit" class="loc-btn primary">Save Location</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ TAB: HOME / MAIN VIEW ============ -->
+      <div id="tabHomeView">
+
+        <!-- MARRIAGE PANEL -->
+        <div id="marriagePanel" style="display:none;" class="section">
+          <div style="text-align:center; padding:40px 10px; font-weight:700; color:var(--text-sub);">Marriage
+            Matchmaking Feature Coming Soon</div>
+        </div>
+
+        <!-- RESULTS CONTAINER -->
+        <div id="resultContainer" style="display:none;">
+
+          <!-- BASIC INFORMATION -->
+          <div class="section">
+            <div class="sec-header">
+              <div class="sec-title-group">
+                <span class="hicon"><svg viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <path d="M16 2v4M8 2v4M3 10h18" />
+                  </svg></span>
+                <span>Basic Information</span>
+              </div>
+            </div>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2" />
+                    <path d="M16 2v4M8 2v4M3 10h18" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Date</div>
+                  <div class="ival" id="biDate">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M12 7v5l3 2" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Time</div>
+                  <div class="ival" id="biTime">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <path
+                      d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Weekday</div>
+                  <div class="ival" id="biWeekday">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="9" />
+                    <path d="M2 12h20M12 2a15 15 0 0 1 0 20a15 15 0 0 1 0-20z" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Time Zone</div>
+                  <div class="ival" id="biTz">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z" />
+                    <circle cx="12" cy="10" r="2.5" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Location</div>
+                  <div class="ival" id="biLocation">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <path d="M3 12h18M12 3v18" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Lat / Long</div>
+                  <div class="ival" id="biLatLon">--</div>
+                </div>
+              </div>
+              <div class="info-item span2" style="background:transparent; padding:4px 0 0 0;">
+                <button id="changeLocBtn" class="loc-btn">Change Location</button>
+              </div>
             </div>
           </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Moon Sign</div>
-              <div class="ival" id="sumMoonSign">--</div>
+
+          <!-- DAILY / BIRTH SUMMARY -->
+          <div class="section">
+            <div class="sec-header">
+              <div class="sec-title-group">
+                <span class="hicon"><svg viewBox="0 0 24 24">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                    <polyline points="14 2 14 8 20 8" />
+                  </svg></span>
+                <span id="summarySectionTitle">Daily Summary</span>
+              </div>
+              <span class="sec-action">View all</span>
+            </div>
+            <div class="info-grid">
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="7" r="4" />
+                    <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Ascendant</div>
+                  <div class="ival" id="sumAsc">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Moon Sign</div>
+                  <div class="ival" id="sumMoonSign">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="5" />
+                    <line x1="12" y1="1" x2="12" y2="3" />
+                    <line x1="12" y1="21" x2="12" y2="23" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                    <line x1="1" y1="12" x2="3" y2="12" />
+                    <line x1="21" y1="12" x2="23" y2="12" />
+                    <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                    <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Sun Sign</div>
+                  <div class="ival" id="sumSunSign">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Nakshatra</div>
+                  <div class="ival" id="sumNak">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <path d="M2 12h20M12 2a15 15 0 0 1 0 20" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Yoga</div>
+                  <div class="ival" id="sumYoga">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Tithi</div>
+                  <div class="ival" id="sumTithi">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Varna</div>
+                  <div class="ival" id="sumVarna">--</div>
+                </div>
+              </div>
+              <div class="info-item">
+                <div class="tile-icon"><svg viewBox="0 0 24 24">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                  </svg></div>
+                <div class="tile-content">
+                  <div class="ilabel">Yoni</div>
+                  <div class="ival" id="sumYoni">--</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="5" />
-                <line x1="12" y1="1" x2="12" y2="3" />
-                <line x1="12" y1="21" x2="12" y2="23" />
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                <line x1="1" y1="12" x2="3" y2="12" />
-                <line x1="21" y1="12" x2="23" y2="12" />
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Sun Sign</div>
-              <div class="ival" id="sumSunSign">--</div>
+
+          <!-- VARGA SELECTOR (Birth mode only) -->
+          <div class="section" id="chartSelectorSection" style="display:none;">
+            <div class="sec-header">
+              <div class="sec-title-group">
+                <span class="hicon"><svg viewBox="0 0 24 24">
+                    <rect x="3" y="3" width="7" height="7" />
+                    <rect x="14" y="3" width="7" height="7" />
+                    <rect x="14" y="14" width="7" height="7" />
+                    <rect x="3" y="14" width="7" height="7" />
+                  </svg></span>
+                <span>Divisional Charts (Vargas)</span>
+              </div>
+            </div>
+            <div class="varga-scroll" id="vargaScroll"></div>
+            <div class="varga-current" id="vargaCurrentLabel"></div>
+          </div>
+
+          <!-- NORTH INDIAN KUNDALI (D1) CHART -->
+          <div class="section">
+            <div class="sec-header">
+              <div class="sec-title-group">
+                <span class="hicon"><svg viewBox="0 0 24 24">
+                    <polygon
+                      points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                  </svg></span>
+                <span id="chartSectionTitle">North Indian Kundali (D1)</span>
+              </div>
+              <span class="sec-action">View</span>
+            </div>
+            <div class="chart-wrap"><svg id="chartSvg" viewBox="0 0 400 400"></svg></div>
+          </div>
+
+          <!-- PLANETARY POSITIONS -->
+          <div class="section">
+            <div class="sec-header">
+              <div class="sec-title-group">
+                <span class="hicon"><svg viewBox="0 0 24 24">
+                    <circle cx="12" cy="12" r="4" />
+                    <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+                  </svg></span>
+                <span>Planetary Positions</span>
+              </div>
+              <span class="sec-action" id="toggleTableBtn">View Table</span>
+            </div>
+            <div class="planet-list" id="planetList"></div>
+
+            <div class="table-scroll" id="planetTableWrap" style="display:none;">
+              <table class="ptable" id="planetTable">
+                <thead>
+                  <tr>
+                    <th>Planet</th>
+                    <th>House</th>
+                    <th>Sign</th>
+                    <th>Degree</th>
+                    <th>Nakshatra</th>
+                    <th>Pada</th>
+                    <th>Motion</th>
+                    <th>Combust</th>
+                  </tr>
+                </thead>
+                <tbody id="planetTableBody"></tbody>
+              </table>
             </div>
           </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <polygon
-                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Nakshatra</div>
-              <div class="ival" id="sumNak">--</div>
+
+          <!-- HOUSE ASPECTS (INTERACTIVE PILLS) -->
+          <div class="section">
+            <div class="sec-header">
+              <div class="sec-title-group">
+                <span class="hicon"><svg viewBox="0 0 24 24">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                    <polyline points="9 22 9 12 15 12 15 22" />
+                  </svg></span>
+                <span>House Aspects</span>
+              </div>
+              <span class="sec-action">View all</span>
+            </div>
+            <div class="house-pills-scroll" id="housePillsScroll"></div>
+
+            <div class="aspect-details-card">
+              <div class="aspect-group">
+                <div class="aspect-label">Planets in <span id="selectedHouseLabel">House 1</span></div>
+                <div class="aspect-badges" id="housePlanetsBadges"></div>
+              </div>
+              <div class="aspect-group" style="margin-top:12px;">
+                <div class="aspect-label">Aspected By</div>
+                <div class="aspect-badges" id="houseAspectedByBadges"></div>
+              </div>
             </div>
           </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <path d="M2 12h20M12 2a15 15 0 0 1 0 20" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Yoga</div>
-              <div class="ival" id="sumYoga">--</div>
+
+          <!-- VIMSHOTTARI DASHAS -->
+          <div class="section">
+            <div class="sec-header">
+              <div class="sec-title-group">
+                <span class="hicon"><svg viewBox="0 0 24 24">
+                    <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+                  </svg></span>
+                <span>Dashas (Vimshottari)</span>
+              </div>
+              <span class="sec-action">View all</span>
+            </div>
+            <div id="dashaList"></div>
+          </div>
+
+          <!-- SHADBALA (PLANET STRENGTH) -->
+          <div class="section">
+            <div class="sec-header">
+              <div class="sec-title-group">
+                <span class="hicon"><svg viewBox="0 0 24 24">
+                    <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+                  </svg></span>
+                <span>Shadbala (Planet Strength)</span>
+              </div>
+              <span class="sec-action">View all</span>
+            </div>
+
+            <div class="shadbala-container">
+              <div class="shadbala-bars" id="shadbalaBars"></div>
+              <div class="overall-gauge">
+                <svg viewBox="0 0 36 36">
+                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+                    stroke="#EAEBF8" stroke-width="3.5" />
+                  <path id="gaugePath" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                    fill="none" stroke="url(#gaugeGrad)" stroke-width="3.5" stroke-dasharray="62.4, 100"
+                    stroke-linecap="round" />
+                  <defs>
+                    <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#6C5CE7" />
+                      <stop offset="100%" stop-color="#8E7CFF" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+                <div class="gauge-text">
+                  <div class="gauge-label">Overall</div>
+                  <div class="gauge-value" id="overallGaugeVal">62.4%</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Tithi</div>
-              <div class="ival" id="sumTithi">--</div>
+
+          <!-- PDF DOWNLOAD ACTION -->
+          <div style="margin-top: 18px; margin-bottom: 20px;">
+            <button id="downloadPdfBtn" class="loc-btn primary" style="padding:14px; font-size:14px;">
+              Download PDF Report
+            </button>
+          </div>
+
+        </div><!-- /resultContainer -->
+      </div><!-- /tabHomeView -->
+
+      <!-- ============ TAB: REPORTS ============ -->
+      <div id="tabReportsView" style="display:none;">
+        <div class="section">
+          <div class="sec-header">
+            <div class="sec-title-group">
+              <span class="hicon"><svg viewBox="0 0 24 24">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                  <polyline points="14 2 14 8 20 8" />
+                </svg></span>
+              <span>Comprehensive Reports</span>
             </div>
           </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Varna (Rashi)</div>
-              <div class="ival" id="sumVarna">--</div>
+          <div style="font-size:13px; color:var(--text-sub); margin-bottom:14px;">Complete astronomical data tables and
+            planetary metrics.</div>
+
+          <button id="downloadPdfBtn2" class="loc-btn primary" style="margin-bottom:14px;">
+            Download Full PDF Report
+          </button>
+
+          <div style="font-weight:800; font-size:13.5px; margin: 16px 0 8px 0; color:var(--text-dark);">Planetary
+            Metrics</div>
+          <div class="table-scroll">
+            <table class="ptable" id="reportsPlanetTable">
+              <thead>
+                <tr>
+                  <th>Planet</th>
+                  <th>House</th>
+                  <th>Sign</th>
+                  <th>Degree</th>
+                  <th>Nakshatra</th>
+                  <th>Pada</th>
+                  <th>Motion</th>
+                  <th>Combust</th>
+                </tr>
+              </thead>
+              <tbody id="reportsPlanetBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ TAB: REMEDIES ============ -->
+      <div id="tabRemediesView" style="display:none;">
+        <div class="section">
+          <div class="sec-header">
+            <div class="sec-title-group">
+              <span class="hicon"><svg viewBox="0 0 24 24">
+                  <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+                </svg></span>
+              <span>Astrological Remedies</span>
             </div>
           </div>
-          <div class="info-item">
-            <div class="tile-icon"><svg viewBox="0 0 24 24">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg></div>
-            <div class="tile-content">
-              <div class="ilabel">Yoni (Animal)</div>
-              <div class="ival" id="sumYoni">--</div>
+          <div style="font-size:13px; color:var(--text-sub); margin-bottom:14px;">Personalized Vedic remedies based on
+            planetary strengths.</div>
+
+          <div class="aspect-details-card" style="margin-bottom:10px;">
+            <div style="font-weight:800; color:var(--primary-purple); margin-bottom:4px;">✨ Gemstone Recommendation
+            </div>
+            <div style="font-size:12.5px; color:var(--text-dark);" id="remedyGemstone">Consult your chart to harmonize
+              Lagna & Moon lords.</div>
+          </div>
+
+          <div class="aspect-details-card" style="margin-bottom:10px;">
+            <div style="font-weight:800; color:var(--primary-purple); margin-bottom:4px;">🕉️ Daily Mantra</div>
+            <div style="font-size:12.5px; color:var(--text-dark);" id="remedyMantra">Om Namah Shivaya / Gayatri Mantra
+            </div>
+          </div>
+
+          <div class="aspect-details-card">
+            <div style="font-weight:800; color:var(--primary-purple); margin-bottom:4px;">📅 Auspicious Days</div>
+            <div style="font-size:12.5px; color:var(--text-dark);" id="remedyDays">Fast on Mondays or Thursdays for
+              Moon/Jupiter grace.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ TAB: MORE ============ -->
+      <div id="tabMoreView" style="display:none;">
+        <div class="section">
+          <div class="sec-header">
+            <div class="sec-title-group">
+              <span class="hicon"><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg></span>
+              <span>More Settings & Info</span>
+            </div>
+          </div>
+          <div class="info-grid">
+            <div class="info-item span2">
+              <div class="tile-icon"><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="9" />
+                  <path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z" />
+                </svg></div>
+              <div class="tile-content">
+                <div class="ilabel">Ayanamsa</div>
+                <div class="ival">Lahiri (Sidereal)</div>
+              </div>
+            </div>
+            <div class="info-item span2">
+              <div class="tile-icon"><svg viewBox="0 0 24 24">
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                </svg></div>
+              <div class="tile-content">
+                <div class="ilabel">House System</div>
+                <div class="ival">Whole Sign (Parashari)</div>
+              </div>
+            </div>
+            <div class="info-item span2">
+              <div class="tile-icon"><svg viewBox="0 0 24 24">
+                  <circle cx="12" cy="12" r="4" />
+                  <ellipse cx="12" cy="12" rx="9" ry="3" transform="rotate(-20 12 12)" />
+                </svg></div>
+              <div class="tile-content">
+                <div class="ilabel">Ephemeris Engine</div>
+                <div class="ival">Swiss Ephemeris (Moshier)</div>
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- VARGA SELECTOR (Birth mode only) -->
-      <div class="section" id="chartSelectorSection" style="display:none;">
-        <div class="sec-header">
-          <div class="sec-title-group">
-            <span class="hicon"><svg viewBox="0 0 24 24">
-                <rect x="3" y="3" width="7" height="7" />
-                <rect x="14" y="3" width="7" height="7" />
-                <rect x="14" y="14" width="7" height="7" />
-                <rect x="3" y="14" width="7" height="7" />
-              </svg></span>
-            <span>Divisional Charts (Vargas)</span>
-          </div>
-        </div>
-        <div class="varga-scroll" id="vargaScroll"></div>
-        <div class="varga-current" id="vargaCurrentLabel"></div>
+    </div><!-- /content-pad -->
+
+    <!-- FIXED MOBILE BOTTOM NAVIGATION BAR -->
+    <nav class="bottom-nav">
+      <div class="nav-item active" id="navHomeBtn">
+        <svg viewBox="0 0 24 24">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+        </svg>
+        <span>Home</span>
       </div>
-
-      <!-- NORTH INDIAN KUNDALI (D1) CHART -->
-      <div class="section">
-        <div class="sec-header">
-          <div class="sec-title-group">
-            <span class="hicon"><svg viewBox="0 0 24 24">
-                <polygon
-                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-              </svg></span>
-            <span id="chartSectionTitle">North Indian Kundali (D1)</span>
-          </div>
-          <span class="sec-action">View</span>
-        </div>
-        <div class="chart-wrap"><svg id="chartSvg" viewBox="0 0 400 400"></svg></div>
+      <div class="nav-item" id="navReportsBtn">
+        <svg viewBox="0 0 24 24">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+        <span>Reports</span>
       </div>
-
-      <!-- PLANETARY POSITIONS -->
-      <div class="section">
-        <div class="sec-header">
-          <div class="sec-title-group">
-            <span class="hicon"><svg viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="4" />
-                <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
-              </svg></span>
-            <span>Planetary Positions</span>
-          </div>
-          <span class="sec-action" id="toggleTableBtn">View Table</span>
-        </div>
-        <div class="planet-list" id="planetList"></div>
-
-        <div class="table-scroll" id="planetTableWrap" style="display:none;">
-          <table class="ptable" id="planetTable">
-            <thead>
-              <tr>
-                <th>Planet</th>
-                <th>House</th>
-                <th>Sign</th>
-                <th>Degree</th>
-                <th>Nakshatra</th>
-                <th>Pada</th>
-                <th>Motion</th>
-                <th>Combust</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="planetTableBody"></tbody>
-          </table>
-        </div>
+      <div class="nav-item center-btn" id="navCenterBtn">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="8" />
+        </svg>
       </div>
-
-      <!-- HOUSE ASPECTS (INTERACTIVE PILLS) -->
-      <div class="section">
-        <div class="sec-header">
-          <div class="sec-title-group">
-            <span class="hicon"><svg viewBox="0 0 24 24">
-                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-                <polyline points="9 22 9 12 15 12 15 22" />
-              </svg></span>
-            <span>House Aspects</span>
-          </div>
-          <span class="sec-action">View all</span>
-        </div>
-        <div class="house-pills-scroll" id="housePillsScroll"></div>
-
-        <div class="aspect-details-card">
-          <div class="aspect-group">
-            <div class="aspect-label">Planets in <span id="selectedHouseLabel">House 1</span></div>
-            <div class="aspect-badges" id="housePlanetsBadges"></div>
-          </div>
-          <div class="aspect-group" style="margin-top:12px;">
-            <div class="aspect-label">Aspected By</div>
-            <div class="aspect-badges" id="houseAspectedByBadges"></div>
-          </div>
-        </div>
+      <div class="nav-item" id="navRemediesBtn">
+        <svg viewBox="0 0 24 24">
+          <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+        </svg>
+        <span>Remedies</span>
       </div>
-
-      <!-- VIMSHOTTARI DASHAS -->
-      <div class="section">
-        <div class="sec-header">
-          <div class="sec-title-group">
-            <span class="hicon"><svg viewBox="0 0 24 24">
-                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
-              </svg></span>
-            <span>Dashas (Vimshottari)</span>
-          </div>
-          <span class="sec-action">View all</span>
-        </div>
-        <div id="dashaList"></div>
+      <div class="nav-item" id="navMoreBtn">
+        <svg viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="1" />
+          <circle cx="12" cy="5" r="1" />
+          <circle cx="12" cy="19" r="1" />
+        </svg>
+        <span>More</span>
       </div>
+    </nav>
 
-      <!-- SHADBALA (PLANET STRENGTH) -->
-      <div class="section">
-        <div class="sec-header">
-          <div class="sec-title-group">
-            <span class="hicon"><svg viewBox="0 0 24 24">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
-              </svg></span>
-            <span>Shadbala (Planet Strength)</span>
-          </div>
-          <span class="sec-action">View all</span>
-        </div>
-
-        <div class="shadbala-container">
-          <div class="shadbala-bars" id="shadbalaBars"></div>
-          <div class="overall-gauge">
-            <svg viewBox="0 0 36 36">
-              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
-                stroke="#EAEBF8" stroke-width="3.5" />
-              <path id="gaugePath" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                fill="none" stroke="url(#gaugeGrad)" stroke-width="3.5" stroke-dasharray="62.4, 100"
-                stroke-linecap="round" />
-              <defs>
-                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stop-color="#6C5CE7" />
-                  <stop offset="100%" stop-color="#8E7CFF" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <div class="gauge-text">
-              <div class="gauge-label">Overall</div>
-              <div class="gauge-value" id="overallGaugeVal">62.4%</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- PDF DOWNLOAD ACTION -->
-      <div style="margin-top: 18px; margin-bottom: 20px;">
-        <button id="downloadPdfBtn" class="loc-btn primary" style="padding:14px; font-size:14px;">
-          Download PDF Report
-        </button>
-      </div>
-
-    </div><!-- /resultContainer -->
-
-  </div><!-- /wrap -->
-
-  <!-- FIXED BOTTOM NAVIGATION BAR -->
-  <div class="bottom-nav">
-    <div class="nav-item active">
-      <svg viewBox="0 0 24 24">
-        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
-      </svg>
-      <span>Home</span>
-    </div>
-    <div class="nav-item">
-      <svg viewBox="0 0 24 24">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
-        <polyline points="14 2 14 8 20 8" />
-      </svg>
-      <span>Reports</span>
-    </div>
-    <div class="nav-item center-btn">
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="8" />
-      </svg>
-    </div>
-    <div class="nav-item">
-      <svg viewBox="0 0 24 24">
-        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
-      </svg>
-      <span>Remedies</span>
-    </div>
-    <div class="nav-item">
-      <svg viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="1" />
-        <circle cx="12" cy="5" r="1" />
-        <circle cx="12" cy="19" r="1" />
-      </svg>
-      <span>More</span>
-    </div>
-  </div>
+  </div><!-- /app-container -->
 
   <script type="module">
     /* ===================== ASTRONOMY & KUNDALI LOGIC ENGINE ===================== */
@@ -1439,29 +1642,6 @@
         cursor = end;
       }
       return mahadashas;
-    }
-
-    function computeAntardashas(maha) {
-      const fullMahaYears = VIMSHOTTARI_YEARS[maha.planet];
-      const startIdx = VIMSHOTTARI_SEQUENCE.indexOf(maha.planet);
-      const alreadyElapsed = maha.alreadyElapsedBefore || 0;
-      const antardashas = [];
-      let virtualCursor = 0;
-      let realCursor = new Date(maha.start.getTime());
-      for (let i = 0; i < 9; i++) {
-        const planet = VIMSHOTTARI_SEQUENCE[(startIdx + i) % 9];
-        const adFullYears = (fullMahaYears * VIMSHOTTARI_YEARS[planet]) / 120;
-        const virtualStart = virtualCursor;
-        const virtualEnd = virtualCursor + adFullYears;
-        virtualCursor = virtualEnd;
-        if (virtualEnd <= alreadyElapsed) continue;
-        const visibleYears = virtualEnd - Math.max(virtualStart, alreadyElapsed);
-        const start = new Date(realCursor.getTime());
-        const end = addYears(start, visibleYears);
-        antardashas.push({ planet, start, end, years: visibleYears });
-        realCursor = end;
-      }
-      return antardashas;
     }
 
     const YONI_TABLE = [
@@ -1649,6 +1829,7 @@
       const order = ["Ascendant", "Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"];
       const listEl = el('planetList');
       const tableBody = el('planetTableBody');
+      const reportsBody = el('reportsPlanetBody');
 
       const orderedPlanets = order.map(name => name === "Ascendant" ? vdata.ascendant : vdata.planets.find(p => p.name === name));
 
@@ -1662,7 +1843,7 @@
           <div class="planet-name">${p.name}</div>
         </div>
         <div class="planet-right">
-          <div class="planet-house-badge">House ${p.house}</div>
+          <div class="planet-house-badge">H${p.house}</div>
           <div class="planet-rashi">${rashi}</div>
           <div class="planet-deg">${fmtDeg(p.longitude)}</div>
           <div class="chevron">›</div>
@@ -1671,15 +1852,18 @@
     `;
       }).join('');
 
-      tableBody.innerHTML = orderedPlanets.map(p => {
+      const tableRowsHtml = orderedPlanets.map(p => {
         const rashi = RASHI[p.vargaRashi][0];
         const motion = p.retro === null ? "—" : (p.retro ? '<span style="color:#E74C3C;font-weight:700">Retro</span>' : '<span style="color:#00B894;font-weight:700">Direct</span>');
         const combust = p.combust === null ? "—" : (p.combust ? '<span style="color:#E74C3C;font-weight:700">Yes</span>' : 'No');
         return `<tr>
       <td><b>${p.name}</b></td><td>${p.house}</td><td>${rashi}</td><td>${fmtDeg(p.longitude)}</td>
-      <td>${NAKSHATRAS[p.nak]}</td><td>${p.pada}</td><td>${motion}</td><td>${combust}</td><td>Active</td>
+      <td>${NAKSHATRAS[p.nak]}</td><td>${p.pada}</td><td>${motion}</td><td>${combust}</td>
     </tr>`;
       }).join('');
+
+      tableBody.innerHTML = tableRowsHtml;
+      if (reportsBody) reportsBody.innerHTML = tableRowsHtml;
     }
 
     /* Render Interactive House Aspect Selector & Badges */
@@ -1707,7 +1891,6 @@
         });
       });
 
-      // Calculate planets in selected house
       const targetSignIdx = (ascRashi + selectedHousePill - 1) % 12;
       const targetSignName = RASHI[targetSignIdx][0];
       el('selectedHouseLabel').textContent = `House ${selectedHousePill} (${targetSignName})`;
@@ -1722,7 +1905,6 @@
         housePlanetsEl.innerHTML = `<span class="badge gray">None</span>`;
       }
 
-      // Calculate aspected by
       const aspectingPlanets = [];
       const order = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"];
       order.forEach(name => {
@@ -1781,7 +1963,6 @@
 
     function computeShadbalaApprox(vdata) {
       const totalRupas = {};
-
       SHADBALA_PLANETS.forEach(name => {
         const p = vdata.planets.find(pl => pl.name === name);
         let score = 55;
@@ -1791,7 +1972,6 @@
         if (p.retro) score += 8;
         totalRupas[name] = Math.min(95, Math.max(35, score));
       });
-
       return totalRupas;
     }
 
@@ -1852,7 +2032,7 @@
       const tzOffsetMin = -dt.getTimezoneOffset();
       const tzSign = tzOffsetMin >= 0 ? "+" : "-";
       const tzAbs = Math.abs(tzOffsetMin);
-      el('biTz').textContent = `Asia/Calcutta (UTC${tzSign}${String(Math.floor(tzAbs / 60)).padStart(2, '0')}:${String(tzAbs % 60).padStart(2, '0')})`;
+      el('biTz').textContent = `UTC${tzSign}${String(Math.floor(tzAbs / 60)).padStart(2, '0')}:${String(tzAbs % 60).padStart(2, '0')}`;
     }
 
     /* Varga Chart Selector for Birth Mode */
@@ -2024,9 +2204,42 @@
     });
 
     /* PDF Download Action */
-    el('downloadPdfBtn').addEventListener('click', () => {
-      alert('Downloading PDF Report...');
+    function triggerPdf() {
+      alert('Generating PDF Report...');
       window.print();
+    }
+    el('downloadPdfBtn').addEventListener('click', triggerPdf);
+    const pdf2 = el('downloadPdfBtn2'); if (pdf2) pdf2.addEventListener('click', triggerPdf);
+
+    /* Bottom Navigation Tab Switcher Logic */
+    const navHome = el('navHomeBtn');
+    const navReports = el('navReportsBtn');
+    const navCenter = el('navCenterBtn');
+    const navRemedies = el('navRemediesBtn');
+    const navMore = el('navMoreBtn');
+
+    const tabHome = el('tabHomeView');
+    const tabReports = el('tabReportsView');
+    const tabRemedies = el('tabRemediesView');
+    const tabMore = el('tabMoreView');
+
+    function switchTab(activeBtn, activeTab) {
+      [navHome, navReports, navRemedies, navMore].forEach(b => b.classList.remove('active'));
+      [tabHome, tabReports, tabRemedies, tabMore].forEach(t => t.style.display = 'none');
+      activeBtn.classList.add('active');
+      activeTab.style.display = 'block';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    navHome.addEventListener('click', () => switchTab(navHome, tabHome));
+    navReports.addEventListener('click', () => switchTab(navReports, tabReports));
+    navRemedies.addEventListener('click', () => switchTab(navRemedies, tabRemedies));
+    navMore.addEventListener('click', () => switchTab(navMore, tabMore));
+    navCenter.addEventListener('click', () => {
+      selectedDateTime = new Date();
+      syncDailyPickers();
+      switchTab(navHome, tabHome);
+      triggerRecalculation(currentMode);
     });
 
     /* Initialization */

@@ -6,102 +6,91 @@
 <title>Kundali</title>
 <style>
   :root{
-    --bg1:#eef0fb; --bg2:#ffffff;
-    --purple:#6c5ce7; --purple-dark:#5b4bd1; --purple-light:#efeafd;
-    --card-bg:#ffffff; --card-bg2:#f7f6fd;
-    --card-border:#eceafb;
-    --text-main:#2c2a3d; --text-sub:#8b88a3;
-    --ok:#34c07a; --warn:#ef5a6f; --neutral:#f0a63a;
-    --radius:18px; --radius-sm:13px;
-    --shadow:0 4px 18px rgba(108,92,231,0.08);
+    --bg1:#0b0514; --bg2:#1a0f2a;
+    --gold:#e6b45a; --gold-light:#f5d799; --saffron:#ff7a3d;
+    --card-bg:rgba(255,255,255,0.055); --card-bg2:rgba(255,255,255,0.03);
+    --card-border:rgba(230,180,90,0.22);
+    --text-main:#fdf6ec; --text-sub:#bfaed9;
+    --ok:#7bd88f; --warn:#ff8a80; --neutral:#f6cf6b;
+    --radius:16px; --radius-sm:11px;
   }
   *{box-sizing:border-box;margin:0;padding:0;}
   html,body{
     min-height:100%;
     background:
-      radial-gradient(circle at 15% -5%, rgba(108,92,231,0.10) 0%, transparent 42%),
-      radial-gradient(circle at 95% 10%, rgba(108,92,231,0.07) 0%, transparent 40%),
+      radial-gradient(circle at 20% 0%, rgba(74,37,112,0.22) 0%, transparent 40%),
+      radial-gradient(circle at 90% 10%, rgba(51,26,84,0.18) 0%, transparent 38%),
       var(--bg1);
     color:var(--text-main);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     -webkit-font-smoothing:antialiased;
-    padding-bottom:88px; font-size:14.5px;
+    padding-bottom:34px; font-size:14.5px;
   }
   .wrap{max-width:560px;margin:0 auto;padding:14px 12px 6px;}
 
-  header.top{
-    display:flex;align-items:center;justify-content:space-between;
-    background:linear-gradient(135deg,#2a2350,#4b3a8f);
-    border-radius:0 0 26px 26px;margin:-14px -12px 14px;padding:18px 18px 26px;
-    color:#fff;
+  header.top{text-align:center;padding:16px 8px 10px;}
+  header.top .om{font-size:30px;color:var(--gold);text-shadow:0 0 16px rgba(230,180,90,.6);}
+  header.top h1{
+    font-size:22px;font-weight:700;letter-spacing:.4px;margin-top:4px;
+    background:linear-gradient(90deg,var(--gold-light),var(--saffron));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
   }
-  header.top .side-icon{width:22px;height:22px;stroke:rgba(255,255,255,0.85);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
-  header.top .center{text-align:center;}
-  header.top .om{font-size:24px;color:#f5c563;text-shadow:0 0 14px rgba(245,197,99,.6);}
-  header.top h1{font-size:19px;font-weight:700;letter-spacing:.3px;margin-top:2px;color:#fff;}
 
-  /* ---------- mode selector (pill group) ---------- */
-  .mode-bar{display:flex;gap:8px;margin:-16px 0 14px;padding:0 2px;overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .mode-btn{flex:0 0 auto;padding:11px 16px;border:none;border-radius:14px;background:#fff;color:var(--text-sub);font-size:12.5px;font-weight:700;text-align:center;line-height:1.3;box-shadow:var(--shadow);white-space:nowrap;}
-  .mode-btn.active{background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;}
-  .mode-btn .soon{display:block;font-size:8.5px;font-weight:600;opacity:.8;}
+  /* ---------- mode selector ---------- */
+  .mode-bar{display:flex;gap:6px;margin:14px 0;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:5px;}
+  .mode-btn{flex:1;padding:10px 4px;border:none;border-radius:8px;background:transparent;color:var(--text-sub);font-size:12px;font-weight:700;text-align:center;line-height:1.3;}
+  .mode-btn.active{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;}
+  .mode-btn .soon{display:block;font-size:9px;font-weight:600;opacity:.8;}
 
-  .date-bar{display:flex;gap:8px;align-items:center;margin:10px 0 8px;flex-wrap:wrap;}
-  .date-bar .field{flex:1;min-width:130px;display:flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:9px 10px;box-shadow:var(--shadow);}
-  .date-bar .field svg{width:16px;height:16px;stroke:var(--purple);fill:none;stroke-width:1.9;flex:0 0 auto;}
+  .date-bar{display:flex;gap:6px;align-items:center;margin:10px 0 8px;flex-wrap:wrap;}
   .date-bar input[type=date],.date-bar input[type=time]{
-    flex:1;min-width:0;background:transparent;border:none;color:var(--text-main);font-size:13px;font-family:inherit;padding:0;
+    flex:1;min-width:120px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-sm);
+    color:var(--text-main);font-size:13px;padding:9px 8px;font-family:inherit;
   }
-  .nav-bar{display:flex;gap:6px;margin-bottom:12px;background:#fff;border-radius:var(--radius-sm);padding:5px;box-shadow:var(--shadow);}
-  .nav-bar button{flex:1;padding:9px 6px;border:none;border-radius:9px;font-size:12px;font-weight:700;background:transparent;color:var(--text-sub);}
-  .nav-bar button.primary{background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;}
+  .nav-bar{display:flex;gap:6px;margin-bottom:12px;}
+  .nav-bar button{flex:1;padding:8px 6px;border:none;border-radius:9px;font-size:12px;font-weight:700;background:var(--card-bg);border:1px solid var(--card-border);color:var(--gold-light);}
+  .nav-bar button.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
 
-  .section{border-radius:var(--radius);overflow:hidden;margin-bottom:14px;border:1px solid var(--card-border);
-    background:var(--card-bg);box-shadow:var(--shadow);}
-  .sec-header{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:15px 16px 4px;font-size:15px;font-weight:700;letter-spacing:.1px;color:var(--text-main);}
-  .sec-header .htitle{display:flex;align-items:center;gap:9px;}
-  .sec-header .hicon{width:30px;height:30px;border-radius:10px;background:var(--purple-light);display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
-  .hicon svg,.btn-icon{width:17px;height:17px;stroke:var(--purple);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto;}
-  .btn-icon{width:14px;height:14px;stroke-width:2.1;margin-right:4px;vertical-align:-2px;}
-  .hicon svg.icon-filled{fill:var(--purple);stroke:none;}
-  .view-all-link{font-size:12px;font-weight:700;color:var(--purple);background:none;border:none;padding:4px;}
-  .sec-body{padding:10px 16px 16px;}
+  .section{border-radius:var(--radius);overflow:hidden;margin-bottom:12px;border:1px solid var(--card-border);
+    background:linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015));}
+  .sec-header{display:flex;align-items:center;gap:10px;padding:13px 15px;font-size:14.5px;font-weight:700;letter-spacing:.3px;}
+  .sec-header .hicon{font-size:18px;}
+  .hicon svg,.btn-icon{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto;vertical-align:-4px;}
+  .btn-icon{width:14px;height:14px;stroke-width:2;margin-right:3px;vertical-align:-2px;}
+  .hicon svg.icon-filled{fill:var(--gold);stroke:none;}
+  .sec-body{padding:0 13px 14px;}
 
   .loc-msg{text-align:center;font-size:14px;font-weight:700;color:var(--warn);padding:10px 4px;}
   .loc-detail{text-align:center;font-size:11px;color:var(--text-sub);padding:0 4px 10px;word-break:break-word;}
-  .loc-btn{display:block;width:100%;padding:12px;border:none;border-radius:13px;font-size:13.5px;font-weight:700;margin-bottom:8px;
-    background:var(--card-bg2);border:1px solid var(--card-border);color:var(--text-main);}
+  .loc-btn{display:block;width:100%;padding:11px;border:none;border-radius:11px;font-size:13.5px;font-weight:700;margin-bottom:8px;
+    background:var(--card-bg2);border:1px solid var(--card-border);color:var(--gold-light);}
   .loc-btn:last-child{margin-bottom:0;}
-  .loc-btn.primary{background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;border:none;}
-  #locManualForm input{width:100%;padding:10px 11px;border-radius:11px;border:1px solid var(--card-border);background:#fff;color:var(--text-main);font-size:12.5px;margin-bottom:8px;}
+  .loc-btn.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
+  #locManualForm input{width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--card-border);background:rgba(255,255,255,.05);color:var(--text-main);font-size:12.5px;margin-bottom:8px;}
 
-  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
-  .info-item{background:var(--card-bg2);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:11px 12px;display:flex;align-items:center;gap:10px;}
-  .info-item .ico{width:34px;height:34px;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;flex:0 0 auto;box-shadow:0 2px 6px rgba(108,92,231,0.10);}
-  .info-item .ico svg{width:17px;height:17px;stroke:var(--purple);fill:none;stroke-width:1.9;}
-  .info-item .txt{min-width:0;}
-  .info-item .ilabel{font-size:10px;color:var(--text-sub);letter-spacing:.2px;}
-  .info-item .ival{font-size:13.5px;font-weight:700;margin-top:2px;color:var(--text-main);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+  .info-item{background:var(--card-bg2);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:9px 10px;}
+  .info-item .ilabel{font-size:10px;color:var(--text-sub);text-transform:uppercase;letter-spacing:.5px;}
+  .info-item .ival{font-size:14px;font-weight:700;margin-top:3px;}
   .info-item.span2{grid-column:1/-1;}
-  .info-item.plain{display:block;}
 
   .varga-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
-  .varga-btn{flex:0 0 auto;padding:8px 12px;border-radius:10px;border:1px solid var(--card-border);background:var(--card-bg2);color:var(--text-sub);font-size:12px;font-weight:700;white-space:nowrap;}
-  .varga-btn.active{background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;border:none;}
-  .varga-current{text-align:center;font-size:11.5px;color:var(--purple);margin-top:8px;font-weight:600;}
+  .varga-btn{flex:0 0 auto;padding:8px 12px;border-radius:9px;border:1px solid var(--card-border);background:var(--card-bg2);color:var(--text-sub);font-size:12px;font-weight:700;white-space:nowrap;}
+  .varga-btn.active{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
+  .varga-current{text-align:center;font-size:11.5px;color:var(--gold-light);margin-top:8px;}
 
   .chart-wrap{display:flex;justify-content:center;padding:6px 0 4px;}
   .chart-desc{text-align:center;font-size:12.5px;color:var(--text-sub);padding:0 4px 8px;line-height:1.4;}
   .chart-wrap svg{width:100%;max-width:400px;height:auto;}
-  .chart-house-num{fill:var(--purple);font-size:11px;font-weight:700;}
+  .chart-house-num{fill:var(--gold);font-size:11px;font-weight:700;}
   .chart-planet{fill:var(--text-main);font-size:12.5px;font-weight:700;}
   .chart-planet.retro{fill:var(--warn);}
-  .chart-line{stroke:var(--card-border);stroke-width:1.6;fill:none;}
+  .chart-line{stroke:var(--card-border);stroke-width:1.4;fill:none;}
 
   table.ptable{width:100%;border-collapse:collapse;font-size:11.3px;}
-  table.ptable th{color:var(--purple);text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;padding:6px 5px;border-bottom:1px solid var(--card-border);white-space:nowrap;}
+  table.ptable th{color:var(--gold);text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;padding:6px 5px;border-bottom:1px solid var(--card-border);white-space:nowrap;}
   table.ptable th small{display:block;color:var(--text-sub);font-size:8px;text-transform:none;letter-spacing:0;font-weight:500;}
-  table.ptable td{padding:7px 5px;border-bottom:1px dashed var(--card-border);white-space:nowrap;color:var(--text-main);}
+  table.ptable td{padding:7px 5px;border-bottom:1px dashed rgba(255,255,255,0.06);white-space:nowrap;}
   table.ptable tr:last-child td{border-bottom:none;}
   .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
   .retro-tag{color:var(--warn);font-weight:700;}
@@ -109,110 +98,39 @@
   .combust-yes{color:var(--warn);font-weight:700;}
   .combust-no{color:var(--text-sub);}
 
-  /* ---------- planetary positions: icon list + expandable detail ---------- */
-  .planet-list-row{display:flex;align-items:center;gap:11px;padding:11px 2px;border-bottom:1px solid var(--card-border);cursor:pointer;}
-  .planet-list-row:last-child{border-bottom:none;}
-  .planet-list-row .p-ico{width:36px;height:36px;border-radius:11px;flex:0 0 auto;display:flex;align-items:center;justify-content:center;font-size:16px;}
-  .planet-list-row .p-name{font-weight:700;font-size:13.5px;flex:1;min-width:56px;}
-  .planet-list-row .p-house{width:26px;color:var(--text-sub);font-size:12.5px;text-align:center;}
-  .planet-list-row .p-rashi{flex:1.1;color:var(--text-sub);font-size:12.5px;}
-  .planet-list-row .p-deg{width:64px;text-align:right;font-size:12.5px;color:var(--text-main);font-weight:600;}
-  .planet-list-row .p-chevron{width:16px;height:16px;stroke:var(--text-sub);fill:none;stroke-width:2;margin-left:2px;transition:transform .2s ease;flex:0 0 auto;}
-  .planet-list-row.open .p-chevron{transform:rotate(90deg);}
-  .planet-detail{max-height:0;overflow:hidden;transition:max-height .3s ease;background:var(--card-bg2);border-radius:11px;}
-  .planet-list-row.open + .planet-detail{max-height:400px;margin:0 0 8px;}
-  .planet-detail-inner{padding:10px 12px;display:grid;grid-template-columns:1fr 1fr;gap:7px 12px;font-size:11.5px;}
-  .planet-detail-inner .dk{color:var(--text-sub);}
-  .planet-detail-inner .dv{font-weight:700;color:var(--text-main);}
-
-  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;}
+  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .summary-grid .info-item .ival{font-size:13.5px;}
-  .summary-extra{display:none;}
-  .summary-extra.show{display:grid;}
 
-  /* ---------- house aspects (pill selector) ---------- */
-  .house-pill-scroll{display:flex;gap:7px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;}
-  .house-pill{flex:0 0 auto;min-width:52px;padding:9px 8px;border-radius:13px;border:1px solid var(--card-border);background:var(--card-bg2);text-align:center;}
-  .house-pill .hp-num{font-weight:700;font-size:14px;}
-  .house-pill .hp-sign{font-size:9.5px;color:var(--text-sub);}
-  .house-pill.active{background:linear-gradient(135deg,var(--purple),var(--purple-dark));border:none;}
-  .house-pill.active .hp-num,.house-pill.active .hp-sign{color:#fff;}
-  .aspect-block{margin-top:12px;}
-  .aspect-block .ab-title{font-size:11.5px;font-weight:700;color:var(--text-sub);margin-bottom:7px;}
-  .aspect-chip-row{display:flex;flex-wrap:wrap;gap:7px;}
-  .aspect-chip{padding:8px 12px;border-radius:11px;background:var(--card-bg2);border:1px solid var(--card-border);font-size:12.5px;font-weight:700;display:flex;align-items:center;gap:5px;}
-  .aspect-chip.asc{background:var(--purple-light);color:var(--purple-dark);}
-  .aspect-chip .achip-sub{font-size:9.5px;color:var(--text-sub);font-weight:500;}
-
-  /* ---------- dasha ---------- */
   .dasha-hint{font-size:11px;color:var(--text-sub);margin-bottom:8px;text-align:center;}
-  .dasha-row{background:var(--card-bg2);border:1px solid var(--card-border);border-radius:var(--radius-sm);margin-bottom:8px;overflow:hidden;}
-  .dasha-row-head{display:flex;justify-content:space-between;align-items:center;padding:11px 12px;}
-  .dasha-row.current{border-color:var(--purple);background:var(--purple-light);}
+  .dasha-row{background:var(--card-bg2);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);margin-bottom:7px;overflow:hidden;}
+  .dasha-row-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;}
+  .dasha-row.current{border-color:var(--gold);}
   .dasha-planet{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:7px;}
-  .dasha-planet .now-tag{font-size:9px;font-weight:700;color:#fff;background:var(--purple);border-radius:6px;padding:2px 6px;}
+  .dasha-planet .now-tag{font-size:9px;font-weight:700;color:#241206;background:var(--gold);border-radius:5px;padding:1px 5px;}
   .dasha-range{font-size:11px;color:var(--text-sub);text-align:right;}
-  .dasha-chevron{width:13px;height:13px;stroke:var(--purple);fill:none;stroke-width:2.2;margin-left:8px;transition:transform .25s ease;}
+  .dasha-chevron{font-size:11px;color:var(--gold);margin-left:8px;transition:transform .25s ease;}
   .dasha-row.open .dasha-chevron{transform:rotate(180deg);}
-  .dasha-progress{height:4px;background:var(--card-border);margin:0 12px 10px;border-radius:3px;overflow:hidden;}
-  .dasha-progress-fill{height:100%;background:linear-gradient(90deg,var(--purple),var(--purple-dark));border-radius:3px;}
   .antardasha-wrap{max-height:0;overflow:hidden;transition:max-height .3s ease;}
   .dasha-row.open .antardasha-wrap{max-height:900px;}
   .antardasha-list{padding:0 12px 10px;}
-  .antardasha-item{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;font-size:11.5px;border-top:1px dashed var(--card-border);}
-  .antardasha-item.current{color:var(--purple-dark);font-weight:700;}
+  .antardasha-item{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;font-size:11.5px;border-top:1px dashed rgba(255,255,255,0.07);}
+  .antardasha-item.current{color:var(--gold-light);font-weight:700;}
   .antardasha-item .ad-name{display:flex;align-items:center;gap:6px;}
-  .antardasha-item .now-tag{font-size:8.5px;font-weight:700;color:#fff;background:var(--purple);border-radius:5px;padding:1px 5px;}
+  .antardasha-item .now-tag{font-size:8.5px;font-weight:700;color:#241206;background:var(--gold);border-radius:4px;padding:1px 4px;}
 
-  /* ---------- shadbala / bhavabala: progress bars + donut ---------- */
-  .bala-toggle{display:flex;gap:8px;margin-bottom:12px;}
-  .bala-toggle button{flex:1;padding:8px;border-radius:10px;border:1px solid var(--card-border);background:var(--card-bg2);color:var(--text-sub);font-size:12px;font-weight:700;}
-  .bala-toggle button.active{background:linear-gradient(135deg,var(--purple),var(--purple-dark));color:#fff;border:none;}
-  .bala-overview{display:flex;align-items:center;gap:16px;}
-  .bala-bars{flex:1;min-width:0;}
-  .bala-bar-row{display:flex;align-items:center;gap:9px;margin-bottom:10px;}
-  .bala-bar-row .bb-name{width:58px;font-size:12px;font-weight:700;flex:0 0 auto;}
-  .bala-bar-row .bb-track{flex:1;height:8px;background:var(--card-border);border-radius:5px;overflow:hidden;}
-  .bala-bar-row .bb-fill{height:100%;border-radius:5px;}
-  .bala-bar-row .bb-pct{width:42px;text-align:right;font-size:11.5px;color:var(--text-sub);font-weight:600;flex:0 0 auto;}
-  .donut-wrap{flex:0 0 auto;position:relative;width:92px;height:92px;}
-  .donut-wrap svg{width:92px;height:92px;transform:rotate(-90deg);}
-  .donut-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;}
-  .donut-label .dl-title{font-size:9px;color:var(--text-sub);font-weight:700;}
-  .donut-label .dl-pct{font-size:16px;font-weight:800;color:var(--purple-dark);}
-  .bala-details-toggle{margin-top:14px;text-align:center;}
-  .bala-details-toggle button{background:none;border:none;color:var(--purple);font-size:12px;font-weight:700;}
-  .bala-details{max-height:0;overflow:hidden;transition:max-height .35s ease;}
-  .bala-details.show{max-height:3000px;margin-top:10px;}
+  .soon-panel{text-align:center;padding:50px 20px;font-size:20px;font-weight:700;color:var(--gold-light);}
 
-  .soon-panel{text-align:center;padding:50px 20px;font-size:20px;font-weight:700;color:var(--purple-dark);}
-
-  footer{text-align:center;font-size:10px;color:var(--text-sub);opacity:.8;padding:14px 20px 90px;line-height:1.5;}
+  footer{text-align:center;font-size:10px;color:var(--text-sub);opacity:.6;padding:14px 20px 0;line-height:1.5;}
 
   #loaderOverlay{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:rgba(238,240,251,0.92);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease;}
+    background:rgba(11,5,20,0.88);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease;}
   #loaderOverlay.show{opacity:1;visibility:visible;}
-  .spinner{width:44px;height:44px;border-radius:50%;border:3px solid rgba(108,92,231,0.18);border-top-color:var(--purple);animation:spin 0.9s linear infinite;margin-bottom:16px;}
+  .spinner{width:44px;height:44px;border-radius:50%;border:3px solid rgba(230,180,90,0.25);border-top-color:var(--gold);animation:spin 0.9s linear infinite;margin-bottom:16px;}
   @keyframes spin{to{transform:rotate(360deg);}}
-  .loader-text{font-size:15px;font-weight:700;color:var(--purple-dark);letter-spacing:.3px;}
+  .loader-text{font-size:15px;font-weight:700;color:var(--gold-light);letter-spacing:.3px;}
   .loader-sub{font-size:12px;color:var(--text-sub);margin-top:5px;}
   [disabled]{opacity:.45;pointer-events:none;}
-
-  /* ---------- bottom nav ---------- */
-  .bottom-nav{position:fixed;left:0;right:0;bottom:0;z-index:500;background:#fff;border-top:1px solid var(--card-border);
-    box-shadow:0 -4px 18px rgba(108,92,231,0.10);padding:8px 6px calc(8px + env(safe-area-inset-bottom));}
-  .bottom-nav-inner{max-width:560px;margin:0 auto;display:flex;justify-content:space-around;align-items:flex-end;position:relative;}
-  .bn-item{display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--text-sub);font-size:9.5px;font-weight:700;padding:4px 8px;}
-  .bn-item svg{width:20px;height:20px;stroke:var(--text-sub);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
-  .bn-item.active{color:var(--purple-dark);}
-  .bn-item.active svg{stroke:var(--purple-dark);}
-  .bn-item.center{margin-top:-30px;}
-  .bn-item.center .bn-center-btn{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--purple),var(--purple-dark));
-    display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(108,92,231,0.4);}
-  .bn-item.center .bn-center-btn svg{width:24px;height:24px;stroke:#fff;}
-  .bn-item.center span{color:var(--purple-dark);margin-top:2px;}
 </style>
-
 </head>
 <body>
 <svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
@@ -234,18 +152,6 @@
   <symbol id="icon-columns" viewBox="0 0 24 24"><path d="M4 21h16"/><path d="M5 21V9M9 21V9M15 21V9M19 21V9"/><path d="M3 9l9-6 9 6"/></symbol>
   <symbol id="icon-cycle" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14.5-4.5"/><path d="M18.5 4v4h-4"/><path d="M20 12a8 8 0 0 1-14.5 4.5"/><path d="M5.5 20v-4h4"/></symbol>
   <symbol id="icon-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></symbol>
-  <symbol id="icon-cloud" viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.5-8.97A5.5 5.5 0 0 1 17 8.06 4 4 0 0 1 16.5 18H7z"/></symbol>
-  <symbol id="icon-menu" viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h16"/></symbol>
-  <symbol id="icon-home" viewBox="0 0 24 24"><path d="M4 11.5L12 4l8 7.5"/><path d="M6 10v10h12V10"/></symbol>
-  <symbol id="icon-reports" viewBox="0 0 24 24"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8.5 8h7M8.5 12h7M8.5 16h4"/></symbol>
-  <symbol id="icon-leaf" viewBox="0 0 24 24"><path d="M20 4C10 4 4 10 4 20c10 0 16-6 16-16z"/><path d="M4 20L14 10"/></symbol>
-  <symbol id="icon-dots" viewBox="0 0 24 24"><rect x="4" y="4" width="6" height="6" rx="1.3"/><rect x="14" y="4" width="6" height="6" rx="1.3"/><rect x="4" y="14" width="6" height="6" rx="1.3"/><rect x="14" y="14" width="6" height="6" rx="1.3"/></symbol>
-  <symbol id="icon-chevron-right" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
-  <symbol id="icon-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></symbol>
-  <symbol id="icon-user" viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M5 20c1.2-4 4-6 7-6s5.8 2 7 6"/></symbol>
-  <symbol id="icon-moon" viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5z"/></symbol>
-  <symbol id="icon-sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><path d="M12 2v3M12 19v3M4.2 4.2l2.1 2.1M17.7 17.7l2.1 2.1M2 12h3M19 12h3M4.2 19.8l2.1-2.1M17.7 6.3l2.1-2.1"/></symbol>
-  <symbol id="icon-tag" viewBox="0 0 24 24"><path d="M3 3h8l10 10-8 8L3 11z"/><circle cx="8.3" cy="8.3" r="1.6" fill="currentColor" stroke="none"/></symbol>
 </defs>
 </svg>
 <div id="loaderOverlay">
@@ -256,25 +162,21 @@
 <div class="wrap">
 
   <header class="top">
-    <svg class="side-icon"><use href="#icon-cloud"/></svg>
-    <div class="center">
-      <div class="om">ॐ</div>
-      <h1>Kundali</h1>
-    </div>
-    <svg class="side-icon"><use href="#icon-menu"/></svg>
+    <div class="om">ॐ</div>
+    <h1>Kundali</h1>
   </header>
 
-  <div class="mode-bar" id="modeBar">
-    <button class="mode-btn active" id="modeDailyBtn">Daily Kundali</button>
-    <button class="mode-btn" id="modeBirthBtn">Birth Kundali</button>
-    <button class="mode-btn" id="modeMarriageBtn">Marriage Match<span class="soon">(Coming Soon)</span></button>
+  <div class="mode-bar">
+    <button class="mode-btn active" id="modeDailyBtn">○ Daily Kundali</button>
+    <button class="mode-btn" id="modeBirthBtn">○ Birth Kundali</button>
+    <button class="mode-btn" id="modeMarriageBtn">○ Marriage Match<span class="soon">(Coming Soon)</span></button>
   </div>
 
   <!-- ============ DAILY KUNDALI PANEL ============ -->
   <div id="dailyPanel">
     <div class="date-bar">
-      <div class="field"><svg><use href="#icon-calendar"/></svg><input type="date" id="dailyDatePicker"></div>
-      <div class="field"><svg><use href="#icon-clock"/></svg><input type="time" id="dailyTimePicker" step="60"></div>
+      <input type="date" id="dailyDatePicker">
+      <input type="time" id="dailyTimePicker" step="60">
     </div>
     <div class="nav-bar">
       <button id="prevDayBtn">◀ Previous Day</button>
@@ -286,8 +188,8 @@
   <!-- ============ BIRTH KUNDALI PANEL ============ -->
   <div id="birthPanel" style="display:none;">
     <div class="date-bar">
-      <div class="field"><svg><use href="#icon-calendar"/></svg><input type="date" id="birthDatePicker"></div>
-      <div class="field"><svg><use href="#icon-clock"/></svg><input type="time" id="birthTimePicker" step="60"></div>
+      <input type="date" id="birthDatePicker">
+      <input type="time" id="birthTimePicker" step="60">
     </div>
   </div>
 
@@ -323,47 +225,40 @@
   <div id="resultContainer" style="display:none;">
 
     <div class="section">
-      <div class="sec-header"><div class="htitle"><span class="hicon"><svg><use href="#icon-clipboard"/></svg></span>Basic Information</div></div>
+      <div class="sec-header"><span class="hicon"><svg><use href="#icon-clipboard"/></svg></span> Basic Information</div>
       <div class="sec-body">
         <div class="info-grid">
-          <div class="info-item span2"><div class="ico"><svg><use href="#icon-calendar"/></svg></div><div class="txt"><div class="ilabel">Date</div><div class="ival" id="biDate">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-clock"/></svg></div><div class="txt"><div class="ilabel">Time</div><div class="ival" id="biTime">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-calendar"/></svg></div><div class="txt"><div class="ilabel">Weekday</div><div class="ival" id="biWeekday">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-pin"/></svg></div><div class="txt"><div class="ilabel">Location</div><div class="ival" id="biLocation">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-globe"/></svg></div><div class="txt"><div class="ilabel">Time Zone</div><div class="ival" id="biTz">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-target"/></svg></div><div class="txt"><div class="ilabel">Latitude</div><div class="ival" id="biLat">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-target"/></svg></div><div class="txt"><div class="ilabel">Longitude</div><div class="ival" id="biLon">--</div></div></div>
-          <div class="info-item span2 plain"><button id="changeLocBtn" class="loc-btn">Change Location</button></div>
+          <div class="info-item span2"><div class="ilabel"><svg class="btn-icon"><use href="#icon-calendar"/></svg>Date</div><div class="ival" id="biDate">--</div></div>
+          <div class="info-item"><div class="ilabel"><svg class="btn-icon"><use href="#icon-clock"/></svg>Time</div><div class="ival" id="biTime">--</div></div>
+          <div class="info-item"><div class="ilabel"><svg class="btn-icon"><use href="#icon-calendar"/></svg>Weekday</div><div class="ival" id="biWeekday">--</div></div>
+          <div class="info-item"><div class="ilabel"><svg class="btn-icon"><use href="#icon-pin"/></svg>Location</div><div class="ival" id="biLocation">--</div></div>
+          <div class="info-item"><div class="ilabel"><svg class="btn-icon"><use href="#icon-globe"/></svg>Time Zone</div><div class="ival" id="biTz">--</div></div>
+          <div class="info-item"><div class="ilabel">Latitude</div><div class="ival" id="biLat">--</div></div>
+          <div class="info-item"><div class="ilabel">Longitude</div><div class="ival" id="biLon">--</div></div>
+          <div class="info-item span2"><button id="changeLocBtn" class="loc-btn">Change Location</button></div>
         </div>
       </div>
     </div>
 
     <div class="section">
-      <div class="sec-header">
-        <div class="htitle"><span class="hicon"><svg><use href="#icon-notes"/></svg></span><span id="summarySectionTitle">Daily Summary</span></div>
-        <button class="view-all-link" id="summaryViewAllBtn">View all</button>
-      </div>
+      <div class="sec-header"><span class="hicon"><svg><use href="#icon-notes"/></svg></span> <span id="summarySectionTitle">Daily Summary</span></div>
       <div class="sec-body">
         <div class="summary-grid">
-          <div class="info-item"><div class="ico"><svg><use href="#icon-star"/></svg></div><div class="txt"><div class="ilabel">Ascendant</div><div class="ival" id="sumAsc">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-moon"/></svg></div><div class="txt"><div class="ilabel">Moon Sign</div><div class="ival" id="sumMoonSign">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-sun"/></svg></div><div class="txt"><div class="ilabel">Sun Sign</div><div class="ival" id="sumSunSign">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-star"/></svg></div><div class="txt"><div class="ilabel" id="sumNakLabel">Moon Nakshatra</div><div class="ival" id="sumNak">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-cycle"/></svg></div><div class="txt"><div class="ilabel">Yoga</div><div class="ival" id="sumYogaVal">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-moon"/></svg></div><div class="txt"><div class="ilabel">Tithi</div><div class="ival" id="sumTithiVal">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-tag"/></svg></div><div class="txt"><div class="ilabel">Varna</div><div class="ival" id="sumVarna">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-tag"/></svg></div><div class="txt"><div class="ilabel">Yoni</div><div class="ival" id="sumYoni">--</div></div></div>
-        </div>
-        <div class="summary-grid summary-extra" id="summaryExtra">
-          <div class="info-item"><div class="ico"><svg><use href="#icon-user"/></svg></div><div class="txt"><div class="ilabel">Ascendant Lord</div><div class="ival" id="sumAscLord">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-grid"/></svg></div><div class="txt"><div class="ilabel" id="sumPadaLabel">Moon Nakshatra Pada</div><div class="ival" id="sumPada">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-tag"/></svg></div><div class="txt"><div class="ilabel">Vashya</div><div class="ival" id="sumVashya">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-tag"/></svg></div><div class="txt"><div class="ilabel">Gana</div><div class="ival" id="sumGana">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-tag"/></svg></div><div class="txt"><div class="ilabel">Nadi</div><div class="ival" id="sumNadi">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-user"/></svg></div><div class="txt"><div class="ilabel">Moon Sign Lord</div><div class="ival" id="sumMoonLord">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-leaf"/></svg></div><div class="txt"><div class="ilabel">Tatva (Element)</div><div class="ival" id="sumTatva">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-edit"/></svg></div><div class="txt"><div class="ilabel">Name Alphabet</div><div class="ival" id="sumNameAlpha">--</div></div></div>
-          <div class="info-item"><div class="ico"><svg><use href="#icon-house"/></svg></div><div class="txt"><div class="ilabel">Paya</div><div class="ival" id="sumPaya">--</div></div></div>
+          <div class="info-item"><div class="ilabel">Ascendant</div><div class="ival" id="sumAsc">--</div></div>
+          <div class="info-item"><div class="ilabel">Ascendant Lord</div><div class="ival" id="sumAscLord">--</div></div>
+          <div class="info-item"><div class="ilabel">Moon Sign</div><div class="ival" id="sumMoonSign">--</div></div>
+          <div class="info-item"><div class="ilabel">Sun Sign</div><div class="ival" id="sumSunSign">--</div></div>
+          <div class="info-item"><div class="ilabel" id="sumNakLabel">Moon Nakshatra</div><div class="ival" id="sumNak">--</div></div>
+          <div class="info-item"><div class="ilabel" id="sumPadaLabel">Moon Nakshatra Pada</div><div class="ival" id="sumPada">--</div></div>
+          <div class="info-item"><div class="ilabel">Varna</div><div class="ival" id="sumVarna">--</div></div>
+          <div class="info-item"><div class="ilabel">Vashya</div><div class="ival" id="sumVashya">--</div></div>
+          <div class="info-item"><div class="ilabel">Yoni</div><div class="ival" id="sumYoni">--</div></div>
+          <div class="info-item"><div class="ilabel">Gana</div><div class="ival" id="sumGana">--</div></div>
+          <div class="info-item"><div class="ilabel">Nadi</div><div class="ival" id="sumNadi">--</div></div>
+          <div class="info-item"><div class="ilabel">Moon Sign Lord</div><div class="ival" id="sumMoonLord">--</div></div>
+          <div class="info-item"><div class="ilabel">Tatva (Element)</div><div class="ival" id="sumTatva">--</div></div>
+          <div class="info-item"><div class="ilabel">Name Alphabet</div><div class="ival" id="sumNameAlpha">--</div></div>
+          <div class="info-item"><div class="ilabel">Paya</div><div class="ival" id="sumPaya">--</div></div>
         </div>
       </div>
     </div>
@@ -385,13 +280,9 @@
     </div>
 
     <div class="section">
-      <div class="sec-header">
-        <div class="htitle"><span class="hicon"><svg><use href="#icon-planet"/></svg></span>Planetary Positions</div>
-        <button class="view-all-link" id="planetViewAllBtn">View all</button>
-      </div>
+      <div class="sec-header"><span class="hicon"><svg><use href="#icon-planet"/></svg></span> Planetary Positions</div>
       <div class="sec-body">
-        <div id="planetListView"></div>
-        <div class="table-scroll" id="planetTableWrap" style="display:none;">
+        <div class="table-scroll">
           <table class="ptable" id="planetTable">
             <thead><tr>
               <th>Planet</th><th>House</th><th>House Lord</th><th>Rashi</th><th>Sign Lord</th>
@@ -418,21 +309,9 @@
     </div>
 
     <div class="section">
-      <div class="sec-header">
-        <div class="htitle"><span class="hicon"><svg><use href="#icon-house"/></svg></span>House Aspects</div>
-        <button class="view-all-link" id="houseAspectsViewAllBtn">View all</button>
-      </div>
+      <div class="sec-header"><span class="hicon"><svg><use href="#icon-house"/></svg></span> House Aspects</div>
       <div class="sec-body">
-        <div class="house-pill-scroll" id="housePillScroll"></div>
-        <div class="aspect-block">
-          <div class="ab-title">Planets in House <span id="hapHouseNum">1</span></div>
-          <div class="aspect-chip-row" id="hapPlaced"></div>
-        </div>
-        <div class="aspect-block">
-          <div class="ab-title">Aspected by</div>
-          <div class="aspect-chip-row" id="hapAspectedBy"></div>
-        </div>
-        <div class="table-scroll" id="houseAspectsTableWrap" style="display:none;margin-top:14px;">
+        <div class="table-scroll">
           <table class="ptable" id="houseAspectsTable">
             <thead><tr>
               <th>House</th><th>Sign</th><th>Planets Placed</th><th>Aspected By</th>
@@ -444,59 +323,39 @@
     </div>
 
     <div class="section">
-      <div class="sec-header"><div class="htitle"><span class="hicon"><svg class="icon-filled"><use href="#icon-bolt"/></svg></span>Shadbala (Planet Strength)</div></div>
+      <div class="sec-header"><span class="hicon"><svg class="icon-filled"><use href="#icon-bolt"/></svg></span> Shadbala</div>
       <div class="sec-body">
-        <div class="dasha-hint">Based on the Rashi (D1) chart · six-fold planetary strength</div>
-        <div class="bala-overview">
-          <div class="bala-bars" id="shadbalaBars"></div>
-          <div class="donut-wrap">
-            <svg viewBox="0 0 100 100">
-              <circle cx="50" cy="50" r="42" fill="none" stroke="#eceafb" stroke-width="10"/>
-              <circle id="shadbalaDonutCircle" cx="50" cy="50" r="42" fill="none" stroke="#6c5ce7" stroke-width="10" stroke-linecap="round" stroke-dasharray="264" stroke-dashoffset="264"/>
-            </svg>
-            <div class="donut-label"><div class="dl-title">Overall</div><div class="dl-pct" id="shadbalaOverallPct">--</div></div>
-          </div>
-        </div>
-        <div class="bala-details-toggle"><button id="shadbalaDetailsBtn">View full Shadbala table</button></div>
-        <div class="bala-details" id="shadbalaDetailsWrap">
-          <div class="table-scroll">
-            <table class="ptable" id="shadbalaTable">
-              <thead><tr>
-                <th>Planet</th><th>Uccha<br><small> (of 60)</small></th><th>Sapta-varga<br><small> (of 315)</small></th><th>Ojayugma<br><small> (of 30)</small></th><th>Kendradi<br><small> (of 60)</small></th><th>Drekkana<br><small> (of 15)</small></th><th>Sthana Total<br><small> (of 480)</small></th>
-                <th>Dig<br><small> (of 60)</small></th><th>Kala (Paksha)<br><small> (of 60)</small></th><th>Chesta<br><small> (of 60)</small></th><th>Naisargika<br><small> (of 60)</small></th><th>Drik<br><small> (-45 to 60)</small></th>
-                <th>Total (Virupas)<br><small> (of 780)</small></th><th>Total (Rupas)<br><small> (of 13)</small></th><th>Required</th><th>Verdict</th>
-              </tr></thead>
-              <tbody id="shadbalaBody"></tbody>
-            </table>
-          </div>
+        <div class="dasha-hint">Based on the Rashi (D1) chart · six-fold planetary strength in Virupas (60 Virupas = 1 Rupa)</div>
+        <div class="table-scroll">
+          <table class="ptable" id="shadbalaTable">
+            <thead><tr>
+              <th>Planet</th><th>Uccha<br><small> (of 60)</small></th><th>Sapta-varga<br><small> (of 315)</small></th><th>Ojayugma<br><small> (of 30)</small></th><th>Kendradi<br><small> (of 60)</small></th><th>Drekkana<br><small> (of 15)</small></th><th>Sthana Total<br><small> (of 480)</small></th>
+              <th>Dig<br><small> (of 60)</small></th><th>Kala (Paksha)<br><small> (of 60)</small></th><th>Chesta<br><small> (of 60)</small></th><th>Naisargika<br><small> (of 60)</small></th><th>Drik<br><small> (-45 to 60)</small></th>
+              <th>Total (Virupas)<br><small> (of 780)</small></th><th>Total (Rupas)<br><small> (of 13)</small></th><th>Required</th><th>Verdict</th>
+            </tr></thead>
+            <tbody id="shadbalaBody"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
     <div class="section">
-      <div class="sec-header"><div class="htitle"><span class="hicon"><svg><use href="#icon-columns"/></svg></span>Bhavabala (House Strength)</div></div>
+      <div class="sec-header"><span class="hicon"><svg><use href="#icon-columns"/></svg></span> Bhavabala</div>
       <div class="sec-body">
-        <div class="dasha-hint">Based on the Rashi (D1) chart · house strength</div>
-        <div class="bala-bars" id="bhavabalaBars"></div>
-        <div class="bala-details-toggle"><button id="bhavabalaDetailsBtn">View full Bhavabala table</button></div>
-        <div class="bala-details" id="bhavabalaDetailsWrap">
-          <div class="table-scroll">
-            <table class="ptable" id="bhavabalaTable">
-              <thead><tr>
-                <th>House</th><th>Sign</th><th>Lord</th><th>Bhavadhipati<br><small> (of 780)</small></th><th>Dig<br><small> (of 60)</small></th><th>Drishti<br><small> (-45 to 60)</small></th><th>Total (Virupas)<br><small> (of 900)</small></th><th>Total (Rupas)<br><small> (of 15)</small></th>
-              </tr></thead>
-              <tbody id="bhavabalaBody"></tbody>
-            </table>
-          </div>
+        <div class="dasha-hint">Based on the Rashi (D1) chart · house strength in Virupas</div>
+        <div class="table-scroll">
+          <table class="ptable" id="bhavabalaTable">
+            <thead><tr>
+              <th>House</th><th>Sign</th><th>Lord</th><th>Bhavadhipati<br><small> (of 780)</small></th><th>Dig<br><small> (of 60)</small></th><th>Drishti<br><small> (-45 to 60)</small></th><th>Total (Virupas)<br><small> (of 900)</small></th><th>Total (Rupas)<br><small> (of 15)</small></th>
+            </tr></thead>
+            <tbody id="bhavabalaBody"></tbody>
+          </table>
         </div>
       </div>
     </div>
 
     <div class="section">
-      <div class="sec-header">
-        <div class="htitle"><span class="hicon"><svg><use href="#icon-cycle"/></svg></span>Dashas (Vimshottari)</div>
-        <button class="view-all-link" id="dashaViewAllBtn">View all</button>
-      </div>
+      <div class="sec-header"><span class="hicon"><svg><use href="#icon-cycle"/></svg></span> Vimshottari Dasha</div>
       <div class="sec-body">
         <div class="dasha-hint">Tap a Mahadasha to view its Antardashas</div>
         <div id="dashaTable"></div>
@@ -510,23 +369,9 @@
 
   </div><!-- /resultContainer -->
 
-  <div id="otherNavPanel" style="display:none;">
-    <div class="soon-panel" id="otherNavPanelText">Coming Soon</div>
-  </div>
-
   <footer>
     Sun/Moon/Planet positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Ayanamsa: Lahiri (Sidereal) · House System: Whole Sign · Rahu: Mean Node, Ketu: Rahu + 180° · Divisional charts: Parashari Shodasavarga rules · Aspects: Parashari graha drishti (7th house full aspect for all grahas; Mars also 4th/8th, Jupiter also 5th/9th, Saturn also 3rd/10th; Rahu/Ketu shown on the common Jupiter-style 5th/7th/9th convention) · Shadbala/Bhavabala: simplified engine (D1-based; full 5-part Sthana Bala, approximated Dig Bala, Paksha-only Kala Bala, retrograde/speed-ratio Chesta Bala, simplified net-aspect Drik Bala) — figures are for relative comparison, not precise classical Shadbala
   </footer>
-</div>
-
-<div class="bottom-nav">
-  <div class="bottom-nav-inner">
-    <button class="bn-item active" id="bnHome"><svg><use href="#icon-home"/></svg><span>Home</span></button>
-    <button class="bn-item" id="bnReports"><svg><use href="#icon-reports"/></svg><span>Reports</span></button>
-    <div class="bn-item center" id="bnCenter"><div class="bn-center-btn"><svg><use href="#icon-sparkle"/></svg></div><span>Kundali</span></div>
-    <button class="bn-item" id="bnRemedies"><svg><use href="#icon-leaf"/></svg><span>Remedies</span></button>
-    <button class="bn-item" id="bnMore"><svg><use href="#icon-dots"/></svg><span>More</span></button>
-  </div>
 </div>
 
 <script type="module">
@@ -545,18 +390,6 @@ const NAKSHATRAS = [
 ];
 const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const COMBUST_ORB = { Moon:12, Mars:17, Mercury:14, Jupiter:11, Venus:10, Saturn:15 };
-
-const SHUKLA_TITHI = ["Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi","Purnima"];
-const KRISHNA_TITHI = ["Pratipada","Dwitiya","Tritiya","Chaturthi","Panchami","Shashthi","Saptami","Ashtami","Navami","Dashami","Ekadashi","Dwadashi","Trayodashi","Chaturdashi","Amavasya"];
-const YOGAS = ["Vishkambha","Priti","Ayushman","Saubhagya","Shobhana","Atiganda","Sukarma","Dhriti","Shula","Ganda","Vriddhi","Dhruva","Vyaghata","Harshana","Vajra","Siddhi","Vyatipata","Variyana","Parigha","Shiva","Siddha","Sadhya","Shubha","Shukla","Brahma","Indra","Vaidhriti"];
-function tithiName(sunSid, moonSid){
-  const idx = Math.floor(norm360(moonSid-sunSid)/12)%30;
-  return idx<15 ? SHUKLA_TITHI[idx] : KRISHNA_TITHI[idx%15];
-}
-function yogaName(sunSid, moonSid){
-  const idx = Math.floor(norm360(sunSid+moonSid)/(360/27))%27;
-  return YOGAS[idx];
-}
 
 /* Nakshatra lord: standard Vimshottari Dasha planet sequence, repeating 3x across 27 nakshatras */
 const VIMSHOTTARI_SEQUENCE = ["Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury"];
@@ -628,42 +461,23 @@ function computeAntardashas(maha){
 
 function fmtDashaDate(d){ return d.toLocaleDateString('en-IN',{year:'numeric',month:'short',day:'2-digit'}); }
 
-let allMahadashas = [];
-let dashaViewAllOpen = false;
-
 function renderDashaTable(referenceDate, moonLongitude){
   const now = new Date();
   const mahadashas = computeMahadashas(moonLongitude, referenceDate);
-  allMahadashas = mahadashas;
-  dashaViewAllOpen = false;
-  el('dashaViewAllBtn').textContent = 'View all';
-  renderDashaRows();
-}
-
-function renderDashaRows(){
-  const now = new Date();
-  const mahadashas = allMahadashas;
-  const visibleCount = dashaViewAllOpen ? mahadashas.length : Math.min(4, mahadashas.length);
-  const currentIdx = mahadashas.findIndex(m=> now>=m.start && now<m.end);
-  const startIdx = (!dashaViewAllOpen && currentIdx>0) ? currentIdx : 0;
-  const visible = mahadashas.map((m,i)=>({m,i})).filter(({i})=> i>=startIdx && i<startIdx+visibleCount);
-
-  el('dashaTable').innerHTML = visible.map(({m,i})=>{
+  el('dashaTable').innerHTML = mahadashas.map((m, idx)=>{
     const isCurrent = now>=m.start && now<m.end;
-    const rowId = 'dasha-row-'+i;
-    const elapsedPct = isCurrent ? Math.max(0,Math.min(100, ((now-m.start)/(m.end-m.start))*100 )) : null;
+    const rowId = 'dasha-row-'+idx;
     return `<div class="dasha-row ${isCurrent?'current':''}" id="${rowId}">
       <div class="dasha-row-head">
         <div class="dasha-planet">${m.planet}${isCurrent?'<span class="now-tag">NOW</span>':''}</div>
-        <div class="dasha-range">${fmtDashaDate(m.start)} – ${fmtDashaDate(m.end)}<svg class="dasha-chevron"><use href="#icon-chevron-right"/></svg></div>
+        <div class="dasha-range">${fmtDashaDate(m.start)} – ${fmtDashaDate(m.end)}<span class="dasha-chevron">▾</span></div>
       </div>
-      ${isCurrent ? `<div class="dasha-progress"><div class="dasha-progress-fill" style="width:${elapsedPct.toFixed(1)}%;"></div></div>` : ''}
-      <div class="antardasha-wrap"><div class="antardasha-list" data-idx="${i}"></div></div>
+      <div class="antardasha-wrap"><div class="antardasha-list" data-idx="${idx}"></div></div>
     </div>`;
   }).join('');
 
-  visible.forEach(({m,i})=>{
-    const row = document.getElementById('dasha-row-'+i);
+  mahadashas.forEach((m, idx)=>{
+    const row = document.getElementById('dasha-row-'+idx);
     const head = row.querySelector('.dasha-row-head');
     const listEl = row.querySelector('.antardasha-list');
     let built = false;
@@ -1058,46 +872,6 @@ function renderTable(vdata){
   }).join('');
 }
 
-const PLANET_COLORS = { Ascendant:'#6c5ce7', Sun:'#ff9f43', Moon:'#5aa9ff', Mars:'#ff6b6b', Mercury:'#20bf8f', Jupiter:'#f0a63a', Venus:'#fd79a8', Saturn:'#636e8c', Rahu:'#8c7bf0', Ketu:'#00b894' };
-
-function renderPlanetList(vdata){
-  const order = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn","Rahu","Ketu"];
-  const ordered = [vdata.ascendant, ...order.map(n=>vdata.planets.find(p=>p.name===n))];
-  el('planetListView').innerHTML = ordered.map((p,i)=>{
-    const rashi = RASHI[p.vargaRashi];
-    const houseLord = RASHI[p.vargaRashi][1];
-    const motion = p.retro===null ? "—" : (p.retro ? 'Retrograde' : 'Direct');
-    const combust = p.combust===null ? "—" : (p.combust ? 'Yes' : 'No');
-    const nakLord = p.name==="Ascendant" ? "—" : nakshatraLord(p.nak);
-    const status = getPlanetStatus(p.name, p.vargaRashi);
-    const color = PLANET_COLORS[p.name] || '#6c5ce7';
-    return `<div>
-      <div class="planet-list-row" data-idx="${i}">
-        <div class="p-ico" style="background:${color};color:#fff;font-size:12px;font-weight:800;">${CHART_ABBR[p.name]}</div>
-        <div class="p-name">${p.name}${p.retro?' (R)':''}</div>
-        <div class="p-house">${p.house}</div>
-        <div class="p-rashi">${rashi[0]}</div>
-        <div class="p-deg">${p.longitude.toFixed(2)}°</div>
-        <svg class="p-chevron"><use href="#icon-chevron-right"/></svg>
-      </div>
-      <div class="planet-detail"><div class="planet-detail-inner">
-        <div class="dk">House Lord</div><div class="dv">${houseLord}</div>
-        <div class="dk">Sign Lord</div><div class="dv">${rashi[1]}</div>
-        <div class="dk">Degree</div><div class="dv">${fmtDeg(p.longitude)}</div>
-        <div class="dk">Nakshatra</div><div class="dv">${NAKSHATRAS[p.nak]}</div>
-        <div class="dk">Nakshatra Lord</div><div class="dv">${nakLord}</div>
-        <div class="dk">Pada</div><div class="dv">${p.pada}</div>
-        <div class="dk">Motion</div><div class="dv">${motion}</div>
-        <div class="dk">Combust</div><div class="dv">${combust}</div>
-        <div class="dk">Status</div><div class="dv">${status}</div>
-      </div></div>
-    </div>`;
-  }).join('');
-  el('planetListView').querySelectorAll('.planet-list-row').forEach(row=>{
-    row.addEventListener('click', ()=> row.classList.toggle('open'));
-  });
-}
-
 /* ===================== GRAHA DRISHTI (PLANETARY ASPECTS) =====================
    Standard Parashari full-aspect (drishti) rules. Every graha aspects the house 7th
    from itself; Mars, Jupiter and Saturn additionally cast special aspects. Rahu/Ketu
@@ -1134,15 +908,11 @@ function renderPlanetAspects(vdata){
   }).join('');
 }
 
-let currentHouseAspectData = null;
-let selectedHousePill = 1;
-
 function renderHouseAspects(vdata){
   const order = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn","Rahu","Ketu"];
   const ascRashi = vdata.ascendant.vargaRashi;
   const byHouse = {}; for(let h=1;h<=12;h++) byHouse[h]=[];
   vdata.planets.forEach(p=> byHouse[p.house].push(p.name));
-  if (vdata.ascendant.house===1) byHouse[1].unshift('Ascendant');
 
   const aspectedBy = {}; for(let h=1;h<=12;h++) aspectedBy[h]=[];
   order.forEach(name=>{
@@ -1154,10 +924,8 @@ function renderHouseAspects(vdata){
   });
 
   let rows = '';
-  const signs = [];
   for(let h=1;h<=12;h++){
     const rashiIdx = (ascRashi + h - 1) % 12;
-    signs.push(RASHI[rashiIdx][0]);
     rows += `<tr>
       <td><b>${h}</b></td><td>${RASHI[rashiIdx][0]}</td>
       <td>${byHouse[h].length ? byHouse[h].join(', ') : '—'}</td>
@@ -1165,36 +933,6 @@ function renderHouseAspects(vdata){
     </tr>`;
   }
   el('houseAspectsBody').innerHTML = rows;
-
-  currentHouseAspectData = { byHouse, aspectedBy, signs };
-  el('housePillScroll').innerHTML = signs.map((s,i)=>{
-    const h = i+1;
-    return `<div class="house-pill ${h===selectedHousePill?'active':''}" data-h="${h}">
-      <div class="hp-num">${h}</div><div class="hp-sign">${s}</div>
-    </div>`;
-  }).join('');
-  el('housePillScroll').querySelectorAll('.house-pill').forEach(pill=>{
-    pill.addEventListener('click', ()=>{
-      selectedHousePill = parseInt(pill.getAttribute('data-h'),10);
-      renderHouseAspectDetail();
-    });
-  });
-  renderHouseAspectDetail();
-}
-
-function renderHouseAspectDetail(){
-  if (!currentHouseAspectData) return;
-  el('housePillScroll').querySelectorAll('.house-pill').forEach(pill=>{
-    pill.classList.toggle('active', parseInt(pill.getAttribute('data-h'),10)===selectedHousePill);
-  });
-  el('hapHouseNum').textContent = selectedHousePill;
-  const { byHouse, aspectedBy, signs } = currentHouseAspectData;
-  const placed = byHouse[selectedHousePill];
-  el('hapPlaced').innerHTML = placed.length ? placed.map(name=>
-    `<div class="aspect-chip ${name==='Ascendant'?'asc':''}">${name}${name==='Ascendant'?'<span class="achip-sub">('+signs[selectedHousePill-1]+')</span>':''}</div>`
-  ).join('') : `<div class="aspect-chip">None</div>`;
-  const by = aspectedBy[selectedHousePill];
-  el('hapAspectedBy').innerHTML = by.length ? by.map(name=>`<div class="aspect-chip">${name}</div>`).join('') : `<div class="aspect-chip">None</div>`;
 }
 
 /* ===================== SHADBALA (SIX-FOLD PLANETARY STRENGTH) =====================
@@ -1372,22 +1110,6 @@ function renderShadbala(results){
       <td>${r.totalVirupas.toFixed(1)}</td><td><b>${r.totalRupas.toFixed(2)}</b></td><td>${req.toFixed(1)}</td><td>${verdict}</td>
     </tr>`;
   }).join('');
-
-  /* Overview bars/donut: % = totalRupas / 13 (the mathematically verified ceiling of
-     Total Rupas — see the Shadbala audit notes above), clamped defensively to [0,100]. */
-  el('shadbalaBars').innerHTML = results.map(r=>{
-    const pct = Math.max(0, Math.min(100, (r.totalRupas/13)*100));
-    const color = PLANET_COLORS[r.name] || '#6c5ce7';
-    return `<div class="bala-bar-row">
-      <div class="bb-name">${r.name}</div>
-      <div class="bb-track"><div class="bb-fill" style="width:${pct.toFixed(1)}%;background:${color};"></div></div>
-      <div class="bb-pct">${pct.toFixed(1)}%</div>
-    </div>`;
-  }).join('');
-  const overallPct = results.reduce((s,r)=> s + Math.max(0,Math.min(100,(r.totalRupas/13)*100)), 0) / results.length;
-  el('shadbalaOverallPct').textContent = overallPct.toFixed(1) + '%';
-  const circumference = 264;
-  el('shadbalaDonutCircle').setAttribute('stroke-dashoffset', (circumference*(1-overallPct/100)).toFixed(1));
 }
 
 /* ===================== BHAVABALA (HOUSE STRENGTH) =====================
@@ -1419,16 +1141,6 @@ function renderBhavabala(results){
     <td>${r.bhavadhipati.toFixed(1)}</td><td>${r.dig.toFixed(1)}</td><td>${r.drishti.toFixed(1)}</td>
     <td>${r.totalVirupas.toFixed(1)}</td><td><b>${r.totalRupas.toFixed(2)}</b></td>
   </tr>`).join('');
-
-  /* % = totalRupas / 15 (the mathematically verified ceiling of Bhavabala Total Rupas) */
-  el('bhavabalaBars').innerHTML = results.map(r=>{
-    const pct = Math.max(0, Math.min(100, (r.totalRupas/15)*100));
-    return `<div class="bala-bar-row">
-      <div class="bb-name">H${r.house}</div>
-      <div class="bb-track"><div class="bb-fill" style="width:${pct.toFixed(1)}%;background:#6c5ce7;"></div></div>
-      <div class="bb-pct">${pct.toFixed(1)}%</div>
-    </div>`;
-  }).join('');
 }
 
 function renderSummary(base, vdata, labelPrefix){
@@ -1452,10 +1164,6 @@ function renderSummary(base, vdata, labelPrefix){
   el('sumTatva').textContent = getTatva(moonBase.rashi);
   el('sumNameAlpha').textContent = NAME_ALPHABET_BY_RASHI[moonBase.rashi];
   el('sumPaya').textContent = getPaya(moonVarga.house);
-
-  const sunBase = base.planets.find(p=>p.name==="Sun");
-  el('sumYogaVal').textContent = yogaName(sunBase.longitude, moonBase.longitude);
-  el('sumTithiVal').textContent = tithiName(sunBase.longitude, moonBase.longitude);
 }
 
 /* ===================== LOADER / CONTROL STATE ===================== */
@@ -1495,7 +1203,6 @@ function renderDailyResult(){
   renderBasicInfo(selectedDateTime, userLat, userLon);
   renderChart(vdata);
   renderTable(vdata);
-  renderPlanetList(vdata);
   renderPlanetAspects(vdata);
   renderHouseAspects(vdata);
   const dailyShadbala = computeShadbala(vdata);
@@ -1527,7 +1234,6 @@ function renderBirthChartAndTable(){
   el('chartSectionDesc').textContent = VARGA_DESCRIPTIONS[cur.n] || '';
   renderChart(vdata);
   renderTable(vdata);
-  renderPlanetList(vdata);
   renderPlanetAspects(vdata);
   renderHouseAspects(vdata);
   renderVargaSelector();
@@ -1614,39 +1320,6 @@ function updateModeUI(){
 el('modeDailyBtn').addEventListener('click', ()=>{ currentMode='daily'; updateModeUI(); });
 el('modeBirthBtn').addEventListener('click', ()=>{ currentMode='birth'; updateModeUI(); });
 el('modeMarriageBtn').addEventListener('click', ()=>{ currentMode='marriage'; updateModeUI(); });
-
-/* ===================== BOTTOM NAVIGATION ===================== */
-
-let bottomNavView = 'home'; // 'home' | 'reports' | 'remedies' | 'more'
-
-function setBottomNav(view){
-  bottomNavView = view;
-  ['bnHome','bnReports','bnRemedies','bnMore'].forEach(id=> el(id).classList.remove('active'));
-  const btnId = { home:'bnHome', reports:'bnReports', remedies:'bnRemedies', more:'bnMore' }[view];
-  if (btnId) el(btnId).classList.add('active');
-
-  const isHome = view === 'home';
-  el('modeBar').style.display = isHome ? 'flex' : 'none';
-
-  if (!isHome){
-    el('dailyPanel').style.display = 'none';
-    el('birthPanel').style.display = 'none';
-    el('locationSection').style.display = 'none';
-    el('resultContainer').style.display = 'none';
-    el('marriagePanel').style.display = 'none';
-    const label = { reports:'Reports', remedies:'Remedies', more:'More' }[view];
-    el('otherNavPanelText').textContent = label + ' — Coming Soon';
-    el('otherNavPanel').style.display = 'block';
-  } else {
-    el('otherNavPanel').style.display = 'none';
-    updateModeUI();
-  }
-}
-el('bnHome').addEventListener('click', ()=> setBottomNav('home'));
-el('bnCenter').addEventListener('click', ()=> setBottomNav('home'));
-el('bnReports').addEventListener('click', ()=> setBottomNav('reports'));
-el('bnRemedies').addEventListener('click', ()=> setBottomNav('remedies'));
-el('bnMore').addEventListener('click', ()=> setBottomNav('more'));
 
 /* ===================== DATE/TIME CONTROLS ===================== */
 
@@ -1759,35 +1432,6 @@ el('manualLocSubmit').addEventListener('click', ()=>{
   useLocation(lat, lon);
 });
 el('changeLocBtn').addEventListener('click', ()=>{ showLocationSection(); showLocChooser(); });
-el('summaryViewAllBtn').addEventListener('click', ()=>{
-  const extra = el('summaryExtra');
-  const showing = extra.classList.toggle('show');
-  el('summaryViewAllBtn').textContent = showing ? 'View less' : 'View all';
-});
-el('planetViewAllBtn').addEventListener('click', ()=>{
-  const showingTable = el('planetTableWrap').style.display !== 'none';
-  el('planetTableWrap').style.display = showingTable ? 'none' : 'block';
-  el('planetListView').style.display = showingTable ? 'block' : 'none';
-  el('planetViewAllBtn').textContent = showingTable ? 'View all' : 'View less';
-});
-el('houseAspectsViewAllBtn').addEventListener('click', ()=>{
-  const showingTable = el('houseAspectsTableWrap').style.display !== 'none';
-  el('houseAspectsTableWrap').style.display = showingTable ? 'none' : 'block';
-  el('houseAspectsViewAllBtn').textContent = showingTable ? 'View all' : 'View less';
-});
-el('shadbalaDetailsBtn').addEventListener('click', ()=>{
-  const showing = el('shadbalaDetailsWrap').classList.toggle('show');
-  el('shadbalaDetailsBtn').textContent = showing ? 'Hide full Shadbala table' : 'View full Shadbala table';
-});
-el('bhavabalaDetailsBtn').addEventListener('click', ()=>{
-  const showing = el('bhavabalaDetailsWrap').classList.toggle('show');
-  el('bhavabalaDetailsBtn').textContent = showing ? 'Hide full Bhavabala table' : 'View full Bhavabala table';
-});
-el('dashaViewAllBtn').addEventListener('click', ()=>{
-  dashaViewAllOpen = !dashaViewAllOpen;
-  el('dashaViewAllBtn').textContent = dashaViewAllOpen ? 'View less' : 'View all';
-  renderDashaRows();
-});
 
 async function watchGeolocationAvailability(){
   if (!navigator.geolocation){ showGpsOffMessage(); return; }

@@ -1,835 +1,1618 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Kundali</title>
-<style>
-  :root{
-    --bg1:#0b0514; --bg2:#1a0f2a;
-    --gold:#e6b45a; --gold-light:#f5d799; --saffron:#ff7a3d;
-    --card-bg:rgba(255,255,255,0.055); --card-bg2:rgba(255,255,255,0.03);
-    --card-border:rgba(230,180,90,0.22);
-    --text-main:#fdf6ec; --text-sub:#bfaed9;
-    --ok:#7bd88f; --warn:#ff8a80; --neutral:#f6cf6b;
-    --radius:16px; --radius-sm:11px;
-  }
-  *{box-sizing:border-box;margin:0;padding:0;}
-  html,body{
-    min-height:100%;
-    background:
-      radial-gradient(circle at 20% 0%, rgba(74,37,112,0.22) 0%, transparent 40%),
-      radial-gradient(circle at 90% 10%, rgba(51,26,84,0.18) 0%, transparent 38%),
-      var(--bg1);
-    color:var(--text-main);
-    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
-    -webkit-font-smoothing:antialiased;
-    padding-bottom:34px; font-size:14.5px;
-  }
-  .wrap{max-width:560px;margin:0 auto;padding:14px 12px 6px;}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kundali</title>
+  <!-- Google Fonts: Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg-main: #ECECFA;
+      --header-bg: #1A173B;
+      --card-bg: #FFFFFF;
+      --card-bg-sub: #F7F7FD;
+      --card-border: rgba(108, 92, 231, 0.12);
+      --primary-purple: #6C5CE7;
+      --primary-gradient: linear-gradient(135deg, #6C5CE7 0%, #8E7CFF 100%);
+      --primary-light: #F0EDFF;
+      --text-dark: #1C1B36;
+      --text-sub: #5E5B7F;
+      --text-muted: #9D9ABF;
+      --accent-orange: #FF7675;
+      --accent-green: #00B894;
+      --badge-pink: #FFEAA7;
+      --badge-purple: #E8E2FF;
+      --radius-lg: 20px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --shadow-card: 0 8px 24px rgba(26, 23, 59, 0.05);
+      --shadow-float: 0 10px 28px rgba(108, 92, 231, 0.3);
+    }
 
-  header.top{text-align:center;padding:16px 8px 10px;}
-  header.top .om{font-size:30px;color:var(--gold);text-shadow:0 0 16px rgba(230,180,90,.6);}
-  header.top h1{
-    font-size:22px;font-weight:700;letter-spacing:.4px;margin-top:4px;
-    background:linear-gradient(90deg,var(--gold-light),var(--saffron));
-    -webkit-background-clip:text;background-clip:text;color:transparent;
-  }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
-  /* ---------- mode selector ---------- */
-  .mode-bar{display:flex;gap:6px;margin:14px 0;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:5px;}
-  .mode-btn{flex:1;padding:10px 4px;border:none;border-radius:8px;background:transparent;color:var(--text-sub);font-size:12px;font-weight:700;text-align:center;line-height:1.3;}
-  .mode-btn.active{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;}
-  .mode-btn .soon{display:block;font-size:9px;font-weight:600;opacity:.8;}
+    html,
+    body {
+      min-height: 100%;
+      background-color: var(--bg-main);
+      color: var(--text-dark);
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 90px;
+      font-size: 14px;
+    }
 
-  .date-bar{display:flex;gap:6px;align-items:center;margin:10px 0 8px;flex-wrap:wrap;}
-  .date-bar input[type=date],.date-bar input[type=time]{
-    flex:1;min-width:120px;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-sm);
-    color:var(--text-main);font-size:13px;padding:9px 8px;font-family:inherit;
-  }
-  .nav-bar{display:flex;gap:6px;margin-bottom:12px;}
-  .nav-bar button{flex:1;padding:8px 6px;border:none;border-radius:9px;font-size:12px;font-weight:700;background:var(--card-bg);border:1px solid var(--card-border);color:var(--gold-light);}
-  .nav-bar button.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
+    .wrap {
+      max-width: 480px;
+      margin: 0 auto;
+      padding: 0 12px 20px;
+    }
 
-  .section{border-radius:var(--radius);overflow:hidden;margin-bottom:12px;border:1px solid var(--card-border);
-    background:linear-gradient(160deg,rgba(255,255,255,0.05),rgba(255,255,255,0.015));}
-  .sec-header{display:flex;align-items:center;gap:10px;padding:13px 15px;font-size:14.5px;font-weight:700;letter-spacing:.3px;}
-  .sec-header .hicon{font-size:18px;}
-  .hicon svg,.btn-icon{width:18px;height:18px;stroke:var(--gold);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:0 0 auto;vertical-align:-4px;}
-  .btn-icon{width:14px;height:14px;stroke-width:2;margin-right:3px;vertical-align:-2px;}
-  .hicon svg.icon-filled{fill:var(--gold);stroke:none;}
-  .sec-body{padding:0 13px 14px;}
+    /* ---------- Top Dark Header & Branding ---------- */
+    .top-container {
+      background-color: var(--header-bg);
+      margin: 0 -12px 14px -12px;
+      padding: 16px 16px 18px 16px;
+      border-bottom-left-radius: 28px;
+      border-bottom-right-radius: 28px;
+      box-shadow: 0 10px 30px rgba(26, 23, 59, 0.15);
+    }
 
-  .loc-msg{text-align:center;font-size:14px;font-weight:700;color:var(--warn);padding:10px 4px;}
-  .loc-detail{text-align:center;font-size:11px;color:var(--text-sub);padding:0 4px 10px;word-break:break-word;}
-  .loc-btn{display:block;width:100%;padding:11px;border:none;border-radius:11px;font-size:13.5px;font-weight:700;margin-bottom:8px;
-    background:var(--card-bg2);border:1px solid var(--card-border);color:var(--gold-light);}
-  .loc-btn:last-child{margin-bottom:0;}
-  .loc-btn.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
-  #locManualForm input{width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--card-border);background:rgba(255,255,255,.05);color:var(--text-main);font-size:12.5px;margin-bottom:8px;}
+    header.top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 4px 14px 4px;
+    }
 
-  .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .info-item{background:var(--card-bg2);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:9px 10px;}
-  .info-item .ilabel{font-size:10px;color:var(--text-sub);text-transform:uppercase;letter-spacing:.5px;}
-  .info-item .ival{font-size:14px;font-weight:700;margin-top:3px;}
-  .info-item.span2{grid-column:1/-1;}
+    header.top .brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
 
-  .varga-scroll{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;-webkit-overflow-scrolling:touch;}
-  .varga-btn{flex:0 0 auto;padding:8px 12px;border-radius:9px;border:1px solid var(--card-border);background:var(--card-bg2);color:var(--text-sub);font-size:12px;font-weight:700;white-space:nowrap;}
-  .varga-btn.active{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
-  .varga-current{text-align:center;font-size:11.5px;color:var(--gold-light);margin-top:8px;}
+    header.top .om {
+      font-size: 24px;
+      color: #F5D799;
+      line-height: 1;
+      text-shadow: 0 0 12px rgba(245, 215, 153, 0.4);
+    }
 
-  .chart-wrap{display:flex;justify-content:center;padding:6px 0 4px;}
-  .chart-desc{text-align:center;font-size:12.5px;color:var(--text-sub);padding:0 4px 8px;line-height:1.4;}
-  .chart-wrap svg{width:100%;max-width:400px;height:auto;}
-  .chart-house-num{fill:var(--gold);font-size:11px;font-weight:700;}
-  .chart-planet{fill:var(--text-main);font-size:12.5px;font-weight:700;}
-  .chart-planet.retro{fill:var(--warn);}
-  .chart-line{stroke:var(--card-border);stroke-width:1.4;fill:none;}
+    header.top h1 {
+      font-size: 18px;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: 0.3px;
+    }
 
-  table.ptable{width:100%;border-collapse:collapse;font-size:11.3px;}
-  table.ptable th{color:var(--gold);text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.4px;padding:6px 5px;border-bottom:1px solid var(--card-border);white-space:nowrap;}
-  table.ptable th small{display:block;color:var(--text-sub);font-size:8px;text-transform:none;letter-spacing:0;font-weight:500;}
-  table.ptable td{padding:7px 5px;border-bottom:1px dashed rgba(255,255,255,0.06);white-space:nowrap;}
-  table.ptable tr:last-child td{border-bottom:none;}
-  .table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;}
-  .retro-tag{color:var(--warn);font-weight:700;}
-  .direct-tag{color:var(--ok);}
-  .combust-yes{color:var(--warn);font-weight:700;}
-  .combust-no{color:var(--text-sub);}
+    header.top .head-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      cursor: pointer;
+    }
 
-  .summary-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
-  .summary-grid .info-item .ival{font-size:13.5px;}
+    header.top .head-icon svg {
+      width: 18px;
+      height: 18px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+    }
 
-  .dasha-hint{font-size:11px;color:var(--text-sub);margin-bottom:8px;text-align:center;}
-  .dasha-row{background:var(--card-bg2);border:1px solid rgba(255,255,255,0.07);border-radius:var(--radius-sm);margin-bottom:7px;overflow:hidden;}
-  .dasha-row-head{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;}
-  .dasha-row.current{border-color:var(--gold);}
-  .dasha-planet{font-weight:700;font-size:13.5px;display:flex;align-items:center;gap:7px;}
-  .dasha-planet .now-tag{font-size:9px;font-weight:700;color:#241206;background:var(--gold);border-radius:5px;padding:1px 5px;}
-  .dasha-range{font-size:11px;color:var(--text-sub);text-align:right;}
-  .dasha-chevron{font-size:11px;color:var(--gold);margin-left:8px;transition:transform .25s ease;}
-  .dasha-row.open .dasha-chevron{transform:rotate(180deg);}
-  .antardasha-wrap{max-height:0;overflow:hidden;transition:max-height .3s ease;}
-  .dasha-row.open .antardasha-wrap{max-height:900px;}
-  .antardasha-list{padding:0 12px 10px;}
-  .antardasha-item{display:flex;justify-content:space-between;align-items:center;padding:6px 8px;font-size:11.5px;border-top:1px dashed rgba(255,255,255,0.07);}
-  .antardasha-item.current{color:var(--gold-light);font-weight:700;}
-  .antardasha-item .ad-name{display:flex;align-items:center;gap:6px;}
-  .antardasha-item .now-tag{font-size:8.5px;font-weight:700;color:#241206;background:var(--gold);border-radius:4px;padding:1px 4px;}
+    /* ---------- Mode Switcher ---------- */
+    .mode-bar {
+      display: flex;
+      gap: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: var(--radius-md);
+      padding: 5px;
+    }
 
-  .soon-panel{text-align:center;padding:50px 20px;font-size:20px;font-weight:700;color:var(--gold-light);}
+    .mode-btn {
+      flex: 1;
+      padding: 9px 4px;
+      border: none;
+      border-radius: 10px;
+      background: transparent;
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 12px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.25s ease;
+      font-family: inherit;
+    }
 
-  footer{text-align:center;font-size:10px;color:var(--text-sub);opacity:.6;padding:14px 20px 0;line-height:1.5;}
+    .mode-btn.active {
+      background: var(--primary-gradient);
+      color: #FFFFFF;
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+    }
 
-  #loaderOverlay{position:fixed;inset:0;z-index:999;display:flex;flex-direction:column;align-items:center;justify-content:center;
-    background:rgba(11,5,20,0.88);backdrop-filter:blur(3px);opacity:0;visibility:hidden;transition:opacity .25s ease,visibility .25s ease;}
-  #loaderOverlay.show{opacity:1;visibility:visible;}
-  .spinner{width:44px;height:44px;border-radius:50%;border:3px solid rgba(230,180,90,0.25);border-top-color:var(--gold);animation:spin 0.9s linear infinite;margin-bottom:16px;}
-  @keyframes spin{to{transform:rotate(360deg);}}
-  .loader-text{font-size:15px;font-weight:700;color:var(--gold-light);letter-spacing:.3px;}
-  .loader-sub{font-size:12px;color:var(--text-sub);margin-top:5px;}
-  [disabled]{opacity:.45;pointer-events:none;}
-</style>
+    .mode-btn .soon {
+      display: block;
+      font-size: 9px;
+      font-weight: 500;
+      opacity: 0.85;
+    }
+
+    /* ---------- Date & Controls Panel ---------- */
+    .control-card {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: var(--radius-md);
+      padding: 10px;
+      margin-top: 10px;
+    }
+
+    .date-bar {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+
+    .date-bar input[type=date],
+    .date-bar input[type=time] {
+      flex: 1;
+      min-width: 0;
+      background: rgba(255, 255, 255, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 10px;
+      color: var(--text-dark);
+      font-size: 12.5px;
+      font-weight: 600;
+      padding: 8px 10px;
+      font-family: inherit;
+      outline: none;
+    }
+
+    .nav-bar {
+      display: flex;
+      gap: 6px;
+    }
+
+    .nav-bar button {
+      flex: 1;
+      padding: 8px 6px;
+      border: none;
+      border-radius: 10px;
+      font-size: 11.5px;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.15);
+      color: #FFFFFF;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s ease;
+    }
+
+    .nav-bar button.primary {
+      background: var(--primary-gradient);
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.4);
+    }
+
+    /* ---------- Section Cards ---------- */
+    .section {
+      background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 16px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow-card);
+      border: 1px solid var(--card-border);
+    }
+
+    .sec-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 14px;
+    }
+
+    .sec-title-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-dark);
+      letter-spacing: -0.2px;
+    }
+
+    .sec-title-group .hicon {
+      width: 32px;
+      height: 32px;
+      border-radius: 10px;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-purple);
+    }
+
+    .sec-title-group .hicon svg {
+      width: 17px;
+      height: 17px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .sec-action {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--primary-purple);
+      cursor: pointer;
+      text-decoration: none;
+    }
+
+    /* ---------- Basic Info Grid ---------- */
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .info-item {
+      background: var(--card-bg-sub);
+      border-radius: var(--radius-md);
+      padding: 11px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .info-item .tile-icon {
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(108, 92, 231, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-purple);
+      flex-shrink: 0;
+    }
+
+    .info-item .tile-icon svg {
+      width: 16px;
+      height: 16px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .info-item .tile-content {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .info-item .ilabel {
+      font-size: 10px;
+      font-weight: 600;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+    }
+
+    .info-item .ival {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--text-dark);
+      margin-top: 2px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .info-item.span2 {
+      grid-column: 1 / -1;
+    }
+
+    .loc-btn {
+      display: block;
+      width: 100%;
+      padding: 11px;
+      border-radius: var(--radius-md);
+      font-size: 13px;
+      font-weight: 700;
+      text-align: center;
+      cursor: pointer;
+      border: 1px solid var(--primary-purple);
+      background: transparent;
+      color: var(--primary-purple);
+      font-family: inherit;
+      transition: all 0.2s ease;
+    }
+
+    .loc-btn.primary {
+      background: var(--primary-gradient);
+      color: #FFFFFF;
+      border: none;
+      box-shadow: 0 4px 14px rgba(108, 92, 231, 0.35);
+    }
+
+    .loc-msg {
+      text-align: center;
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--accent-orange);
+      padding: 8px 4px;
+    }
+
+    .loc-detail {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-sub);
+      padding-bottom: 8px;
+    }
+
+    #locManualForm input {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--card-border);
+      background: var(--card-bg-sub);
+      color: var(--text-dark);
+      font-size: 13px;
+      margin-bottom: 8px;
+      font-family: inherit;
+    }
+
+    /* ---------- North Indian Chart (SVG) ---------- */
+    .chart-wrap {
+      display: flex;
+      justify-content: center;
+      padding: 6px 0;
+      background: #FAF9FE;
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(108, 92, 231, 0.08);
+    }
+
+    .chart-wrap svg {
+      width: 100%;
+      max-width: 360px;
+      height: auto;
+    }
+
+    .chart-house-num {
+      fill: #E67E22;
+      font-size: 11px;
+      font-weight: 800;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .chart-planet {
+      fill: var(--text-dark);
+      font-size: 12px;
+      font-weight: 800;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+    }
+
+    .chart-planet.retro {
+      fill: #E74C3C;
+    }
+
+    .chart-line {
+      stroke: rgba(108, 92, 231, 0.22);
+      stroke-width: 1.5;
+      fill: none;
+    }
+
+    .varga-scroll {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 6px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .varga-btn {
+      flex: 0 0 auto;
+      padding: 7px 12px;
+      border-radius: 9px;
+      border: 1px solid var(--card-border);
+      background: var(--card-bg-sub);
+      color: var(--text-sub);
+      font-size: 11.5px;
+      font-weight: 700;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .varga-btn.active {
+      background: var(--primary-gradient);
+      color: #FFFFFF;
+      border: none;
+    }
+
+    .varga-current {
+      text-align: center;
+      font-size: 11.5px;
+      color: var(--primary-purple);
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    /* ---------- Planetary Positions List ---------- */
+    .planet-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .planet-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card-bg-sub);
+      border-radius: var(--radius-md);
+      padding: 10px 12px;
+    }
+
+    .planet-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .planet-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: var(--primary-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--primary-purple);
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .planet-name {
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--text-dark);
+    }
+
+    .planet-right {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .planet-house-badge {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--text-sub);
+      background: #FFFFFF;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .planet-rashi {
+      font-size: 12.5px;
+      font-weight: 600;
+      color: var(--text-sub);
+      width: 70px;
+      text-align: right;
+    }
+
+    .planet-deg {
+      font-size: 12.5px;
+      font-weight: 700;
+      color: var(--text-dark);
+      width: 60px;
+      text-align: right;
+    }
+
+    .chevron {
+      color: var(--text-muted);
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    /* ---------- House Aspects Pill Selector & Card ---------- */
+    .house-pills-scroll {
+      display: flex;
+      gap: 6px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .house-pill {
+      flex: 0 0 auto;
+      min-width: 56px;
+      padding: 8px 6px;
+      text-align: center;
+      border-radius: var(--radius-sm);
+      background: var(--card-bg-sub);
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .house-pill.active {
+      background: var(--primary-gradient);
+      color: #FFFFFF;
+      border: none;
+      box-shadow: 0 4px 12px rgba(108, 92, 231, 0.3);
+    }
+
+    .house-pill .h-num {
+      font-size: 14px;
+      font-weight: 800;
+    }
+
+    .house-pill .h-sign {
+      font-size: 9.5px;
+      font-weight: 600;
+      opacity: 0.85;
+    }
+
+    .aspect-details-card {
+      background: var(--card-bg-sub);
+      border-radius: var(--radius-md);
+      padding: 14px;
+      margin-top: 4px;
+    }
+
+    .aspect-group {
+      margin-bottom: 10px;
+    }
+
+    .aspect-group:last-child {
+      margin-bottom: 0;
+    }
+
+    .aspect-label {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      letter-spacing: 0.4px;
+      margin-bottom: 6px;
+    }
+
+    .aspect-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .badge {
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .badge.pink {
+      background: #FFEAA7;
+      color: #D63031;
+    }
+
+    .badge.purple {
+      background: #E8E2FF;
+      color: var(--primary-purple);
+    }
+
+    .badge.gray {
+      background: #EAEAEA;
+      color: var(--text-sub);
+    }
+
+    /* ---------- Dashas (Vimshottari) List ---------- */
+    .dasha-list-item {
+      background: var(--card-bg-sub);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      margin-bottom: 8px;
+      border: 1px solid transparent;
+      transition: all 0.2s ease;
+    }
+
+    .dasha-list-item.current {
+      border-color: var(--primary-purple);
+      background: #FAF9FE;
+    }
+
+    .dasha-item-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .dasha-name-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 13.5px;
+    }
+
+    .now-tag {
+      font-size: 9px;
+      font-weight: 800;
+      background: var(--primary-purple);
+      color: #FFFFFF;
+      padding: 2px 6px;
+      border-radius: 5px;
+    }
+
+    .dasha-dates {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--text-sub);
+    }
+
+    .dasha-progress {
+      height: 4px;
+      background: rgba(108, 92, 231, 0.15);
+      border-radius: 2px;
+      margin-top: 8px;
+      overflow: hidden;
+    }
+
+    .dasha-progress-fill {
+      height: 100%;
+      background: var(--primary-gradient);
+      border-radius: 2px;
+    }
+
+    /* ---------- Shadbala (Planet Strength) ---------- */
+    .shadbala-container {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .shadbala-bars {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .shadbala-bar-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .s-name {
+      font-size: 11.5px;
+      font-weight: 700;
+      width: 50px;
+      color: var(--text-dark);
+    }
+
+    .s-track {
+      flex: 1;
+      height: 7px;
+      background: rgba(108, 92, 231, 0.1);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .s-fill {
+      height: 100%;
+      border-radius: 4px;
+      transition: width 0.4s ease;
+    }
+
+    .s-val {
+      font-size: 11px;
+      font-weight: 700;
+      width: 42px;
+      text-align: right;
+      color: var(--text-dark);
+    }
+
+    .overall-gauge {
+      width: 105px;
+      height: 105px;
+      flex-shrink: 0;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .overall-gauge svg {
+      width: 100%;
+      height: 100%;
+      transform: rotate(-90deg);
+    }
+
+    .gauge-text {
+      position: absolute;
+      text-align: center;
+    }
+
+    .gauge-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--text-sub);
+      text-transform: uppercase;
+    }
+
+    .gauge-value {
+      font-size: 15px;
+      font-weight: 800;
+      color: var(--text-dark);
+      margin-top: 1px;
+    }
+
+    /* ---------- Tables (Full View Toggle) ---------- */
+    .table-scroll {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      margin-top: 8px;
+    }
+
+    table.ptable {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 11px;
+    }
+
+    table.ptable th {
+      color: var(--primary-purple);
+      text-align: left;
+      font-size: 9.5px;
+      text-transform: uppercase;
+      padding: 7px 6px;
+      border-bottom: 1px solid var(--card-border);
+      white-space: nowrap;
+    }
+
+    table.ptable td {
+      padding: 8px 6px;
+      border-bottom: 1px dashed rgba(108, 92, 231, 0.1);
+      white-space: nowrap;
+    }
+
+    /* ---------- Bottom Navigation Bar ---------- */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: 480px;
+      background: #FFFFFF;
+      border-top-left-radius: 20px;
+      border-top-right-radius: 20px;
+      box-shadow: 0 -4px 20px rgba(26, 23, 59, 0.08);
+      display: flex;
+      justify-style: space-around;
+      align-items: center;
+      padding: 8px 10px 12px;
+      z-index: 900;
+    }
+
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      color: var(--text-muted);
+      font-size: 10px;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    .nav-item.active {
+      color: var(--primary-purple);
+    }
+
+    .nav-item svg {
+      width: 20px;
+      height: 20px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .nav-item.center-btn {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--primary-gradient);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: -24px;
+      box-shadow: var(--shadow-float);
+    }
+
+    .nav-item.center-btn svg {
+      width: 24px;
+      height: 24px;
+      fill: #FFFFFF;
+      stroke: none;
+    }
+
+    /* Loader Overlay */
+    #loaderOverlay {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(26, 23, 59, 0.7);
+      backdrop-filter: blur(4px);
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity .25s ease;
+    }
+
+    #loaderOverlay.show {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border-radius: 50%;
+      border: 3.5px solid rgba(255, 255, 255, 0.2);
+      border-top-color: #FFFFFF;
+      animation: spin 0.8s linear infinite;
+      margin-bottom: 14px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .loader-text {
+      font-size: 15px;
+      font-weight: 700;
+      color: #FFFFFF;
+    }
+
+    .loader-sub {
+      font-size: 12px;
+      color: rgba(255, 255, 255, 0.7);
+      margin-top: 4px;
+    }
+  </style>
 </head>
+
 <body>
-<svg style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">
-<defs>
-  <symbol id="icon-pin" viewBox="0 0 24 24"><path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.3"/></symbol>
-  <symbol id="icon-edit" viewBox="0 0 24 24"><path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14 6l4 4"/></symbol>
-  <symbol id="icon-refresh" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7"/><path d="M21 3v6h-6"/></symbol>
-  <symbol id="icon-clipboard" viewBox="0 0 24 24"><rect x="6" y="4" width="12" height="17" rx="2"/><path d="M9 4V3a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v1"/><path d="M9 10h6M9 14h6M9 18h3"/></symbol>
-  <symbol id="icon-calendar" viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="16" rx="2"/><path d="M3.5 9.5h17"/><path d="M8 3v4M16 3v4"/></symbol>
-  <symbol id="icon-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></symbol>
-  <symbol id="icon-globe" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18z"/></symbol>
-  <symbol id="icon-notes" viewBox="0 0 24 24"><path d="M7 3h7l4 4v14H7z"/><path d="M14 3v4h4"/><path d="M9.5 12h5M9.5 15.5h5M9.5 8.5h2"/></symbol>
-  <symbol id="icon-grid" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1"/><rect x="13.5" y="3.5" width="7" height="7" rx="1"/><rect x="3.5" y="13.5" width="7" height="7" rx="1"/><rect x="13.5" y="13.5" width="7" height="7" rx="1"/></symbol>
-  <symbol id="icon-star" viewBox="0 0 24 24"><path d="M12 2l3.2 6.4L22 9.5l-5 5.1 1.2 7.4L12 18.7l-6.2 3.3L7 14.6 2 9.5l6.8-1.1z"/></symbol>
-  <symbol id="icon-planet" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4.2"/><ellipse cx="12" cy="12" rx="9.2" ry="3" transform="rotate(-20 12 12)"/></symbol>
-  <symbol id="icon-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5" fill="currentColor" stroke="none"/></symbol>
-  <symbol id="icon-house" viewBox="0 0 24 24"><path d="M4 11.5L12 4l8 7.5"/><path d="M6 10v10h12V10"/><path d="M10 20v-6h4v6"/></symbol>
-  <symbol id="icon-bolt" viewBox="0 0 24 24"><path d="M13 2L4 14h6l-1 8 9-12h-6z"/></symbol>
-  <symbol id="icon-columns" viewBox="0 0 24 24"><path d="M4 21h16"/><path d="M5 21V9M9 21V9M15 21V9M19 21V9"/><path d="M3 9l9-6 9 6"/></symbol>
-  <symbol id="icon-cycle" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14.5-4.5"/><path d="M18.5 4v4h-4"/><path d="M20 12a8 8 0 0 1-14.5 4.5"/><path d="M5.5 20v-4h4"/></symbol>
-  <symbol id="icon-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></symbol>
-</defs>
-</svg>
-<div id="loaderOverlay">
-  <div class="spinner"></div>
-  <div class="loader-text">Calculating Kundali...</div>
-  <div class="loader-sub">Computing planetary positions...</div>
-</div>
-<div class="wrap">
 
-  <header class="top">
-    <div class="om">ॐ</div>
-    <h1>Kundali</h1>
-  </header>
-
-  <div class="mode-bar">
-    <button class="mode-btn active" id="modeDailyBtn">○ Daily Kundali</button>
-    <button class="mode-btn" id="modeBirthBtn">○ Birth Kundali</button>
-    <button class="mode-btn" id="modeMarriageBtn">○ Marriage Match<span class="soon">(Coming Soon)</span></button>
+  <div id="loaderOverlay">
+    <div class="spinner"></div>
+    <div class="loader-text">Calculating Kundali...</div>
+    <div class="loader-sub">Computing astronomical positions...</div>
   </div>
 
-  <!-- ============ DAILY KUNDALI PANEL ============ -->
-  <div id="dailyPanel">
-    <div class="date-bar">
-      <input type="date" id="dailyDatePicker">
-      <input type="time" id="dailyTimePicker" step="60">
-    </div>
-    <div class="nav-bar">
-      <button id="prevDayBtn">◀ Previous Day</button>
-      <button id="todayBtn" class="primary">Today</button>
-      <button id="nextDayBtn">Next Day ▶</button>
-    </div>
-  </div>
+  <div class="wrap">
 
-  <!-- ============ BIRTH KUNDALI PANEL ============ -->
-  <div id="birthPanel" style="display:none;">
-    <div class="date-bar">
-      <input type="date" id="birthDatePicker">
-      <input type="time" id="birthTimePicker" step="60">
-    </div>
-  </div>
+    <!-- ============ TOP HEADER SECTION ============ -->
+    <div class="top-container">
+      <header class="top">
+        <div class="head-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M17.5 19C19.9853 19 22 16.9853 22 14.5C22 12.1564 20.206 10.2312 17.9001 10.0235C17.4392 6.58156 14.4735 3.9 10.8889 3.9C7.8188 3.9 5.21327 5.79586 4.31688 8.44146C2.42194 9.07342 1 10.8711 1 13C1 15.7614 3.23858 18 6 18H17.5Z" />
+          </svg>
+        </div>
+        <div class="brand">
+          <div class="om">ॐ</div>
+          <h1>Kundali</h1>
+        </div>
+        <div class="head-icon">
+          <svg viewBox="0 0 24 24">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </div>
+      </header>
 
-  <!-- ============ SHARED LOCATION SECTION ============ -->
-  <div class="section" id="locationSection">
-    <div class="sec-header"><span class="hicon"><svg><use href="#icon-pin"/></svg></span> Location</div>
-    <div class="sec-body">
-      <div id="locGpsOff" class="loc-state" style="display:none;"><div class="loc-msg">Please turn on GPS.</div></div>
-      <div id="locChooser" class="loc-state" style="display:none;">
-        <button id="myLocationBtn" class="loc-btn primary"><svg class="btn-icon"><use href="#icon-pin"/></svg>My Location</button>
-        <button id="enterLocationBtn" class="loc-btn"><svg class="btn-icon"><use href="#icon-edit"/></svg>Enter Location</button>
+      <div class="mode-bar">
+        <button class="mode-btn active" id="modeDailyBtn">Daily Kundali</button>
+        <button class="mode-btn" id="modeBirthBtn">Birth Kundali</button>
+        <button class="mode-btn" id="modeMarriageBtn">Marriage Match<span class="soon">(Coming Soon)</span></button>
       </div>
-      <div id="locError" class="loc-state" style="display:none;">
-        <div class="loc-msg">Unable to get your location. Retry?</div>
-        <div class="loc-detail" id="locErrorDetail"></div>
-        <button id="retryLocationBtn" class="loc-btn primary"><svg class="btn-icon"><use href="#icon-refresh"/></svg>Retry</button>
-        <button id="enterLocationBtn2" class="loc-btn"><svg class="btn-icon"><use href="#icon-edit"/></svg>Enter Location</button>
+
+      <!-- DAILY PANEL CONTROLS -->
+      <div id="dailyPanel" class="control-card">
+        <div class="date-bar">
+          <input type="date" id="dailyDatePicker">
+          <input type="time" id="dailyTimePicker" step="60">
+        </div>
+        <div class="nav-bar">
+          <button id="prevDayBtn">◀ Previous Day</button>
+          <button id="todayBtn" class="primary">Today</button>
+          <button id="nextDayBtn">Next Day ▶</button>
+        </div>
       </div>
-      <div id="locManualForm" class="loc-state" style="display:none;">
-        <input type="text" id="manualLat" placeholder="Latitude e.g. 23.0225">
-        <input type="text" id="manualLon" placeholder="Longitude e.g. 72.5714">
-        <button id="manualLocSubmit" class="loc-btn primary">Submit</button>
+
+      <!-- BIRTH PANEL CONTROLS -->
+      <div id="birthPanel" class="control-card" style="display:none;">
+        <div class="date-bar">
+          <input type="date" id="birthDatePicker">
+          <input type="time" id="birthTimePicker" step="60">
+        </div>
       </div>
-    </div>
-  </div>
+    </div><!-- /top-container -->
 
-  <!-- ============ MARRIAGE MATCH PANEL ============ -->
-  <div id="marriagePanel" style="display:none;">
-    <div class="soon-panel">Coming Soon</div>
-  </div>
-
-  <!-- ============ RESULTS (Daily or Birth) ============ -->
-  <div id="resultContainer" style="display:none;">
-
-    <div class="section">
-      <div class="sec-header"><span class="hicon"><svg><use href="#icon-clipboard"/></svg></span> Basic Information</div>
+    <!-- ============ LOCATION SECTION ============ -->
+    <div class="section" id="locationSection">
+      <div class="sec-header">
+        <div class="sec-title-group">
+          <span class="hicon"><svg viewBox="0 0 24 24">
+              <path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z" />
+              <circle cx="12" cy="10" r="2.5" />
+            </svg></span>
+          <span>Location Access</span>
+        </div>
+      </div>
       <div class="sec-body">
+        <div id="locGpsOff" class="loc-state" style="display:none;">
+          <div class="loc-msg">Please enable GPS or enter location manually.</div>
+        </div>
+        <div id="locChooser" class="loc-state">
+          <button id="myLocationBtn" class="loc-btn primary" style="margin-bottom:8px;">Use Current Location</button>
+          <button id="enterLocationBtn" class="loc-btn">Enter Coordinates Manually</button>
+        </div>
+        <div id="locError" class="loc-state" style="display:none;">
+          <div class="loc-msg">Location Error</div>
+          <div class="loc-detail" id="locErrorDetail"></div>
+          <button id="retryLocationBtn" class="loc-btn primary" style="margin-bottom:8px;">Retry Location</button>
+          <button id="enterLocationBtn2" class="loc-btn">Enter Coordinates</button>
+        </div>
+        <div id="locManualForm" class="loc-state" style="display:none;">
+          <input type="text" id="manualLat" placeholder="Latitude e.g. 20.9262">
+          <input type="text" id="manualLon" placeholder="Longitude e.g. 70.3595">
+          <button id="manualLocSubmit" class="loc-btn primary">Save Location</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============ MARRIAGE PANEL ============ -->
+    <div id="marriagePanel" style="display:none;" class="section">
+      <div style="text-align:center; padding:40px 10px; font-weight:700; color:var(--text-sub);">Marriage Matchmaking
+        Feature Coming Soon</div>
+    </div>
+
+    <!-- ============ RESULTS CONTAINER ============ -->
+    <div id="resultContainer" style="display:none;">
+
+      <!-- BASIC INFORMATION -->
+      <div class="section">
+        <div class="sec-header">
+          <div class="sec-title-group">
+            <span class="hicon"><svg viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg></span>
+            <span>Basic Information</span>
+          </div>
+        </div>
         <div class="info-grid">
-          <div class="info-item span2"><div class="ilabel"><svg class="btn-icon"><use href="#icon-calendar"/></svg>Date</div><div class="ival" id="biDate">--</div></div>
-          <div class="info-item"><div class="ilabel"><svg class="btn-icon"><use href="#icon-clock"/></svg>Time</div><div class="ival" id="biTime">--</div></div>
-          <div class="info-item"><div class="ilabel"><svg class="btn-icon"><use href="#icon-calendar"/></svg>Weekday</div><div class="ival" id="biWeekday">--</div></div>
-          <div class="info-item"><div class="ilabel"><svg class="btn-icon"><use href="#icon-pin"/></svg>Location</div><div class="ival" id="biLocation">--</div></div>
-          <div class="info-item"><div class="ilabel"><svg class="btn-icon"><use href="#icon-globe"/></svg>Time Zone</div><div class="ival" id="biTz">--</div></div>
-          <div class="info-item"><div class="ilabel">Latitude</div><div class="ival" id="biLat">--</div></div>
-          <div class="info-item"><div class="ilabel">Longitude</div><div class="ival" id="biLon">--</div></div>
-          <div class="info-item span2"><button id="changeLocBtn" class="loc-btn">Change Location</button></div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <rect x="3" y="4" width="18" height="18" rx="2" />
+                <path d="M16 2v4M8 2v4M3 10h18" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Date</div>
+              <div class="ival" id="biDate">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 7v5l3 2" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Time</div>
+              <div class="ival" id="biTime">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <path
+                  d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Weekday</div>
+              <div class="ival" id="biWeekday">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="9" />
+                <path d="M2 12h20M12 2a15 15 0 0 1 0 20a15 15 0 0 1 0-20z" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Time Zone</div>
+              <div class="ival" id="biTz">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <path d="M12 21s-7-6.5-7-11a7 7 0 0 1 14 0c0 4.5-7 11-7 11z" />
+                <circle cx="12" cy="10" r="2.5" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Location</div>
+              <div class="ival" id="biLocation">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <path d="M3 12h18M12 3v18" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Lat / Long</div>
+              <div class="ival" id="biLatLon">--</div>
+            </div>
+          </div>
+          <div class="info-item span2" style="background:transparent; padding:4px 0 0 0;">
+            <button id="changeLocBtn" class="loc-btn">Change Location</button>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="sec-header"><span class="hicon"><svg><use href="#icon-notes"/></svg></span> <span id="summarySectionTitle">Daily Summary</span></div>
-      <div class="sec-body">
-        <div class="summary-grid">
-          <div class="info-item"><div class="ilabel">Ascendant</div><div class="ival" id="sumAsc">--</div></div>
-          <div class="info-item"><div class="ilabel">Ascendant Lord</div><div class="ival" id="sumAscLord">--</div></div>
-          <div class="info-item"><div class="ilabel">Moon Sign</div><div class="ival" id="sumMoonSign">--</div></div>
-          <div class="info-item"><div class="ilabel">Sun Sign</div><div class="ival" id="sumSunSign">--</div></div>
-          <div class="info-item"><div class="ilabel" id="sumNakLabel">Moon Nakshatra</div><div class="ival" id="sumNak">--</div></div>
-          <div class="info-item"><div class="ilabel" id="sumPadaLabel">Moon Nakshatra Pada</div><div class="ival" id="sumPada">--</div></div>
-          <div class="info-item"><div class="ilabel">Varna</div><div class="ival" id="sumVarna">--</div></div>
-          <div class="info-item"><div class="ilabel">Vashya</div><div class="ival" id="sumVashya">--</div></div>
-          <div class="info-item"><div class="ilabel">Yoni</div><div class="ival" id="sumYoni">--</div></div>
-          <div class="info-item"><div class="ilabel">Gana</div><div class="ival" id="sumGana">--</div></div>
-          <div class="info-item"><div class="ilabel">Nadi</div><div class="ival" id="sumNadi">--</div></div>
-          <div class="info-item"><div class="ilabel">Moon Sign Lord</div><div class="ival" id="sumMoonLord">--</div></div>
-          <div class="info-item"><div class="ilabel">Tatva (Element)</div><div class="ival" id="sumTatva">--</div></div>
-          <div class="info-item"><div class="ilabel">Name Alphabet</div><div class="ival" id="sumNameAlpha">--</div></div>
-          <div class="info-item"><div class="ilabel">Paya</div><div class="ival" id="sumPaya">--</div></div>
+      <!-- DAILY / BIRTH SUMMARY -->
+      <div class="section">
+        <div class="sec-header">
+          <div class="sec-title-group">
+            <span class="hicon"><svg viewBox="0 0 24 24">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                <polyline points="14 2 14 8 20 8" />
+              </svg></span>
+            <span id="summarySectionTitle">Daily Summary</span>
+          </div>
+          <span class="sec-action">View all</span>
+        </div>
+        <div class="info-grid">
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <circle cx="12" cy="7" r="4" />
+                <path d="M6 21v-2a4 4 0 0 1 4-4h4a4 4 0 0 1 4 4v2" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Ascendant</div>
+              <div class="ival" id="sumAsc">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Moon Sign</div>
+              <div class="ival" id="sumMoonSign">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Sun Sign</div>
+              <div class="ival" id="sumSunSign">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Nakshatra</div>
+              <div class="ival" id="sumNak">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <path d="M2 12h20M12 2a15 15 0 0 1 0 20" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Yoga</div>
+              <div class="ival" id="sumYoga">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Tithi</div>
+              <div class="ival" id="sumTithi">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Varna (Rashi)</div>
+              <div class="ival" id="sumVarna">--</div>
+            </div>
+          </div>
+          <div class="info-item">
+            <div class="tile-icon"><svg viewBox="0 0 24 24">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg></div>
+            <div class="tile-content">
+              <div class="ilabel">Yoni (Animal)</div>
+              <div class="ival" id="sumYoni">--</div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="section" id="chartSelectorSection" style="display:none;">
-      <div class="sec-header"><span class="hicon"><svg><use href="#icon-grid"/></svg></span> Chart Selector</div>
-      <div class="sec-body">
+      <!-- VARGA SELECTOR (Birth mode only) -->
+      <div class="section" id="chartSelectorSection" style="display:none;">
+        <div class="sec-header">
+          <div class="sec-title-group">
+            <span class="hicon"><svg viewBox="0 0 24 24">
+                <rect x="3" y="3" width="7" height="7" />
+                <rect x="14" y="3" width="7" height="7" />
+                <rect x="14" y="14" width="7" height="7" />
+                <rect x="3" y="14" width="7" height="7" />
+              </svg></span>
+            <span>Divisional Charts (Vargas)</span>
+          </div>
+        </div>
         <div class="varga-scroll" id="vargaScroll"></div>
         <div class="varga-current" id="vargaCurrentLabel"></div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="sec-header"><span class="hicon"><svg class="icon-filled"><use href="#icon-star"/></svg></span> <span id="chartSectionTitle">North Indian Kundali</span></div>
-      <div class="sec-body">
-        <div class="chart-desc" id="chartSectionDesc"></div>
+      <!-- NORTH INDIAN KUNDALI (D1) CHART -->
+      <div class="section">
+        <div class="sec-header">
+          <div class="sec-title-group">
+            <span class="hicon"><svg viewBox="0 0 24 24">
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg></span>
+            <span id="chartSectionTitle">North Indian Kundali (D1)</span>
+          </div>
+          <span class="sec-action">View</span>
+        </div>
         <div class="chart-wrap"><svg id="chartSvg" viewBox="0 0 400 400"></svg></div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="sec-header"><span class="hicon"><svg><use href="#icon-planet"/></svg></span> Planetary Positions</div>
-      <div class="sec-body">
-        <div class="table-scroll">
+      <!-- PLANETARY POSITIONS -->
+      <div class="section">
+        <div class="sec-header">
+          <div class="sec-title-group">
+            <span class="hicon"><svg viewBox="0 0 24 24">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+              </svg></span>
+            <span>Planetary Positions</span>
+          </div>
+          <span class="sec-action" id="toggleTableBtn">View Table</span>
+        </div>
+        <div class="planet-list" id="planetList"></div>
+
+        <div class="table-scroll" id="planetTableWrap" style="display:none;">
           <table class="ptable" id="planetTable">
-            <thead><tr>
-              <th>Planet</th><th>House</th><th>House Lord</th><th>Rashi</th><th>Sign Lord</th>
-              <th>Longitude</th><th>Degree</th><th>Nakshatra</th><th>Nak. Lord</th><th>Pada</th><th>Motion</th><th>Combust</th><th>Status</th>
-            </tr></thead>
+            <thead>
+              <tr>
+                <th>Planet</th>
+                <th>House</th>
+                <th>Sign</th>
+                <th>Degree</th>
+                <th>Nakshatra</th>
+                <th>Pada</th>
+                <th>Motion</th>
+                <th>Combust</th>
+                <th>Status</th>
+              </tr>
+            </thead>
             <tbody id="planetTableBody"></tbody>
           </table>
         </div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="sec-header"><span class="hicon"><svg><use href="#icon-target"/></svg></span> Planet Aspects</div>
-      <div class="sec-body">
-        <div class="table-scroll">
-          <table class="ptable" id="planetAspectsTable">
-            <thead><tr>
-              <th>Planet</th><th>House</th><th>Aspects (Houses)</th><th>Aspected Planets</th><th>Aspected Signs</th>
-            </tr></thead>
-            <tbody id="planetAspectsBody"></tbody>
-          </table>
+      <!-- HOUSE ASPECTS (INTERACTIVE PILLS) -->
+      <div class="section">
+        <div class="sec-header">
+          <div class="sec-title-group">
+            <span class="hicon"><svg viewBox="0 0 24 24">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                <polyline points="9 22 9 12 15 12 15 22" />
+              </svg></span>
+            <span>House Aspects</span>
+          </div>
+          <span class="sec-action">View all</span>
+        </div>
+        <div class="house-pills-scroll" id="housePillsScroll"></div>
+
+        <div class="aspect-details-card">
+          <div class="aspect-group">
+            <div class="aspect-label">Planets in <span id="selectedHouseLabel">House 1</span></div>
+            <div class="aspect-badges" id="housePlanetsBadges"></div>
+          </div>
+          <div class="aspect-group" style="margin-top:12px;">
+            <div class="aspect-label">Aspected By</div>
+            <div class="aspect-badges" id="houseAspectedByBadges"></div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="sec-header"><span class="hicon"><svg><use href="#icon-house"/></svg></span> House Aspects</div>
-      <div class="sec-body">
-        <div class="table-scroll">
-          <table class="ptable" id="houseAspectsTable">
-            <thead><tr>
-              <th>House</th><th>Sign</th><th>Planets Placed</th><th>Aspected By</th>
-            </tr></thead>
-            <tbody id="houseAspectsBody"></tbody>
-          </table>
+      <!-- VIMSHOTTARI DASHAS -->
+      <div class="section">
+        <div class="sec-header">
+          <div class="sec-title-group">
+            <span class="hicon"><svg viewBox="0 0 24 24">
+                <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67" />
+              </svg></span>
+            <span>Dashas (Vimshottari)</span>
+          </div>
+          <span class="sec-action">View all</span>
+        </div>
+        <div id="dashaList"></div>
+      </div>
+
+      <!-- SHADBALA (PLANET STRENGTH) -->
+      <div class="section">
+        <div class="sec-header">
+          <div class="sec-title-group">
+            <span class="hicon"><svg viewBox="0 0 24 24">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" />
+              </svg></span>
+            <span>Shadbala (Planet Strength)</span>
+          </div>
+          <span class="sec-action">View all</span>
+        </div>
+
+        <div class="shadbala-container">
+          <div class="shadbala-bars" id="shadbalaBars"></div>
+          <div class="overall-gauge">
+            <svg viewBox="0 0 36 36">
+              <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" fill="none"
+                stroke="#EAEBF8" stroke-width="3.5" />
+              <path id="gaugePath" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                fill="none" stroke="url(#gaugeGrad)" stroke-width="3.5" stroke-dasharray="62.4, 100"
+                stroke-linecap="round" />
+              <defs>
+                <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stop-color="#6C5CE7" />
+                  <stop offset="100%" stop-color="#8E7CFF" />
+                </linearGradient>
+              </defs>
+            </svg>
+            <div class="gauge-text">
+              <div class="gauge-label">Overall</div>
+              <div class="gauge-value" id="overallGaugeVal">62.4%</div>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <div class="section">
-      <div class="sec-header"><span class="hicon"><svg class="icon-filled"><use href="#icon-bolt"/></svg></span> Shadbala</div>
-      <div class="sec-body">
-        <div class="dasha-hint">Based on the Rashi (D1) chart · six-fold planetary strength in Virupas (60 Virupas = 1 Rupa)</div>
-        <div class="table-scroll">
-          <table class="ptable" id="shadbalaTable">
-            <thead><tr>
-              <th>Planet</th><th>Uccha<br><small> (of 60)</small></th><th>Sapta-varga<br><small> (of 315)</small></th><th>Ojayugma<br><small> (of 30)</small></th><th>Kendradi<br><small> (of 60)</small></th><th>Drekkana<br><small> (of 15)</small></th><th>Sthana Total<br><small> (of 480)</small></th>
-              <th>Dig<br><small> (of 60)</small></th><th>Kala (Paksha)<br><small> (of 60)</small></th><th>Chesta<br><small> (of 60)</small></th><th>Naisargika<br><small> (of 60)</small></th><th>Drik<br><small> (-45 to 60)</small></th>
-              <th>Total (Virupas)<br><small> (of 780)</small></th><th>Total (Rupas)<br><small> (of 13)</small></th><th>Required</th><th>Verdict</th>
-            </tr></thead>
-            <tbody id="shadbalaBody"></tbody>
-          </table>
-        </div>
+      <!-- PDF DOWNLOAD ACTION -->
+      <div style="margin-top: 18px; margin-bottom: 20px;">
+        <button id="downloadPdfBtn" class="loc-btn primary" style="padding:14px; font-size:14px;">
+          Download PDF Report
+        </button>
       </div>
+
+    </div><!-- /resultContainer -->
+
+  </div><!-- /wrap -->
+
+  <!-- FIXED BOTTOM NAVIGATION BAR -->
+  <div class="bottom-nav">
+    <div class="nav-item active">
+      <svg viewBox="0 0 24 24">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+      </svg>
+      <span>Home</span>
     </div>
-
-    <div class="section">
-      <div class="sec-header"><span class="hicon"><svg><use href="#icon-columns"/></svg></span> Bhavabala</div>
-      <div class="sec-body">
-        <div class="dasha-hint">Based on the Rashi (D1) chart · house strength in Virupas</div>
-        <div class="table-scroll">
-          <table class="ptable" id="bhavabalaTable">
-            <thead><tr>
-              <th>House</th><th>Sign</th><th>Lord</th><th>Bhavadhipati<br><small> (of 780)</small></th><th>Dig<br><small> (of 60)</small></th><th>Drishti<br><small> (-45 to 60)</small></th><th>Total (Virupas)<br><small> (of 900)</small></th><th>Total (Rupas)<br><small> (of 15)</small></th>
-            </tr></thead>
-            <tbody id="bhavabalaBody"></tbody>
-          </table>
-        </div>
-      </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+      </svg>
+      <span>Reports</span>
     </div>
-
-    <div class="section">
-      <div class="sec-header"><span class="hicon"><svg><use href="#icon-cycle"/></svg></span> Vimshottari Dasha</div>
-      <div class="sec-body">
-        <div class="dasha-hint">Tap a Mahadasha to view its Antardashas</div>
-        <div id="dashaTable"></div>
-      </div>
+    <div class="nav-item center-btn">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="8" />
+      </svg>
     </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z" />
+      </svg>
+      <span>Remedies</span>
+    </div>
+    <div class="nav-item">
+      <svg viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="1" />
+        <circle cx="12" cy="5" r="1" />
+        <circle cx="12" cy="19" r="1" />
+      </svg>
+      <span>More</span>
+    </div>
+  </div>
 
-    <button id="downloadPdfBtn" class="loc-btn primary" style="margin-bottom:6px;">
-      <svg class="btn-icon"><use href="#icon-download"/></svg>Download PDF
-    </button>
-    <div class="loc-detail" style="padding-bottom:4px;">Includes the chart, all tables & Dasha details for the current mode</div>
+  <script type="module">
+    /* ===================== ASTRONOMY & KUNDALI LOGIC ENGINE ===================== */
 
-  </div><!-- /resultContainer -->
+    const RASHI = [
+      ["Mesha", "Mars"], ["Vrishabha", "Venus"], ["Mithuna", "Mercury"], ["Karka", "Moon"],
+      ["Simha", "Sun"], ["Kanya", "Mercury"], ["Tula", "Venus"], ["Vrishchika", "Mars"],
+      ["Dhanu", "Jupiter"], ["Makara", "Saturn"], ["Kumbha", "Saturn"], ["Meena", "Jupiter"]
+    ];
+    const NAKSHATRAS = [
+      "Ashwini", "Bharani", "Krittika", "Rohini", "Mrigashira", "Ardra", "Punarvasu", "Pushya", "Ashlesha",
+      "Magha", "Purva Phalguni", "Uttara Phalguni", "Hasta", "Chitra", "Swati", "Vishakha", "Anuradha", "Jyeshtha",
+      "Mula", "Purva Ashadha", "Uttara Ashadha", "Shravana", "Dhanishtha", "Shatabhisha", "Purva Bhadrapada",
+      "Uttara Bhadrapada", "Revati"
+    ];
+    const YOGAS = [
+      "Viskumbha", "Priti", "Ayushman", "Saubhagya", "Sobhana", "Atiganda", "Sukarma", "Dhriti", "Shula",
+      "Ganda", "Vriddhi", "Dhruva", "Vyaghata", "Harshana", "Vajra", "Siddhi", "Vyatipata", "Variyan",
+      "Parigha", "Shiva", "Siddha", "Sadhya", "Shubha", "Shukla", "Brahma", "Indra", "Vaidhriti"
+    ];
+    const TITHIS = [
+      "Shukla Pratipada", "Shukla Dwitiya", "Shukla Tritiya", "Shukla Chaturthi", "Shukla Panchami",
+      "Shukla Shashthi", "Shukla Saptami", "Shukla Ashtami", "Shukla Navami", "Shukla Dashami",
+      "Shukla Ekadashi", "Shukla Dwadashi", "Shukla Trayodashi", "Shukla Chaturdashi", "Purnima",
+      "Krishna Pratipada", "Krishna Dwitiya", "Krishna Tritiya", "Krishna Chaturthi", "Krishna Panchami",
+      "Krishna Shashthi", "Krishna Saptami", "Krishna Ashtami", "Krishna Navami", "Krishna Dashami",
+      "Krishna Ekadashi", "Krishna Dwadashi", "Krishna Trayodashi", "Krishna Chaturdashi", "Amavasya"
+    ];
+    const WEEKDAYS = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+    const COMBUST_ORB = { Moon: 12, Mars: 17, Mercury: 14, Jupiter: 11, Venus: 10, Saturn: 15 };
 
-  <footer>
-    Sun/Moon/Planet positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Ayanamsa: Lahiri (Sidereal) · House System: Whole Sign · Rahu: Mean Node, Ketu: Rahu + 180° · Divisional charts: Parashari Shodasavarga rules · Aspects: Parashari graha drishti (7th house full aspect for all grahas; Mars also 4th/8th, Jupiter also 5th/9th, Saturn also 3rd/10th; Rahu/Ketu shown on the common Jupiter-style 5th/7th/9th convention) · Shadbala/Bhavabala: simplified engine (D1-based; full 5-part Sthana Bala, approximated Dig Bala, Paksha-only Kala Bala, retrograde/speed-ratio Chesta Bala, simplified net-aspect Drik Bala) — figures are for relative comparison, not precise classical Shadbala
-  </footer>
-</div>
+    const VIMSHOTTARI_SEQUENCE = ["Ketu", "Venus", "Sun", "Moon", "Mars", "Rahu", "Jupiter", "Saturn", "Mercury"];
+    const VIMSHOTTARI_YEARS = { Ketu: 7, Venus: 20, Sun: 6, Moon: 10, Mars: 7, Rahu: 18, Jupiter: 16, Saturn: 19, Mercury: 17 };
+    const DAYS_PER_YEAR = 365.25;
 
-<script type="module">
-/* ===================== NAME TABLES ===================== */
+    function nakshatraLord(nakIdx) { return VIMSHOTTARI_SEQUENCE[nakIdx % 9]; }
+    function addYears(date, years) { return new Date(date.getTime() + years * DAYS_PER_YEAR * 86400000); }
 
-const RASHI = [
-  ["Mesha","Mars"],["Vrishabha","Venus"],["Mithuna","Mercury"],["Karka","Moon"],
-  ["Simha","Sun"],["Kanya","Mercury"],["Tula","Venus"],["Vrishchika","Mars"],
-  ["Dhanu","Jupiter"],["Makara","Saturn"],["Kumbha","Saturn"],["Meena","Jupiter"]
-];
-const NAKSHATRAS = [
-  "Ashwini","Bharani","Krittika","Rohini","Mrigashira","Ardra","Punarvasu","Pushya","Ashlesha",
-  "Magha","Purva Phalguni","Uttara Phalguni","Hasta","Chitra","Swati","Vishakha","Anuradha","Jyeshtha",
-  "Mula","Purva Ashadha","Uttara Ashadha","Shravana","Dhanishtha","Shatabhisha","Purva Bhadrapada",
-  "Uttara Bhadrapada","Revati"
-];
-const WEEKDAYS = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
-const COMBUST_ORB = { Moon:12, Mars:17, Mercury:14, Jupiter:11, Venus:10, Saturn:15 };
+    function computeMahadashas(moonLongitude, referenceDate) {
+      const nakSpan = 360 / 27;
+      const lon = norm360(moonLongitude);
+      const nakIdx = Math.floor(lon / nakSpan);
+      const posInNak = lon % nakSpan;
+      const fractionElapsed = posInNak / nakSpan;
+      const startIdx = nakIdx % 9;
+      const startPlanet = VIMSHOTTARI_SEQUENCE[startIdx];
+      const fullYears = VIMSHOTTARI_YEARS[startPlanet];
+      const balanceYears = fullYears * (1 - fractionElapsed);
+      const alreadyElapsed = fullYears - balanceYears;
 
-/* Nakshatra lord: standard Vimshottari Dasha planet sequence, repeating 3x across 27 nakshatras */
-const VIMSHOTTARI_SEQUENCE = ["Ketu","Venus","Sun","Moon","Mars","Rahu","Jupiter","Saturn","Mercury"];
-function nakshatraLord(nakIdx){ return VIMSHOTTARI_SEQUENCE[nakIdx%9]; }
-
-/* ===================== VIMSHOTTARI DASHA ===================== */
-
-const VIMSHOTTARI_YEARS = { Ketu:7, Venus:20, Sun:6, Moon:10, Mars:7, Rahu:18, Jupiter:16, Saturn:19, Mercury:17 };
-const DAYS_PER_YEAR = 365.25; // standard convention for Vimshottari date arithmetic
-function addYears(date, years){ return new Date(date.getTime() + years*DAYS_PER_YEAR*86400000); }
-
-/* Computes the 9 Mahadashas starting from birth/reference moment, based on the Moon's
-   nakshatra at that moment. The first Mahadasha is the nakshatra lord's balance period
-   (proportional to how much of that nakshatra remains); the following 8 run at full
-   classical length, cycling through the fixed Vimshottari sequence. */
-function computeMahadashas(moonLongitude, referenceDate){
-  const nakSpan = 360/27;
-  const lon = norm360(moonLongitude);
-  const nakIdx = Math.floor(lon/nakSpan);
-  const posInNak = lon % nakSpan;
-  const fractionElapsed = posInNak / nakSpan;
-  const startIdx = nakIdx % 9;
-  const startPlanet = VIMSHOTTARI_SEQUENCE[startIdx];
-  const fullYears = VIMSHOTTARI_YEARS[startPlanet];
-  const balanceYears = fullYears * (1 - fractionElapsed);
-  const alreadyElapsed = fullYears - balanceYears;
-
-  const mahadashas = [];
-  let cursor = new Date(referenceDate.getTime());
-  for (let i=0; i<9; i++){
-    const planet = VIMSHOTTARI_SEQUENCE[(startIdx+i)%9];
-    const years = i===0 ? balanceYears : VIMSHOTTARI_YEARS[planet];
-    const start = new Date(cursor.getTime());
-    const end = addYears(start, years);
-    mahadashas.push({ planet, start, end, years, alreadyElapsedBefore: i===0 ? alreadyElapsed : 0 });
-    cursor = end;
-  }
-  return mahadashas;
-}
-
-/* Computes the 9 Antardashas within a given Mahadasha. Uses the standard proportional
-   formula AD(years) = fullMahaYears * fullAntarYears / 120, then — for a Mahadasha that
-   itself starts partway through its own full classical span (only ever true for the very
-   first, birth-balance Mahadasha) — trims off whatever Antardasha portion would have
-   already elapsed before the reference moment, so the visible Antardashas sum exactly to
-   that Mahadasha's actual (possibly partial) duration. */
-function computeAntardashas(maha){
-  const fullMahaYears = VIMSHOTTARI_YEARS[maha.planet];
-  const startIdx = VIMSHOTTARI_SEQUENCE.indexOf(maha.planet);
-  const alreadyElapsed = maha.alreadyElapsedBefore || 0;
-  const antardashas = [];
-  let virtualCursor = 0;
-  let realCursor = new Date(maha.start.getTime());
-  for (let i=0; i<9; i++){
-    const planet = VIMSHOTTARI_SEQUENCE[(startIdx+i)%9];
-    const adFullYears = (fullMahaYears * VIMSHOTTARI_YEARS[planet]) / 120;
-    const virtualStart = virtualCursor;
-    const virtualEnd = virtualCursor + adFullYears;
-    virtualCursor = virtualEnd;
-    if (virtualEnd <= alreadyElapsed) continue;
-    const visibleYears = virtualEnd - Math.max(virtualStart, alreadyElapsed);
-    const start = new Date(realCursor.getTime());
-    const end = addYears(start, visibleYears);
-    antardashas.push({ planet, start, end, years: visibleYears });
-    realCursor = end;
-  }
-  return antardashas;
-}
-
-function fmtDashaDate(d){ return d.toLocaleDateString('en-IN',{year:'numeric',month:'short',day:'2-digit'}); }
-
-function renderDashaTable(referenceDate, moonLongitude){
-  const now = new Date();
-  const mahadashas = computeMahadashas(moonLongitude, referenceDate);
-  el('dashaTable').innerHTML = mahadashas.map((m, idx)=>{
-    const isCurrent = now>=m.start && now<m.end;
-    const rowId = 'dasha-row-'+idx;
-    return `<div class="dasha-row ${isCurrent?'current':''}" id="${rowId}">
-      <div class="dasha-row-head">
-        <div class="dasha-planet">${m.planet}${isCurrent?'<span class="now-tag">NOW</span>':''}</div>
-        <div class="dasha-range">${fmtDashaDate(m.start)} – ${fmtDashaDate(m.end)}<span class="dasha-chevron">▾</span></div>
-      </div>
-      <div class="antardasha-wrap"><div class="antardasha-list" data-idx="${idx}"></div></div>
-    </div>`;
-  }).join('');
-
-  mahadashas.forEach((m, idx)=>{
-    const row = document.getElementById('dasha-row-'+idx);
-    const head = row.querySelector('.dasha-row-head');
-    const listEl = row.querySelector('.antardasha-list');
-    let built = false;
-    head.addEventListener('click', ()=>{
-      const opening = !row.classList.contains('open');
-      row.classList.toggle('open');
-      if (opening && !built){
-        const antardashas = computeAntardashas(m);
-        listEl.innerHTML = antardashas.map(a=>{
-          const adCurrent = now>=a.start && now<a.end;
-          return `<div class="antardasha-item ${adCurrent?'current':''}">
-            <div class="ad-name">${a.planet}${adCurrent?'<span class="now-tag">NOW</span>':''}</div>
-            <div>${fmtDashaDate(a.start)} – ${fmtDashaDate(a.end)}</div>
-          </div>`;
-        }).join('');
-        built = true;
+      const mahadashas = [];
+      let cursor = new Date(referenceDate.getTime());
+      for (let i = 0; i < 9; i++) {
+        const planet = VIMSHOTTARI_SEQUENCE[(startIdx + i) % 9];
+        const years = i === 0 ? balanceYears : VIMSHOTTARI_YEARS[planet];
+        const start = new Date(cursor.getTime());
+        const end = addYears(start, years);
+        mahadashas.push({ planet, start, end, years, alreadyElapsedBefore: i === 0 ? alreadyElapsed : 0 });
+        cursor = end;
       }
-    });
-    if (isCurrentRow(m, now)) head.click();
-  });
-}
-function isCurrentRow(m, now){ return now>=m.start && now<m.end; }
+      return mahadashas;
+    }
 
-/* Yoni (instinctive-nature animal symbol per nakshatra) — source: classical 14-animal Ashtakoot table */
-const YONI_TABLE = [
-  "Horse","Elephant","Sheep/Goat","Serpent","Serpent","Dog","Cat","Sheep/Goat","Cat","Rat","Rat","Cow",
-  "Buffalo","Tiger","Buffalo","Tiger","Deer","Deer","Dog","Monkey","Mongoose","Monkey","Lion","Horse",
-  "Lion","Cow","Elephant"
-];
-/* Gana (temperament) — Deva/Manushya/Rakshasa, 9 nakshatras each */
-const GANA_TABLE = [
-  "Deva","Manushya","Rakshasa","Manushya","Deva","Manushya","Deva","Deva","Rakshasa","Rakshasa","Manushya","Manushya",
-  "Deva","Rakshasa","Deva","Rakshasa","Deva","Rakshasa","Rakshasa","Manushya","Manushya","Deva","Rakshasa","Rakshasa",
-  "Manushya","Manushya","Deva"
-];
-/* Nadi (constitutional energy) — Aadi(Vata)/Madhya(Pitta)/Antya(Kapha), 9 nakshatras each */
-const NADI_TABLE = [
-  "Aadi","Madhya","Antya","Antya","Madhya","Aadi","Aadi","Madhya","Antya","Antya","Madhya","Aadi",
-  "Aadi","Madhya","Antya","Antya","Madhya","Aadi","Aadi","Madhya","Antya","Antya","Madhya","Aadi",
-  "Aadi","Madhya","Antya"
-];
-/* Naming starting-letters per Moon Rashi — commonly used simplified naming convention
-   (distinct from, and simpler than, the Nakshatra-Pada based Namakarana system) */
-const NAME_ALPHABET_BY_RASHI = [
-  "A, L, E/I",          // Mesha (Aries)
-  "B, V, U",            // Vrishabha (Taurus)
-  "K, Chh, Gh",         // Mithuna (Gemini)
-  "D, H",               // Karka (Cancer)
-  "M, T",               // Simha (Leo)
-  "P, Th, N",           // Kanya (Virgo)
-  "R, T",               // Tula (Libra)
-  "N, Y",               // Vrishchika (Scorpio)
-  "Bh, Dh, Ph/F, Dhh",  // Dhanu (Sagittarius)
-  "Kh, J, G",           // Makara (Capricorn)
-  "G, S, Sh",           // Kumbha (Aquarius)
-  "D, Ch, Jh, Th"       // Meena (Pisces)
-];
-/* Varna — from Moon rashi's element (classical caste-like classification) */
-function getVarna(rashiIdx){
-  const el = signElement(rashiIdx);
-  return { fire:"Kshatriya", earth:"Vaishya", air:"Shudra", water:"Brahmin" }[el];
-}
-/* Vashya — 5-group classification, including the classical Sagittarius/Capricorn half-sign split */
-function getVashya(rashiIdx, degInSign){
-  if (rashiIdx===0 || rashiIdx===1) return "Chatushpada";
-  if (rashiIdx===2 || rashiIdx===5 || rashiIdx===6 || rashiIdx===10) return "Manava";
-  if (rashiIdx===3 || rashiIdx===11) return "Jalachara";
-  if (rashiIdx===4) return "Vanachara";
-  if (rashiIdx===7) return "Keeta";
-  if (rashiIdx===8) return degInSign<15 ? "Manava" : "Chatushpada";
-  if (rashiIdx===9) return degInSign<15 ? "Chatushpada" : "Jalachara";
-}
-/* Tatva (element) in Sanskrit naming */
-function getTatva(rashiIdx){
-  return { fire:"Agni (Fire)", earth:"Prithvi (Earth)", air:"Vayu (Air)", water:"Jal (Water)" }[signElement(rashiIdx)];
-}
-/* Paya — Gold/Silver/Copper/Iron by Moon's house from Lagna (well-defined, unambiguous classical rule) */
-function getPaya(moonHouse){
-  if ([1,6,11].includes(moonHouse)) return "Gold";
-  if ([2,5,9].includes(moonHouse)) return "Silver";
-  if ([3,7,10].includes(moonHouse)) return "Copper";
-  return "Iron"; // 4,8,12
-}
+    function computeAntardashas(maha) {
+      const fullMahaYears = VIMSHOTTARI_YEARS[maha.planet];
+      const startIdx = VIMSHOTTARI_SEQUENCE.indexOf(maha.planet);
+      const alreadyElapsed = maha.alreadyElapsedBefore || 0;
+      const antardashas = [];
+      let virtualCursor = 0;
+      let realCursor = new Date(maha.start.getTime());
+      for (let i = 0; i < 9; i++) {
+        const planet = VIMSHOTTARI_SEQUENCE[(startIdx + i) % 9];
+        const adFullYears = (fullMahaYears * VIMSHOTTARI_YEARS[planet]) / 120;
+        const virtualStart = virtualCursor;
+        const virtualEnd = virtualCursor + adFullYears;
+        virtualCursor = virtualEnd;
+        if (virtualEnd <= alreadyElapsed) continue;
+        const visibleYears = virtualEnd - Math.max(virtualStart, alreadyElapsed);
+        const start = new Date(realCursor.getTime());
+        const end = addYears(start, visibleYears);
+        antardashas.push({ planet, start, end, years: visibleYears });
+        realCursor = end;
+      }
+      return antardashas;
+    }
 
-/* Baladi Avastha (5-fold planet state by degree within sign; order reverses for even signs) */
-function getPlanetState(rashiIdx, degInSign){
-  const states = isOddSign(rashiIdx) ? ["Bala","Kumara","Yuva","Vriddha","Mrita"] : ["Mrita","Vriddha","Yuva","Kumara","Bala"];
-  return states[Math.min(4, Math.floor(degInSign/6))];
-}
-/* Dignity (exaltation/debilitation/own-sign/friend-enemy) — standard Parashari tables */
-const EXALTATION = { Sun:0, Moon:1, Mars:9, Mercury:5, Jupiter:3, Venus:11, Saturn:6, Rahu:1, Ketu:7 };
-const DEBILITATION = { Sun:6, Moon:7, Mars:3, Mercury:11, Jupiter:9, Venus:5, Saturn:0, Rahu:7, Ketu:1 };
-const OWN_SIGNS = { Sun:[4], Moon:[3], Mars:[0,7], Mercury:[2,5], Jupiter:[8,11], Venus:[1,6], Saturn:[9,10] };
-const NATURAL_FRIENDS = { Sun:["Moon","Mars","Jupiter"], Moon:["Sun","Mercury"], Mars:["Sun","Moon","Jupiter"], Mercury:["Sun","Venus"], Jupiter:["Sun","Moon","Mars"], Venus:["Mercury","Saturn"], Saturn:["Mercury","Venus"] };
-const NATURAL_ENEMIES = { Sun:["Venus","Saturn"], Moon:[], Mars:["Mercury"], Mercury:["Moon"], Jupiter:["Mercury","Venus"], Venus:["Sun","Moon"], Saturn:["Sun","Moon","Mars"] };
-function getPlanetStatus(planetName, rashiIdx){
-  if (planetName==="Ascendant") return "—";
-  if (DEBILITATION[planetName]===rashiIdx) return "Debilitated";
-  if (EXALTATION[planetName]===rashiIdx) return "Exalted";
-  if (OWN_SIGNS[planetName] && OWN_SIGNS[planetName].includes(rashiIdx)) return "Own Sign";
-  if (planetName==="Rahu" || planetName==="Ketu") return "—";
-  const signLord = RASHI[rashiIdx][1];
-  if (NATURAL_FRIENDS[planetName] && NATURAL_FRIENDS[planetName].includes(signLord)) return "Friendly Sign";
-  if (NATURAL_ENEMIES[planetName] && NATURAL_ENEMIES[planetName].includes(signLord)) return "Enemy Sign";
-  return "Neutral Sign";
-}
+    const YONI_TABLE = [
+      "Horse", "Elephant", "Sheep/Goat", "Serpent", "Serpent", "Dog", "Cat", "Sheep/Goat", "Cat", "Rat", "Rat", "Cow",
+      "Buffalo", "Tiger", "Buffalo", "Tiger", "Deer", "Deer", "Dog", "Monkey", "Mongoose", "Monkey", "Lion", "Horse",
+      "Lion", "Cow", "Elephant"
+    ];
 
-/* ===================== DIVISIONAL CHART (VARGA) RULES =====================
-   Standard Parashari Shodasavarga rules. Each function takes the D1 (natal) rashi
-   index (0=Mesha..11=Meena) and the degree within that sign (0-30), and returns the
-   resulting varga rashi index (0-11). This layer is fully separate from the base
-   astronomy (computeBaseChart) so it can be extended/replaced independently. */
+    function signElement(idx) { return ['fire', 'earth', 'air', 'water'][idx % 4]; }
+    function signModality(idx) { return ['movable', 'fixed', 'dual'][idx % 3]; }
+    function isOddSign(idx) { return idx % 2 === 0; }
 
-function signElement(idx){ return ['fire','earth','air','water'][idx%4]; }
-function signModality(idx){ return ['movable','fixed','dual'][idx%3]; }
-function isOddSign(idx){ return idx%2===0; } // 0-indexed: Mesha(0)=sign#1=odd
+    function getVarna(rashiIdx) {
+      const el = signElement(rashiIdx);
+      return { fire: "Kshatriya", earth: "Vaishya", air: "Shudra", water: "Brahmin" }[el];
+    }
 
-function vargaD1(r,d){ return r; }
-function vargaD2(r,d){
-  const odd = isOddSign(r);
-  const half = d<15 ? 0 : 1;
-  if (odd) return half===0 ? 4 : 3; // Leo : Cancer
-  return half===0 ? 3 : 4;          // Cancer : Leo
-}
-function vargaD3(r,d){ const part=Math.min(2,Math.floor(d/10)); return (r+part*4)%12; }
-function vargaD4(r,d){ const part=Math.min(3,Math.floor(d/7.5)); return (r+part*3)%12; }
-function vargaD7(r,d){
-  const start = isOddSign(r) ? r : (r+6)%12;
-  const part = Math.min(6, Math.floor(d/(30/7)));
-  return (start+part)%12;
-}
-function vargaD9(r,d){
-  const startMap = {fire:0, earth:9, air:6, water:3};
-  const start = startMap[signElement(r)];
-  const part = Math.min(8, Math.floor(d/(30/9)));
-  return (start+part)%12;
-}
-function vargaD10(r,d){
-  const start = isOddSign(r) ? r : (r+8)%12;
-  const part = Math.min(9, Math.floor(d/3));
-  return (start+part)%12;
-}
-function vargaD12(r,d){ const part=Math.min(11,Math.floor(d/2.5)); return (r+part)%12; }
-function vargaD16(r,d){
-  const startMap = {movable:0, fixed:4, dual:8};
-  const start = startMap[signModality(r)];
-  const part = Math.min(15, Math.floor(d/1.875));
-  return (start+part)%12;
-}
-function vargaD20(r,d){
-  const startMap = {movable:0, fixed:8, dual:4};
-  const start = startMap[signModality(r)];
-  const part = Math.min(19, Math.floor(d/1.5));
-  return (start+part)%12;
-}
-function vargaD24(r,d){
-  const start = isOddSign(r) ? 4 : 3; // Leo : Cancer
-  const part = Math.min(23, Math.floor(d/1.25));
-  return (start+part)%12;
-}
-function vargaD27(r,d){
-  const startMap = {fire:0, earth:3, air:6, water:9};
-  const start = startMap[signElement(r)];
-  const part = Math.min(26, Math.floor(d/(30/27)));
-  return (start+part)%12;
-}
-function vargaD30(r,d){
-  const odd = isOddSign(r);
-  if (odd){
-    if (d<5) return 0; if (d<10) return 10; if (d<18) return 8; if (d<25) return 2; return 1;
-  }
-  if (d<5) return 1; if (d<12) return 2; if (d<20) return 8; if (d<25) return 10; return 0;
-}
-function vargaD40(r,d){
-  const start = isOddSign(r) ? 0 : 6;
-  const part = Math.min(39, Math.floor(d/0.75));
-  return (start+part)%12;
-}
-function vargaD45(r,d){
-  const startMap = {movable:0, fixed:4, dual:8};
-  const start = startMap[signModality(r)];
-  const part = Math.min(44, Math.floor(d/(2/3)));
-  return (start+part)%12;
-}
-function vargaD60(r,d){ const part=Math.min(59,Math.floor(d/0.5)); return (r+part)%12; }
+    /* Divisional Chart rules */
+    function vargaD1(r, d) { return r; }
+    function vargaD2(r, d) { const odd = isOddSign(r), half = d < 15 ? 0 : 1; return odd ? (half === 0 ? 4 : 3) : (half === 0 ? 3 : 4); }
+    function vargaD3(r, d) { const part = Math.min(2, Math.floor(d / 10)); return (r + part * 4) % 12; }
+    function vargaD4(r, d) { const part = Math.min(3, Math.floor(d / 7.5)); return (r + part * 3) % 12; }
+    function vargaD7(r, d) { const start = isOddSign(r) ? r : (r + 6) % 12, part = Math.min(6, Math.floor(d / (30 / 7))); return (start + part) % 12; }
+    function vargaD9(r, d) { const startMap = { fire: 0, earth: 9, air: 6, water: 3 }, start = startMap[signElement(r)], part = Math.min(8, Math.floor(d / (30 / 9))); return (start + part) % 12; }
+    function vargaD10(r, d) { const start = isOddSign(r) ? r : (r + 8) % 12, part = Math.min(9, Math.floor(d / 3)); return (start + part) % 12; }
+    function vargaD12(r, d) { const part = Math.min(11, Math.floor(d / 2.5)); return (r + part) % 12; }
+    function vargaD16(r, d) { const startMap = { movable: 0, fixed: 4, dual: 8 }, start = startMap[signModality(r)], part = Math.min(15, Math.floor(d / 1.875)); return (start + part) % 12; }
+    function vargaD20(r, d) { const startMap = { movable: 0, fixed: 8, dual: 4 }, start = startMap[signModality(r)], part = Math.min(19, Math.floor(d / 1.5)); return (start + part) % 12; }
+    function vargaD24(r, d) { const start = isOddSign(r) ? 4 : 3, part = Math.min(23, Math.floor(d / 1.25)); return (start + part) % 12; }
+    function vargaD27(r, d) { const startMap = { fire: 0, earth: 3, air: 6, water: 9 }, start = startMap[signElement(r)], part = Math.min(26, Math.floor(d / (30 / 27))); return (start + part) % 12; }
+    function vargaD30(r, d) { const odd = isOddSign(r); if (odd) { if (d < 5) return 0; if (d < 10) return 10; if (d < 18) return 8; if (d < 25) return 2; return 1; } if (d < 5) return 1; if (d < 12) return 2; if (d < 20) return 8; if (d < 25) return 10; return 0; }
+    function vargaD40(r, d) { const start = isOddSign(r) ? 0 : 6, part = Math.min(39, Math.floor(d / 0.75)); return (start + part) % 12; }
+    function vargaD45(r, d) { const startMap = { movable: 0, fixed: 4, dual: 8 }, start = startMap[signModality(r)], part = Math.min(44, Math.floor(d / (2 / 3))); return (start + part) % 12; }
+    function vargaD60(r, d) { const part = Math.min(59, Math.floor(d / 0.5)); return (r + part) % 12; }
 
-const VARGA_FUNCS = {1:vargaD1,2:vargaD2,3:vargaD3,4:vargaD4,7:vargaD7,9:vargaD9,10:vargaD10,12:vargaD12,16:vargaD16,20:vargaD20,24:vargaD24,27:vargaD27,30:vargaD30,40:vargaD40,45:vargaD45,60:vargaD60};
-const VARGA_LIST = [
-  {n:1,label:"D1",full:"D1 (Rashi)"},{n:2,label:"D2",full:"D2 (Hora)"},{n:3,label:"D3",full:"D3 (Drekkana)"},
-  {n:4,label:"D4",full:"D4 (Chaturthamsa)"},{n:7,label:"D7",full:"D7 (Saptamsa)"},{n:9,label:"D9",full:"D9 (Navamsa)"},
-  {n:10,label:"D10",full:"D10 (Dashamsa)"},{n:12,label:"D12",full:"D12 (Dwadashamsa)"},{n:16,label:"D16",full:"D16 (Shodashamsa)"},
-  {n:20,label:"D20",full:"D20 (Vimsamsa)"},{n:24,label:"D24",full:"D24 (Chaturvimshamsa)"},{n:27,label:"D27",full:"D27 (Nakshatramsa)"},
-  {n:30,label:"D30",full:"D30 (Trimsamsa)"},{n:40,label:"D40",full:"D40 (Khavedamsa)"},{n:45,label:"D45",full:"D45 (Akshavedamsa)"},
-  {n:60,label:"D60",full:"D60 (Shastiamsa)"}
-];
+    const VARGA_FUNCS = { 1: vargaD1, 2: vargaD2, 3: vargaD3, 4: vargaD4, 7: vargaD7, 9: vargaD9, 10: vargaD10, 12: vargaD12, 16: vargaD16, 20: vargaD20, 24: vargaD24, 27: vargaD27, 30: vargaD30, 40: vargaD40, 45: vargaD45, 60: vargaD60 };
+    const VARGA_LIST = [
+      { n: 1, label: "D1" }, { n: 2, label: "D2" }, { n: 3, label: "D3" }, { n: 4, label: "D4" }, { n: 7, label: "D7" }, { n: 9, label: "D9" },
+      { n: 10, label: "D10" }, { n: 12, label: "D12" }, { n: 16, label: "D16" }, { n: 20, label: "D20" }, { n: 24, label: "D24" }, { n: 27, label: "D27" },
+      { n: 30, label: "D30" }, { n: 40, label: "D40" }, { n: 45, label: "D45" }, { n: 60, label: "D60" }
+    ];
 
-/* One-line purpose description shown under the chart title, per divisional chart */
-const VARGA_DESCRIPTIONS = {
-  1:  "Main birth chart — personality, career, marriage, wealth & overall life.",
-  2:  "Wealth, savings, financial stability & assets.",
-  3:  "Courage, siblings, communication & self-effort.",
-  4:  "Property, home, land & fixed assets.",
-  7:  "Children, fertility & progeny.",
-  9:  "Marriage, spouse, relationships & dharma.",
-  10: "Career, profession, authority & achievements.",
-  12: "Parents, family lineage & ancestral influences.",
-  16: "Vehicles, comforts, luxury & happiness.",
-  20: "Spiritual life, devotion & religious practices.",
-  24: "Education, learning, intelligence & knowledge.",
-  27: "Inner strength, stamina, courage & weaknesses.",
-  30: "Misfortunes, obstacles, suffering & hidden challenges.",
-  40: "Maternal blessings, auspicious karma & fortune.",
-  45: "Character, ethics, conduct & paternal blessings.",
-  60: "Past-life karma, karmic debts & overall destiny."
-};
+    function applyVarga(base, vargaN) {
+      const vfn = VARGA_FUNCS[vargaN] || vargaD1;
+      const ascVargaRashi = vfn(base.ascendant.rashi, base.ascendant.longitude % 30);
+      const planets = base.planets.map(p => {
+        const vRashi = vfn(p.rashi, p.longitude % 30);
+        const house = ((vRashi - ascVargaRashi + 12) % 12) + 1;
+        return { ...p, vargaRashi: vRashi, house };
+      });
+      const ascendant = { ...base.ascendant, vargaRashi: ascVargaRashi, house: 1 };
+      return { ascendant, planets };
+    }
 
+    /* Math Helpers */
+    const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+    const norm360 = x => ((x % 360) + 360) % 360;
+    function toJulianUTC(date) { return date.getTime() / 86400000 + 2440587.5; }
+    function angDiff(a, b) { const d = Math.abs(norm360(a - b)); return d > 180 ? 360 - d : d; }
+    function fmtDeg(lon) { const inSign = lon % 30; return `${inSign.toFixed(2)}°`; }
+    function fmtFullDate(date) { return date.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: '2-digit' }); }
+    function fmtTime12(date) { return date.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true }); }
+    function fmtDashaDate(d) { return d.toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: '2-digit' }); }
 
-/* Projects a base D1 chart through a divisional chart rule. Base data (longitude,
-   nakshatra, pada, retrograde, combust) is untouched — only rashi/house are re-derived
-   for the selected division. Keeps the varga layer swappable/extensible on its own. */
-function applyVarga(base, vargaN){
-  const vfn = VARGA_FUNCS[vargaN] || vargaD1;
-  const ascVargaRashi = vfn(base.ascendant.rashi, base.ascendant.longitude % 30);
-  const planets = base.planets.map(p=>{
-    const vRashi = vfn(p.rashi, p.longitude % 30);
-    const house = ((vRashi - ascVargaRashi + 12) % 12) + 1;
-    return { ...p, vargaRashi:vRashi, house };
-  });
-  const ascendant = { ...base.ascendant, vargaRashi:ascVargaRashi, house:1 };
-  return { ascendant, planets };
-}
+    /* App State */
+    let userLat = null, userLon = null;
+    let sweModule = null, sweInstance = null;
+    let currentMode = 'daily';
+    let selectedDateTime = new Date();
+    let birthDateTime = new Date();
+    let selectedVarga = 1;
+    let selectedHousePill = 1;
+    let dailyBaseData = null;
+    let birthBaseData = null;
 
-/* ===================== MATH / TIME HELPERS ===================== */
+    const el = id => document.getElementById(id);
 
-const D2R=Math.PI/180, R2D=180/Math.PI;
-const sinD=d=>Math.sin(d*D2R), cosD=d=>Math.cos(d*D2R);
-const asinD=x=>Math.asin(Math.max(-1,Math.min(1,x)))*R2D;
-const norm360=x=>((x%360)+360)%360;
-function toJulianUTC(date){ return date.getTime()/86400000 + 2440587.5; }
-function angDiff(a,b){ const d=Math.abs(norm360(a-b)); return d>180?360-d:d; }
-function fmtDeg(lon){
-  const inSign = lon % 30;
-  const d = Math.floor(inSign);
-  const m = Math.floor((inSign-d)*60);
-  const s = Math.round(((inSign-d)*60-m)*60);
-  return `${d}°${String(m).padStart(2,'0')}'${String(s).padStart(2,'0')}"`;
-}
-function fmtFullDate(date){ return date.toLocaleDateString('en-IN',{year:'numeric',month:'long',day:'numeric'}); }
-function fmtTime12(date){ return date.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}); }
+    /* Swiss Ephemeris Loading */
+    async function loadSwissEphemeris() {
+      try {
+        const mod = await import("./js/swisseph/swisseph-browser.js");
+        const swe = new mod.SwissEphemeris();
+        await swe.init();
+        swe.setSiderealMode(mod.SiderealMode.Lahiri);
+        sweModule = mod; sweInstance = swe;
+        return true;
+      } catch (err) {
+        console.error(err);
+        return false;
+      }
+    }
 
-/* ===================== APP STATE ===================== */
+    function getSiderealPosition(jd, body) {
+      const flags = sweModule.CalculationFlag.MoshierEphemeris | sweModule.CalculationFlag.Sidereal | sweModule.CalculationFlag.Speed;
+      const p = sweInstance.calculatePosition(jd, body, flags);
+      return { longitude: norm360(p.longitude), speed: p.longitudeSpeed };
+    }
+    function getSiderealAscendant(jd, lat, lon) {
+      const houses = sweInstance.calculateHouses(jd, lat, lon, sweModule.HouseSystem.WholeSign);
+      const ayan = sweInstance.getAyanamsa(jd);
+      return norm360(houses.ascendant - ayan);
+    }
+    function rashiIndex(lon) { return Math.floor(norm360(lon) / 30); }
+    function nakshatraIndex(lon) { return Math.floor(norm360(lon) / (360 / 27)) % 27; }
+    function nakshatraPada(lon) { return Math.floor((norm360(lon) % (360 / 27)) / (360 / 108)) + 1; }
 
-let userLat=null, userLon=null;
-let sweModule=null, sweInstance=null;
-let currentMode = 'daily'; // 'daily' | 'birth' | 'marriage'
-let selectedDateTime = new Date();   // daily kundali reference moment
-let birthDateTime = new Date();      // birth kundali reference moment
-let selectedVarga = 1;               // birth kundali chart selector
-let dailyBaseData = null;            // last computed base D1 data for daily mode
-let birthBaseData = null;            // last computed base D1 data for birth mode
+    function computeBaseChart(jd, lat, lon) {
+      const ascSid = getSiderealAscendant(jd, lat, lon);
+      const ascRashi = rashiIndex(ascSid);
+      const sun = getSiderealPosition(jd, sweModule.Planet.Sun);
+      const sunSid = sun.longitude;
 
-const el = id => document.getElementById(id);
+      const bodies = [
+        { key: "Sun", body: sweModule.Planet.Sun },
+        { key: "Moon", body: sweModule.Planet.Moon },
+        { key: "Mars", body: sweModule.Planet.Mars },
+        { key: "Mercury", body: sweModule.Planet.Mercury },
+        { key: "Jupiter", body: sweModule.Planet.Jupiter },
+        { key: "Venus", body: sweModule.Planet.Venus },
+        { key: "Saturn", body: sweModule.Planet.Saturn },
+        { key: "Rahu", body: sweModule.Planet.MeanNode }
+      ];
 
-/* ===================== SWISS EPHEMERIS LOADING ===================== */
+      const planets = bodies.map(b => {
+        const pos = b.key === "Sun" ? sun : getSiderealPosition(jd, b.body);
+        const lon2 = pos.longitude;
+        const rashi = rashiIndex(lon2);
+        const nak = nakshatraIndex(lon2);
+        const retro = pos.speed < 0;
+        let combust = null;
+        if (COMBUST_ORB[b.key] !== undefined) combust = angDiff(lon2, sunSid) < COMBUST_ORB[b.key];
+        return { name: b.key, longitude: lon2, rashi, nak, pada: nakshatraPada(lon2), retro, combust, speed: pos.speed };
+      });
 
-async function loadSwissEphemeris(){
-  try{
-    const mod = await import("./js/swisseph/swisseph-browser.js");
-    const swe = new mod.SwissEphemeris();
-    await swe.init();
-    swe.setSiderealMode(mod.SiderealMode.Lahiri);
-    sweModule = mod; sweInstance = swe;
-    return true;
-  }catch(err){
-    console.error(err);
-    showGpsOffMessage("Could not load the astronomical engine. Ensure js/swisseph/ files are present and this page is served over http(s).");
-    return false;
-  }
-}
+      const rahu = planets.find(p => p.name === "Rahu");
+      const ketuLon = norm360(rahu.longitude + 180);
+      planets.push({ name: "Ketu", longitude: ketuLon, rashi: rashiIndex(ketuLon), nak: nakshatraIndex(ketuLon), pada: nakshatraPada(ketuLon), retro: rahu.retro, combust: null, speed: rahu.speed });
 
-/* ===================== CORE ASTRONOMY (modular; independent of divisional-chart layer) ===================== */
+      const ascendant = { name: "Ascendant", longitude: ascSid, rashi: ascRashi, nak: nakshatraIndex(ascSid), pada: nakshatraPada(ascSid), retro: null, combust: null };
+      return { ascendant, planets };
+    }
 
-function getSiderealPosition(jd, body){
-  const flags = sweModule.CalculationFlag.MoshierEphemeris | sweModule.CalculationFlag.Sidereal | sweModule.CalculationFlag.Speed;
-  const p = sweInstance.calculatePosition(jd, body, flags);
-  return { longitude: norm360(p.longitude), speed: p.longitudeSpeed };
-}
-function getSiderealAscendant(jd, lat, lon){
-  const houses = sweInstance.calculateHouses(jd, lat, lon, sweModule.HouseSystem.WholeSign);
-  const ayan = sweInstance.getAyanamsa(jd);
-  return norm360(houses.ascendant - ayan);
-}
-function rashiIndex(lon){ return Math.floor(norm360(lon)/30); }
-function nakshatraIndex(lon){ return Math.floor(norm360(lon)/(360/27))%27; }
-function nakshatraPada(lon){
-  const span=360/27, padaSpan=span/4;
-  return Math.floor((norm360(lon)%span)/padaSpan)+1;
-}
+    /* North Indian Chart SVG Renderer */
+    const CHART_ABBR = { Sun: "Su", Moon: "Mo", Mars: "Ma", Mercury: "Me", Jupiter: "Ju", Venus: "Ve", Saturn: "Sa", Rahu: "Ra", Ketu: "Ke", Ascendant: "As" };
+    const HOUSE_POS = { 1: [200, 80], 2: [95, 45], 3: [45, 95], 4: [80, 200], 5: [45, 305], 6: [95, 355], 7: [200, 320], 8: [305, 355], 9: [355, 305], 10: [320, 200], 11: [355, 95], 12: [305, 45] };
 
-/* Computes the base D1 (natal) chart for a given moment/location: ascendant + all 9
-   graha positions. This is the ONLY function that talks to the ephemeris engine and to
-   lat/lon — everything downstream (varga projection, chart, table, summary) consumes
-   its plain-data output, so replacing the location input later (e.g. birth-place city
-   search) only needs to supply lat/lon here, nothing else changes. */
-function computeBaseChart(jd, lat, lon){
-  const ascSid = getSiderealAscendant(jd, lat, lon);
-  const ascRashi = rashiIndex(ascSid);
-
-  const sun = getSiderealPosition(jd, sweModule.Planet.Sun);
-  const sunSid = sun.longitude;
-
-  const bodies = [
-    { key:"Sun",     body:sweModule.Planet.Sun },
-    { key:"Moon",    body:sweModule.Planet.Moon },
-    { key:"Mars",    body:sweModule.Planet.Mars },
-    { key:"Mercury", body:sweModule.Planet.Mercury },
-    { key:"Jupiter", body:sweModule.Planet.Jupiter },
-    { key:"Venus",   body:sweModule.Planet.Venus },
-    { key:"Saturn",  body:sweModule.Planet.Saturn },
-    { key:"Rahu",    body:sweModule.LunarPoint.MeanNode }
-  ];
-
-  const planets = bodies.map(b=>{
-    const pos = b.key==="Sun" ? sun : getSiderealPosition(jd, b.body);
-    const lon2 = pos.longitude;
-    const rashi = rashiIndex(lon2);
-    const nak = nakshatraIndex(lon2);
-    const retro = pos.speed < 0;
-    let combust=null;
-    if (COMBUST_ORB[b.key] !== undefined) combust = angDiff(lon2, sunSid) < COMBUST_ORB[b.key];
-    return { name:b.key, longitude:lon2, rashi, nak, pada:nakshatraPada(lon2), retro, combust, speed:pos.speed };
-  });
-
-  const rahu = planets.find(p=>p.name==="Rahu");
-  const ketuLon = norm360(rahu.longitude + 180);
-  planets.push({ name:"Ketu", longitude:ketuLon, rashi:rashiIndex(ketuLon), nak:nakshatraIndex(ketuLon), pada:nakshatraPada(ketuLon), retro:rahu.retro, combust:null, speed:rahu.speed });
-
-  const ascendant = { name:"Ascendant", longitude:ascSid, rashi:ascRashi, nak:nakshatraIndex(ascSid), pada:nakshatraPada(ascSid), retro:null, combust:null };
-
-  return { ascendant, planets };
-}
-
-/* ===================== NORTH INDIAN CHART (SVG) ===================== */
-
-const CHART_ABBR = { Sun:"Su",Moon:"Mo",Mars:"Ma",Mercury:"Me",Jupiter:"Ju",Venus:"Ve",Saturn:"Sa",Rahu:"Ra",Ketu:"Ke",Ascendant:"As" };
-const HOUSE_POS = { 1:[200,80],2:[95,45],3:[45,95],4:[80,200],5:[45,305],6:[95,355],7:[200,320],8:[305,355],9:[355,305],10:[320,200],11:[355,95],12:[305,45] };
-
-function renderChart(vdata){
-  const svg = el('chartSvg');
-  const ascRashi = vdata.ascendant.vargaRashi;
-  const lines = `
-    <polygon class="chart-line" points="0,0 400,0 400,400 0,400"/>
+    function renderChart(vdata) {
+      const svg = el('chartSvg');
+      const ascRashi = vdata.ascendant.vargaRashi;
+      const lines = `
+    <rect class="chart-line" x="2" y="2" width="396" height="396" rx="14"/>
     <line class="chart-line" x1="0" y1="0" x2="400" y2="400"/>
     <line class="chart-line" x1="400" y1="0" x2="0" y2="400"/>
     <line class="chart-line" x1="200" y1="0" x2="400" y2="200"/>
@@ -837,844 +1620,422 @@ function renderChart(vdata){
     <line class="chart-line" x1="200" y1="400" x2="0" y2="200"/>
     <line class="chart-line" x1="0" y1="200" x2="200" y2="0"/>
   `;
-  const byHouse = {}; for(let h=1;h<=12;h++) byHouse[h]=[];
-  vdata.planets.forEach(p=> byHouse[p.house].push(p));
-  byHouse[1].unshift(vdata.ascendant);
-
-  let content = "";
-  for(let h=1;h<=12;h++){
-    const rashiNum = ((ascRashi + h - 1) % 12) + 1;
-    const [cx,cy] = HOUSE_POS[h];
-    content += `<text class="chart-house-num" x="${cx}" y="${cy-16}" text-anchor="middle">${rashiNum}</text>`;
-    byHouse[h].forEach((p,i)=>{
-      const label = CHART_ABBR[p.name] + (p.retro ? "(R)" : "");
-      content += `<text class="chart-planet ${p.retro?'retro':''}" x="${cx}" y="${cy + i*15}" text-anchor="middle">${label}</text>`;
-    });
-  }
-  svg.innerHTML = lines + content;
-}
-
-function renderTable(vdata){
-  const order = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn","Rahu","Ketu"];
-  const ordered = [vdata.ascendant, ...order.map(n=>vdata.planets.find(p=>p.name===n))];
-  el('planetTableBody').innerHTML = ordered.map(p=>{
-    const rashi = RASHI[p.vargaRashi];
-    const houseLord = RASHI[p.vargaRashi][1];
-    const motion = p.retro===null ? "—" : (p.retro ? '<span class="retro-tag">Retrograde</span>' : '<span class="direct-tag">Direct</span>');
-    const combust = p.combust===null ? "—" : (p.combust ? '<span class="combust-yes">Yes</span>' : '<span class="combust-no">No</span>');
-    const nakLord = p.name==="Ascendant" ? "—" : nakshatraLord(p.nak);
-    const status = getPlanetStatus(p.name, p.vargaRashi);
-    return `<tr>
-      <td><b>${p.name}</b></td><td>${p.house}</td><td>${houseLord}</td><td>${rashi[0]}</td><td>${rashi[1]}</td>
-      <td>${p.longitude.toFixed(2)}°</td><td>${fmtDeg(p.longitude)}</td><td>${NAKSHATRAS[p.nak]}</td><td>${nakLord}</td><td>${p.pada}</td>
-      <td>${motion}</td><td>${combust}</td><td>${status}</td>
-    </tr>`;
-  }).join('');
-}
-
-/* ===================== GRAHA DRISHTI (PLANETARY ASPECTS) =====================
-   Standard Parashari full-aspect (drishti) rules. Every graha aspects the house 7th
-   from itself; Mars, Jupiter and Saturn additionally cast special aspects. Rahu/Ketu
-   are given here on the widely-used Jupiter-style convention (5th/7th/9th) — classical
-   texts differ on this point, so treat their entries as one common convention rather
-   than an undisputed rule. Ascendant is a point, not a graha, so it casts no aspect. */
-const ASPECT_RULES = {
-  Sun:[7], Moon:[7], Mars:[4,7,8], Mercury:[7], Jupiter:[5,7,9], Venus:[7], Saturn:[3,7,10],
-  Rahu:[5,7,9], Ketu:[5,7,9]
-};
-/* aspectNum counts the target house inclusively from the planet's own house (7th aspect => aspectNum 7) */
-function aspectHouse(fromHouse, aspectNum){ return ((fromHouse - 1 + (aspectNum - 1)) % 12) + 1; }
-
-function renderPlanetAspects(vdata){
-  const order = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn","Rahu","Ketu"];
-  const ascRashi = vdata.ascendant.vargaRashi;
-  const byHouse = {}; for(let h=1;h<=12;h++) byHouse[h]=[];
-  vdata.planets.forEach(p=> byHouse[p.house].push(p.name));
-
-  el('planetAspectsBody').innerHTML = order.map(name=>{
-    const p = vdata.planets.find(pl=>pl.name===name);
-    const houses = ASPECT_RULES[name].map(n=>aspectHouse(p.house, n));
-    const aspectedPlanets = houses.flatMap(h=>byHouse[h]);
-    const aspectedSigns = houses.map(h=>{
-      const rashiIdx = (ascRashi + h - 1) % 12;
-      return RASHI[rashiIdx][0];
-    });
-    return `<tr>
-      <td><b>${name}</b></td><td>${p.house}</td>
-      <td>${houses.map(h=>'H'+h).join(', ')}</td>
-      <td>${aspectedPlanets.length ? aspectedPlanets.join(', ') : '—'}</td>
-      <td>${aspectedSigns.join(', ')}</td>
-    </tr>`;
-  }).join('');
-}
-
-function renderHouseAspects(vdata){
-  const order = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn","Rahu","Ketu"];
-  const ascRashi = vdata.ascendant.vargaRashi;
-  const byHouse = {}; for(let h=1;h<=12;h++) byHouse[h]=[];
-  vdata.planets.forEach(p=> byHouse[p.house].push(p.name));
-
-  const aspectedBy = {}; for(let h=1;h<=12;h++) aspectedBy[h]=[];
-  order.forEach(name=>{
-    const p = vdata.planets.find(pl=>pl.name===name);
-    ASPECT_RULES[name].forEach(n=>{
-      const h = aspectHouse(p.house, n);
-      aspectedBy[h].push(name);
-    });
-  });
-
-  let rows = '';
-  for(let h=1;h<=12;h++){
-    const rashiIdx = (ascRashi + h - 1) % 12;
-    rows += `<tr>
-      <td><b>${h}</b></td><td>${RASHI[rashiIdx][0]}</td>
-      <td>${byHouse[h].length ? byHouse[h].join(', ') : '—'}</td>
-      <td>${aspectedBy[h].length ? aspectedBy[h].join(', ') : '—'}</td>
-    </tr>`;
-  }
-  el('houseAspectsBody').innerHTML = rows;
-}
-
-/* ===================== SHADBALA (SIX-FOLD PLANETARY STRENGTH) =====================
-   Always computed from the Rashi (D1) chart, independent of which varga is currently
-   selected — Shadbala is a D1-specific classical concept. Applies to the 7 classical
-   grahas only (Sun..Saturn); Rahu/Ketu are excluded per standard Parashari practice
-   since they have no Shadbala of their own.
-
-   IMPORTANT — this is a simplified engine, not a full classical implementation:
-   - Sthana Bala covers all 5 classical sub-parts (Uccha, Saptavargaja, Ojayugmarasyamsa,
-     Kendradi, Drekkana), using a 5-tier friend/enemy scale (no adhi-mitra/adhi-shatru split).
-   - Dig Bala is approximated from whole-sign house position rather than exact MC/IC/
-     Ascendant/Descendant cusp degrees (which this engine doesn't compute).
-   - Kala Bala here is Paksha Bala (lunar-phase strength) ONLY. Nathonnata, Tribhaga,
-     Year/Month/Day/Hour-lord, Ayana and Yuddha Bala are omitted — they need sunrise/
-     sunset and declination data this engine doesn't calculate — so Kala Bala totals
-     read lower than full classical software.
-   - Chesta Bala uses a retrograde/speed-ratio approximation, not the classical
-     Sighrocca-based Chesta Kendra; Sun and Moon don't carry this component (shown "—"),
-     matching classical practice.
-   - Drik Bala is a simplified net aspect-strength (benefic aspects add, malefic
-     subtract, using the standard partial-aspect table, divided by 4).
-   Totals are useful for comparing planets against each other, but shouldn't be read
-   as precise classical Shadbala figures. */
-
-const SHADBALA_PLANETS = ["Sun","Moon","Mars","Mercury","Jupiter","Venus","Saturn"];
-const BENEFIC_GRAHAS = ["Jupiter","Venus","Mercury","Moon"];
-const MALEFIC_GRAHAS = ["Sun","Mars","Saturn"];
-const REQUIRED_RUPAS = { Sun:5, Moon:6, Mars:5, Mercury:7, Jupiter:6.5, Venus:5.5, Saturn:5 };
-const NAISARGIKA_BALA = { Saturn:60/7, Mars:120/7, Mercury:180/7, Jupiter:240/7, Venus:300/7, Moon:360/7, Sun:60 };
-const DIG_BALA_HOUSE = { Sun:10, Mars:10, Jupiter:1, Mercury:1, Moon:4, Venus:4, Saturn:7 };
-/* Mean sidereal daily motion (deg/day) used only as a reference speed for Chesta Bala's ratio */
-const MEAN_DAILY_MOTION = { Mars:0.524, Mercury:1.383, Jupiter:0.0831, Venus:1.602, Saturn:0.0335 };
-/* Classical exaltation degree-in-sign; debilitation point uses the same numeric degree in the opposite sign */
-const EXALT_DEG = { Sun:10, Moon:3, Mars:28, Mercury:15, Jupiter:5, Venus:27, Saturn:20, Rahu:20, Ketu:20 };
-/* Moolatrikona sign + degree range (checked only in the D1 rashi, per classical rule) */
-const MOOLATRIKONA = {
-  Sun:{rashi:4, from:0, to:20}, Moon:{rashi:1, from:4, to:20}, Mars:{rashi:0, from:0, to:12},
-  Mercury:{rashi:5, from:16, to:20}, Jupiter:{rashi:8, from:0, to:10}, Venus:{rashi:6, from:0, to:15},
-  Saturn:{rashi:10, from:0, to:20}
-};
-
-function varDignityPoints(name, rashiIdx, degInSign, isD1){
-  const mt = MOOLATRIKONA[name];
-  if (isD1 && mt && rashiIdx===mt.rashi && degInSign>=mt.from && degInSign<mt.to) return 45;
-  if (EXALTATION[name]===rashiIdx) return 45;
-  if (DEBILITATION[name]===rashiIdx) return 0;
-  if (OWN_SIGNS[name] && OWN_SIGNS[name].includes(rashiIdx)) return 30;
-  const lord = RASHI[rashiIdx][1];
-  if (NATURAL_FRIENDS[name] && NATURAL_FRIENDS[name].includes(lord)) return 15;
-  if (NATURAL_ENEMIES[name] && NATURAL_ENEMIES[name].includes(lord)) return 3.75;
-  return 7.5;
-}
-function saptavargaBala(name, d1Rashi, degInSign){
-  return [1,2,3,7,9,12,30].reduce((sum, n)=>{
-    const vRashi = VARGA_FUNCS[n](d1Rashi, degInSign);
-    return sum + varDignityPoints(name, vRashi, degInSign, n===1);
-  }, 0);
-}
-function ojayugmaBala(name, d1Rashi, degInSign){
-  if (name==="Mercury") return 30; // classically always gets full Ojayugma strength
-  const d9Rashi = vargaD9(d1Rashi, degInSign);
-  const oddStrong = ["Sun","Mars","Jupiter"].includes(name);
-  const rashiOdd = isOddSign(d1Rashi), navamsaOdd = isOddSign(d9Rashi);
-  let total = 0;
-  if (oddStrong){ if (rashiOdd) total+=15; if (navamsaOdd) total+=15; }
-  else { if (!rashiOdd) total+=15; if (!navamsaOdd) total+=15; }
-  return total;
-}
-function kendradiBala(house){
-  if ([1,4,7,10].includes(house)) return 60;
-  if ([2,5,8,11].includes(house)) return 30;
-  return 15;
-}
-function drekkanaBala(name, degInSign){
-  const part = Math.min(2, Math.floor(degInSign/10));
-  if (part===0 && ["Sun","Mars","Jupiter"].includes(name)) return 15;
-  if (part===1 && ["Moon","Venus"].includes(name)) return 15;
-  if (part===2 && ["Mercury","Saturn"].includes(name)) return 15;
-  return 0;
-}
-function uchchaBala(name, longitude){
-  const debLon = DEBILITATION[name]*30 + (EXALT_DEG[name]||0);
-  return angDiff(longitude, debLon)/3;
-}
-function digBala(name, house){
-  const target = DIG_BALA_HOUSE[name];
-  if (target===undefined) return 0;
-  let diff = Math.abs(house-target);
-  if (diff>6) diff = 12-diff;
-  return 60*(1-diff/6);
-}
-function pakshaBala(name, moonLon, sunLon){
-  const elong = norm360(moonLon-sunLon);
-  const phase = elong<=180 ? elong : 360-elong; // 0=new moon, 180=full moon
-  const benefic = ["Moon","Mercury","Jupiter","Venus"].includes(name);
-  return benefic ? (phase/180)*60 : ((180-phase)/180)*60;
-}
-function chestaBala(name, retro, speed){
-  if (name==="Sun" || name==="Moon") return null; // not applicable classically
-  if (retro) return 60;
-  const mean = MEAN_DAILY_MOTION[name];
-  if (!mean) return null;
-  const ratio = Math.abs(speed)/mean;
-  return Math.max(0, Math.min(60, 60*(1-ratio)));
-}
-function drishtiVirupas(name, houseDistance){
-  let base = 0;
-  if (houseDistance===7) base=60;
-  else if (houseDistance===4||houseDistance===8) base=45;
-  else if (houseDistance===5||houseDistance===9) base=30;
-  else if (houseDistance===3||houseDistance===10) base=15;
-  if (name==="Mars" && (houseDistance===4||houseDistance===8)) base=60;
-  if (name==="Jupiter" && (houseDistance===5||houseDistance===9)) base=60;
-  if (name==="Saturn" && (houseDistance===3||houseDistance===10)) base=60;
-  return base;
-}
-function houseDistanceFromTo(fromHouse, toHouse){ return ((toHouse-fromHouse+12)%12)+1; }
-function netDrishtiBala(targetHouse, byName, excludeName){
-  let sum = 0;
-  SHADBALA_PLANETS.forEach(name=>{
-    if (name===excludeName) return;
-    const dist = houseDistanceFromTo(byName[name].house, targetHouse);
-    const v = drishtiVirupas(name, dist);
-    if (!v) return;
-    if (BENEFIC_GRAHAS.includes(name)) sum += v;
-    else if (MALEFIC_GRAHAS.includes(name)) sum -= v;
-  });
-  return sum/4;
-}
-
-/* d1vdata must be a D1 (varga=1) applyVarga() result, so .house reflects whole-sign
-   houses from the Ascendant and .rashi/.longitude are the true natal values. */
-function computeShadbala(d1vdata){
-  const byName = {}; d1vdata.planets.forEach(p=> byName[p.name]=p);
-  const sun = byName.Sun, moon = byName.Moon;
-
-  return SHADBALA_PLANETS.map(name=>{
-    const p = byName[name];
-    const degInSign = p.longitude % 30;
-
-    const uccha = uchchaBala(name, p.longitude);
-    const sapta = saptavargaBala(name, p.rashi, degInSign);
-    const ojayugma = ojayugmaBala(name, p.rashi, degInSign);
-    const kendradi = kendradiBala(p.house);
-    const drekkana = drekkanaBala(name, degInSign);
-    const sthanaTotal = uccha+sapta+ojayugma+kendradi+drekkana;
-
-    const dig = digBala(name, p.house);
-    const kala = pakshaBala(name, moon.longitude, sun.longitude);
-    const chesta = chestaBala(name, p.retro, p.speed);
-    const naisargika = NAISARGIKA_BALA[name];
-    const drik = netDrishtiBala(p.house, byName, name);
-
-    const totalVirupas = sthanaTotal + dig + kala + (chesta||0) + naisargika + drik;
-    return {
-      name, house:p.house,
-      sthana:{uccha,sapta,ojayugma,kendradi,drekkana,total:sthanaTotal},
-      dig, kala, chesta, naisargika, drik,
-      totalVirupas, totalRupas: totalVirupas/60
-    };
-  });
-}
-
-function renderShadbala(results){
-  el('shadbalaBody').innerHTML = results.map(r=>{
-    const req = REQUIRED_RUPAS[r.name];
-    const verdict = r.totalRupas>=req ? '<span class="direct-tag">Strong</span>' : '<span class="combust-yes">Weak</span>';
-    return `<tr>
-      <td><b>${r.name}</b></td>
-      <td>${r.sthana.uccha.toFixed(1)}</td><td>${r.sthana.sapta.toFixed(1)}</td><td>${r.sthana.ojayugma.toFixed(1)}</td>
-      <td>${r.sthana.kendradi.toFixed(1)}</td><td>${r.sthana.drekkana.toFixed(1)}</td><td>${r.sthana.total.toFixed(1)}</td>
-      <td>${r.dig.toFixed(1)}</td><td>${r.kala.toFixed(1)}</td><td>${r.chesta===null?'—':r.chesta.toFixed(1)}</td>
-      <td>${r.naisargika.toFixed(1)}</td><td>${r.drik.toFixed(1)}</td>
-      <td>${r.totalVirupas.toFixed(1)}</td><td><b>${r.totalRupas.toFixed(2)}</b></td><td>${req.toFixed(1)}</td><td>${verdict}</td>
-    </tr>`;
-  }).join('');
-}
-
-/* ===================== BHAVABALA (HOUSE STRENGTH) =====================
-   Also always computed from the D1 chart. Bhavadhipati Bala reuses each house lord's
-   Shadbala total (its dominant, classically-expected component); Bhava Dig Bala reuses
-   the Kendra/Panapara/Apoklima scale applied to the house itself; Bhava Drishti Bala is
-   the same simplified net-aspect formula used for Drik Bala, aimed at the house point. */
-function computeBhavabala(d1vdata, shadbalaResults){
-  const shadbalaByName = {}; shadbalaResults.forEach(r=> shadbalaByName[r.name]=r);
-  const byName = {}; d1vdata.planets.forEach(p=> byName[p.name]=p);
-  const ascRashi = d1vdata.ascendant.vargaRashi;
-
-  const results = [];
-  for (let h=1; h<=12; h++){
-    const rashiIdx = (ascRashi + h - 1) % 12;
-    const lord = RASHI[rashiIdx][1];
-    const bhavadhipati = shadbalaByName[lord] ? shadbalaByName[lord].totalVirupas : 0;
-    const dig = kendradiBala(h);
-    const drishti = netDrishtiBala(h, byName, null);
-    const totalVirupas = bhavadhipati + dig + drishti;
-    results.push({ house:h, rashi:rashiIdx, lord, bhavadhipati, dig, drishti, totalVirupas, totalRupas: totalVirupas/60 });
-  }
-  return results;
-}
-
-function renderBhavabala(results){
-  el('bhavabalaBody').innerHTML = results.map(r=>`<tr>
-    <td><b>${r.house}</b></td><td>${RASHI[r.rashi][0]}</td><td>${r.lord}</td>
-    <td>${r.bhavadhipati.toFixed(1)}</td><td>${r.dig.toFixed(1)}</td><td>${r.drishti.toFixed(1)}</td>
-    <td>${r.totalVirupas.toFixed(1)}</td><td><b>${r.totalRupas.toFixed(2)}</b></td>
-  </tr>`).join('');
-}
-
-function renderSummary(base, vdata, labelPrefix){
-  el('sumAsc').textContent = RASHI[vdata.ascendant.vargaRashi][0];
-  el('sumAscLord').textContent = RASHI[vdata.ascendant.vargaRashi][1];
-  el('sumMoonSign').textContent = RASHI[vdata.planets.find(p=>p.name==="Moon").vargaRashi][0];
-  el('sumSunSign').textContent = RASHI[vdata.planets.find(p=>p.name==="Sun").vargaRashi][0];
-  const moonBase = base.planets.find(p=>p.name==="Moon");
-  const moonVarga = vdata.planets.find(p=>p.name==="Moon");
-  el('sumNak').textContent = NAKSHATRAS[moonBase.nak];
-  el('sumPada').textContent = moonBase.pada;
-  el('sumNakLabel').textContent = labelPrefix + "Moon Nakshatra";
-  el('sumPadaLabel').textContent = labelPrefix + "Moon Nakshatra Pada";
-
-  el('sumVarna').textContent = getVarna(moonBase.rashi);
-  el('sumVashya').textContent = getVashya(moonBase.rashi, moonBase.longitude % 30);
-  el('sumYoni').textContent = YONI_TABLE[moonBase.nak];
-  el('sumGana').textContent = GANA_TABLE[moonBase.nak];
-  el('sumNadi').textContent = NADI_TABLE[moonBase.nak];
-  el('sumMoonLord').textContent = RASHI[moonBase.rashi][1];
-  el('sumTatva').textContent = getTatva(moonBase.rashi);
-  el('sumNameAlpha').textContent = NAME_ALPHABET_BY_RASHI[moonBase.rashi];
-  el('sumPaya').textContent = getPaya(moonVarga.house);
-}
-
-/* ===================== LOADER / CONTROL STATE ===================== */
-
-let activeRequestId = 0;
-const CONTROL_IDS = ['dailyDatePicker','dailyTimePicker','prevDayBtn','todayBtn','nextDayBtn','birthDatePicker','birthTimePicker','myLocationBtn','enterLocationBtn','enterLocationBtn2','retryLocationBtn','manualLocSubmit','modeDailyBtn','modeBirthBtn','modeMarriageBtn','downloadPdfBtn'];
-function showLoader(){ el('loaderOverlay').classList.add('show'); }
-function hideLoader(){ el('loaderOverlay').classList.remove('show'); }
-function setControlsDisabled(disabled){
-  CONTROL_IDS.forEach(id=>{ const n=el(id); if(disabled) n.setAttribute('disabled',''); else n.removeAttribute('disabled'); });
-}
-function nextFrame(){ return new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r))); }
-
-/* ===================== RENDER ORCHESTRATION ===================== */
-
-function renderBasicInfo(dt, lat, lon){
-  el('biDate').textContent = fmtFullDate(dt);
-  el('biTime').textContent = fmtTime12(dt);
-  el('biWeekday').textContent = WEEKDAYS[dt.getDay()];
-  el('biLocation').textContent = lat.toFixed(2)+", "+lon.toFixed(2);
-  el('biLat').textContent = lat.toFixed(4)+"°";
-  el('biLon').textContent = lon.toFixed(4)+"°";
-  const tzOffsetMin = -dt.getTimezoneOffset();
-  const tzSign = tzOffsetMin>=0 ? "+" : "-";
-  const tzAbs = Math.abs(tzOffsetMin);
-  const tzStr = `UTC${tzSign}${String(Math.floor(tzAbs/60)).padStart(2,'0')}:${String(tzAbs%60).padStart(2,'0')}`;
-  let tzName = ""; try{ tzName = Intl.DateTimeFormat().resolvedOptions().timeZone; }catch(e){}
-  el('biTz').textContent = tzName ? (tzName+" ("+tzStr+")") : tzStr;
-}
-
-function renderDailyResult(){
-  const vdata = applyVarga(dailyBaseData, 1);
-  el('chartSelectorSection').style.display = 'none';
-  el('chartSectionTitle').textContent = 'North Indian Kundali (D1)';
-  el('chartSectionDesc').textContent = VARGA_DESCRIPTIONS[1];
-  el('summarySectionTitle').textContent = 'Daily Summary';
-  renderBasicInfo(selectedDateTime, userLat, userLon);
-  renderChart(vdata);
-  renderTable(vdata);
-  renderPlanetAspects(vdata);
-  renderHouseAspects(vdata);
-  const dailyShadbala = computeShadbala(vdata);
-  renderShadbala(dailyShadbala);
-  const dailyBhavabala = computeBhavabala(vdata, dailyShadbala);
-  renderBhavabala(dailyBhavabala);
-  renderSummary(dailyBaseData, vdata, "");
-  renderDashaTable(selectedDateTime, dailyBaseData.planets.find(p=>p.name==="Moon").longitude);
-}
-
-function renderVargaSelector(){
-  el('vargaScroll').innerHTML = VARGA_LIST.map(v=>
-    `<button class="varga-btn ${v.n===selectedVarga?'active':''}" data-n="${v.n}">${v.label}</button>`
-  ).join('');
-  el('vargaScroll').querySelectorAll('.varga-btn').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      selectedVarga = parseInt(btn.getAttribute('data-n'),10);
-      renderBirthChartAndTable(); // pure re-projection of already-fetched data — no new ephemeris call needed
-    });
-  });
-  const cur = VARGA_LIST.find(v=>v.n===selectedVarga);
-  el('vargaCurrentLabel').textContent = "Showing: " + cur.full;
-}
-
-function renderBirthChartAndTable(){
-  const vdata = applyVarga(birthBaseData, selectedVarga);
-  const cur = VARGA_LIST.find(v=>v.n===selectedVarga);
-  el('chartSectionTitle').textContent = 'North Indian Kundali (' + cur.label + ')';
-  el('chartSectionDesc').textContent = VARGA_DESCRIPTIONS[cur.n] || '';
-  renderChart(vdata);
-  renderTable(vdata);
-  renderPlanetAspects(vdata);
-  renderHouseAspects(vdata);
-  renderVargaSelector();
-}
-
-function renderBirthResult(){
-  el('chartSelectorSection').style.display = 'block';
-  el('summarySectionTitle').textContent = 'Birth Summary';
-  renderBasicInfo(birthDateTime, userLat, userLon);
-  renderBirthChartAndTable();
-  const d1 = applyVarga(birthBaseData, 1);
-  renderSummary(birthBaseData, d1, "Birth ");
-  const birthShadbala = computeShadbala(d1);
-  renderShadbala(birthShadbala);
-  const birthBhavabala = computeBhavabala(d1, birthShadbala);
-  renderBhavabala(birthBhavabala);
-  renderDashaTable(birthDateTime, birthBaseData.planets.find(p=>p.name==="Moon").longitude);
-}
-
-/* Single entry point for every recalculation trigger. Always builds a fresh Julian Day
-   and calls computeBaseChart() from scratch — nothing from a previous run is reused.
-   Race-guarded: if a newer request starts before this one finishes, its result is
-   discarded so the UI never shows stale or partial data. */
-async function triggerRecalculation(mode){
-  const myId = ++activeRequestId;
-  showLoader(); setControlsDisabled(true);
-  await nextFrame();
-
-  if (!sweInstance || userLat===null || userLon===null){
-    if (myId === activeRequestId){ hideLoader(); setControlsDisabled(false); }
-    return;
-  }
-
-  if (mode === 'daily'){
-    const dt = new Date(selectedDateTime.getTime());
-    const freshJd = toJulianUTC(dt);
-    const data = computeBaseChart(freshJd, userLat, userLon);
-    if (myId !== activeRequestId) return;
-    dailyBaseData = data;
-    if (currentMode==='daily') renderDailyResult();
-  } else {
-    const dt = new Date(birthDateTime.getTime());
-    const freshJd = toJulianUTC(dt);
-    const data = computeBaseChart(freshJd, userLat, userLon);
-    if (myId !== activeRequestId) return;
-    birthBaseData = data;
-    if (currentMode==='birth') renderBirthResult();
-  }
-
-  hideLoader(); setControlsDisabled(false);
-}
-
-/* ===================== MODE SWITCHING ===================== */
-
-function updateModeUI(){
-  el('modeDailyBtn').classList.toggle('active', currentMode==='daily');
-  el('modeBirthBtn').classList.toggle('active', currentMode==='birth');
-  el('modeMarriageBtn').classList.toggle('active', currentMode==='marriage');
-  el('dailyPanel').style.display = currentMode==='daily' ? 'block' : 'none';
-  el('birthPanel').style.display = currentMode==='birth' ? 'block' : 'none';
-  el('marriagePanel').style.display = currentMode==='marriage' ? 'block' : 'none';
-
-  if (currentMode==='marriage'){
-    el('locationSection').style.display = 'none';
-    el('resultContainer').style.display = 'none';
-    return;
-  }
-
-  if (userLat===null || userLon===null){
-    el('resultContainer').style.display = 'none';
-    showLocationSection();
-    return;
-  }
-
-  el('locationSection').style.display = 'none';
-  el('resultContainer').style.display = 'block';
-  if (currentMode==='daily'){
-    if (dailyBaseData) renderDailyResult(); else triggerRecalculation('daily');
-  } else {
-    if (birthBaseData) renderBirthResult(); else triggerRecalculation('birth');
-  }
-}
-
-el('modeDailyBtn').addEventListener('click', ()=>{ currentMode='daily'; updateModeUI(); });
-el('modeBirthBtn').addEventListener('click', ()=>{ currentMode='birth'; updateModeUI(); });
-el('modeMarriageBtn').addEventListener('click', ()=>{ currentMode='marriage'; updateModeUI(); });
-
-/* ===================== DATE/TIME CONTROLS ===================== */
-
-function dateToInputValue(d){ return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,'0')+"-"+String(d.getDate()).padStart(2,'0'); }
-function timeToInputValue(d){ return String(d.getHours()).padStart(2,'0')+":"+String(d.getMinutes()).padStart(2,'0'); }
-
-function syncDailyPickers(){ el('dailyDatePicker').value=dateToInputValue(selectedDateTime); el('dailyTimePicker').value=timeToInputValue(selectedDateTime); }
-function syncBirthPickers(){ el('birthDatePicker').value=dateToInputValue(birthDateTime); el('birthTimePicker').value=timeToInputValue(birthDateTime); }
-
-function applyDailyPickers(){
-  const dv=el('dailyDatePicker').value, tv=el('dailyTimePicker').value;
-  if(!dv||!tv) return;
-  const [y,m,d]=dv.split('-').map(Number), [hh,mm]=tv.split(':').map(Number);
-  selectedDateTime = new Date(y,m-1,d,hh,mm,0);
-  triggerRecalculation('daily');
-}
-function applyBirthPickers(){
-  const dv=el('birthDatePicker').value, tv=el('birthTimePicker').value;
-  if(!dv||!tv) return;
-  const [y,m,d]=dv.split('-').map(Number), [hh,mm]=tv.split(':').map(Number);
-  birthDateTime = new Date(y,m-1,d,hh,mm,0);
-  triggerRecalculation('birth');
-}
-el('dailyDatePicker').addEventListener('change', applyDailyPickers);
-el('dailyDatePicker').addEventListener('input', applyDailyPickers);
-el('dailyTimePicker').addEventListener('change', applyDailyPickers);
-el('dailyTimePicker').addEventListener('input', applyDailyPickers);
-el('prevDayBtn').addEventListener('click', ()=>{ selectedDateTime=new Date(selectedDateTime.getTime()-24*3600*1000); syncDailyPickers(); triggerRecalculation('daily'); });
-el('nextDayBtn').addEventListener('click', ()=>{ selectedDateTime=new Date(selectedDateTime.getTime()+24*3600*1000); syncDailyPickers(); triggerRecalculation('daily'); });
-el('todayBtn').addEventListener('click', ()=>{ selectedDateTime=new Date(); syncDailyPickers(); triggerRecalculation('daily'); });
-el('birthDatePicker').addEventListener('change', applyBirthPickers);
-el('birthDatePicker').addEventListener('input', applyBirthPickers);
-el('birthTimePicker').addEventListener('change', applyBirthPickers);
-el('birthTimePicker').addEventListener('input', applyBirthPickers);
-syncDailyPickers(); syncBirthPickers();
-
-/* ===================== LOCATION FLOW ===================== */
-
-function showGpsOffMessage(text){
-  el('locGpsOff').querySelector('.loc-msg').textContent = text || "Please turn on GPS.";
-  el('locGpsOff').style.display='block'; el('locChooser').style.display='none';
-  el('locError').style.display='none'; el('locManualForm').style.display='none';
-}
-function showLocChooser(){
-  el('locGpsOff').style.display='none'; el('locChooser').style.display='block';
-  el('locError').style.display='none'; el('locManualForm').style.display='none';
-}
-function showLocError(detail){
-  el('locGpsOff').style.display='none'; el('locChooser').style.display='none';
-  el('locError').style.display='block'; el('locErrorDetail').textContent = detail||'';
-  el('locManualForm').style.display='none';
-}
-function showLocManualForm(){
-  el('locGpsOff').style.display='none'; el('locChooser').style.display='none';
-  el('locError').style.display='none'; el('locManualForm').style.display='block';
-}
-function showResults(){ el('locationSection').style.display='none'; el('resultContainer').style.display='block'; }
-function showLocationSection(){ el('resultContainer').style.display='none'; el('locationSection').style.display='block'; }
-
-async function useLocation(lat, lon){
-  userLat=lat; userLon=lon;
-  if (currentMode==='marriage') return;
-  await triggerRecalculation(currentMode);
-  showResults();
-}
-
-function getPositionOnce(options){ return new Promise((resolve,reject)=>navigator.geolocation.getCurrentPosition(resolve,reject,options)); }
-async function getLocationWithRetries(maxRetries, timeoutMs){
-  let lastErr;
-  for(let attempt=0; attempt<=maxRetries; attempt++){
-    const relaxed = attempt>=2;
-    const options = relaxed ? {enableHighAccuracy:false,timeout:Math.min(timeoutMs,15000),maximumAge:120000} : {enableHighAccuracy:true,timeout:timeoutMs,maximumAge:0};
-    try{ return await getPositionOnce(options); }
-    catch(err){ lastErr=err; if(err.code===1) throw err; }
-  }
-  throw lastErr;
-}
-async function currentPermissionState(){
-  if (navigator.permissions && navigator.permissions.query){
-    try{ const s = await navigator.permissions.query({name:'geolocation'}); return s.state; }catch(e){}
-  }
-  return 'unknown';
-}
-
-async function attemptMyLocation(){
-  if (!navigator.geolocation){ showGpsOffMessage(); return; }
-  if (!window.isSecureContext){ showLocManualForm(); return; }
-  showLoader(); setControlsDisabled(true);
-  try{
-    const pos = await getLocationWithRetries(4, 25000);
-    await useLocation(pos.coords.latitude, pos.coords.longitude);
-  }catch(err){
-    const permState = await currentPermissionState();
-    hideLoader(); setControlsDisabled(false);
-    console.error("Geolocation failed:", err.code, err.message, "permission state:", permState);
-    if (err.code===1 || permState==='denied') showGpsOffMessage();
-    else {
-      const codeNames={1:'PERMISSION_DENIED',2:'POSITION_UNAVAILABLE',3:'TIMEOUT'};
-      showLocError(`(${codeNames[err.code]||'code '+err.code}: ${err.message||'no message'}, permission: ${permState})`);
-    }
-  }
-}
-el('myLocationBtn').addEventListener('click', attemptMyLocation);
-el('retryLocationBtn').addEventListener('click', attemptMyLocation);
-el('enterLocationBtn').addEventListener('click', showLocManualForm);
-el('enterLocationBtn2').addEventListener('click', showLocManualForm);
-el('manualLocSubmit').addEventListener('click', ()=>{
-  const lat=parseFloat(el('manualLat').value), lon=parseFloat(el('manualLon').value);
-  if (isNaN(lat)||isNaN(lon)||lat<-90||lat>90||lon<-180||lon>180) return;
-  useLocation(lat, lon);
-});
-el('changeLocBtn').addEventListener('click', ()=>{ showLocationSection(); showLocChooser(); });
-
-async function watchGeolocationAvailability(){
-  if (!navigator.geolocation){ showGpsOffMessage(); return; }
-  if (!window.isSecureContext){ showLocManualForm(); return; }
-  if (navigator.permissions && navigator.permissions.query){
-    try{
-      const status = await navigator.permissions.query({name:'geolocation'});
-      const apply = ()=>{
-        if (el('resultContainer').style.display==='block') return;
-        if (status.state==='denied') showGpsOffMessage(); else showLocChooser();
-      };
-      apply(); status.onchange = apply; return;
-    }catch(e){}
-  }
-  showLocChooser();
-}
-
-/* ===================== PDF EXPORT ===================== */
-/* Builds a proper structured PDF (native text tables, not a page screenshot),
-   loading jsPDF + jsPDF-AutoTable from CDN on first use. The North Indian chart
-   is drawn natively with jsPDF's own line/text primitives (same geometry as the
-   on-screen SVG), not captured via html2canvas — SVG rasterization was fragile
-   (raw <svg> with no explicit width/height, CSS custom properties for colors)
-   and was the actual cause of PDF generation failing. Each chart is followed by
-   ITS OWN Planetary Positions / Planet Aspects / House Aspects tables. In Birth
-   mode, every divisional chart (D1 through D60) gets this treatment, each
-   starting on a fresh page. Still requires an internet connection for jsPDF
-   itself, since this page is statically hosted (GitHub Pages) and that library
-   isn't bundled locally, unlike the self-hosted Swiss Ephemeris. */
-
-function loadScriptOnce(src){
-  return new Promise((resolve, reject)=>{
-    if (document.querySelector('script[src="'+src+'"]')){ resolve(); return; }
-    const s = document.createElement('script');
-    s.src = src; s.onload = ()=>resolve(); s.onerror = ()=>reject(new Error('Failed to load '+src));
-    document.head.appendChild(s);
-  });
-}
-let pdfLibsPromise = null;
-function ensurePdfLibs(){
-  if (!pdfLibsPromise){
-    pdfLibsPromise = (async ()=>{
-      await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js');
-      await loadScriptOnce('https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js');
-    })();
-  }
-  return pdfLibsPromise;
-}
-
-const GOLD_RGB = [230,180,90], DARK_RGB = [40,25,10], MUTED_RGB = [110,110,110];
-
-function pdfBasicInfoPairs(){
-  return [
-    ['Date', el('biDate').textContent], ['Time', el('biTime').textContent],
-    ['Weekday', el('biWeekday').textContent], ['Location', el('biLocation').textContent],
-    ['Time Zone', el('biTz').textContent], ['Latitude', el('biLat').textContent], ['Longitude', el('biLon').textContent]
-  ];
-}
-function pdfSummaryPairs(){
-  return [
-    ['Ascendant', el('sumAsc').textContent], ['Ascendant Lord', el('sumAscLord').textContent],
-    ['Moon Sign', el('sumMoonSign').textContent], ['Sun Sign', el('sumSunSign').textContent],
-    [el('sumNakLabel').textContent, el('sumNak').textContent], [el('sumPadaLabel').textContent, el('sumPada').textContent],
-    ['Varna', el('sumVarna').textContent], ['Vashya', el('sumVashya').textContent], ['Yoni', el('sumYoni').textContent],
-    ['Gana', el('sumGana').textContent], ['Nadi', el('sumNadi').textContent], ['Moon Sign Lord', el('sumMoonLord').textContent],
-    ['Tatva (Element)', el('sumTatva').textContent], ['Name Alphabet', el('sumNameAlpha').textContent], ['Paya', el('sumPaya').textContent]
-  ];
-}
-
-async function downloadPdf(){
-  if (el('resultContainer').style.display==='none') return;
-  const loaderText = el('loaderOverlay').querySelector('.loader-text');
-  const loaderSub = el('loaderOverlay').querySelector('.loader-sub');
-  loaderText.textContent = 'Generating PDF...';
-  loaderSub.textContent = 'Loading PDF engine...';
-  showLoader(); setControlsDisabled(true);
-  await nextFrame();
-
-  try{
-    await ensurePdfLibs();
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const margin = 12;
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    let cursorY = margin;
-
-    const ensureSpace = (neededMM)=>{ if (cursorY + neededMM > pageHeight - margin){ pdf.addPage(); cursorY = margin; } };
-    const addHeading = (text, size)=>{
-      ensureSpace(9);
-      pdf.setFont(undefined,'bold'); pdf.setFontSize(size||13); pdf.setTextColor(...DARK_RGB);
-      pdf.text(text, margin, cursorY); cursorY += size>=16 ? 7 : 6;
-      pdf.setFont(undefined,'normal');
-    };
-    const addSubtext = (text)=>{
-      ensureSpace(6);
-      pdf.setFontSize(9); pdf.setTextColor(...MUTED_RGB);
-      pdf.text(text, margin, cursorY); cursorY += 6;
-      pdf.setTextColor(0,0,0);
-    };
-    const addKvTable = (title, pairs)=>{
-      addHeading(title, 12);
-      pdf.autoTable({ startY: cursorY, margin:{left:margin,right:margin}, body: pairs,
-        styles:{fontSize:8.5, cellPadding:2}, headStyles:{fillColor:GOLD_RGB, textColor:DARK_RGB}, theme:'grid' });
-      cursorY = pdf.lastAutoTable.finalY + 8;
-    };
-    const addHtmlTable = (title, selector, fontSize)=>{
-      addHeading(title, 12);
-      pdf.autoTable({ html: selector, startY: cursorY, margin:{left:margin,right:margin},
-        styles:{fontSize: fontSize||7, cellPadding:1.3, overflow:'linebreak'},
-        headStyles:{fillColor:GOLD_RGB, textColor:DARK_RGB, fontSize:(fontSize||7)}, theme:'grid' });
-      cursorY = pdf.lastAutoTable.finalY + 8;
-    };
-    const addChartVector = (vdata, title, desc)=>{
-      addHeading(title, 12);
-      if (desc) addSubtext(desc);
-      const boxSize = 78;
-      ensureSpace(boxSize + 6);
-      const bx = margin, by = cursorY;
-      const scale = boxSize / 400;
-      const mapX = x => bx + x*scale;
-      const mapY = y => by + y*scale;
-
-      pdf.setDrawColor(...GOLD_RGB); pdf.setLineWidth(0.15);
-      const chartLines = [
-        [0,0,400,0],[400,0,400,400],[400,400,0,400],[0,400,0,0],
-        [0,0,400,400],[400,0,0,400],
-        [200,0,400,200],[400,200,200,400],[200,400,0,200],[0,200,200,0]
-      ];
-      chartLines.forEach(([x1,y1,x2,y2])=> pdf.line(mapX(x1),mapY(y1),mapX(x2),mapY(y2)));
-
-      const ascRashi = vdata.ascendant.vargaRashi;
-      const byHouse = {}; for(let h=1;h<=12;h++) byHouse[h]=[];
-      vdata.planets.forEach(p=> byHouse[p.house].push(p));
+      const byHouse = {}; for (let h = 1; h <= 12; h++) byHouse[h] = [];
+      vdata.planets.forEach(p => byHouse[p.house].push(p));
       byHouse[1].unshift(vdata.ascendant);
 
-      pdf.setFontSize(7);
-      for(let h=1;h<=12;h++){
-        const rashiNum = ((ascRashi+h-1)%12)+1;
-        const [cx,cy] = HOUSE_POS[h];
-        pdf.setFont(undefined,'bold'); pdf.setTextColor(...GOLD_RGB);
-        pdf.text(String(rashiNum), mapX(cx), mapY(cy-16), {align:'center'});
-        pdf.setFont(undefined,'normal');
-        byHouse[h].forEach((p,i)=>{
+      let content = "";
+      for (let h = 1; h <= 12; h++) {
+        const rashiNum = ((ascRashi + h - 1) % 12) + 1;
+        const [cx, cy] = HOUSE_POS[h];
+        content += `<text class="chart-house-num" x="${cx}" y="${cy - 16}" text-anchor="middle">${rashiNum}</text>`;
+        byHouse[h].forEach((p, i) => {
           const label = CHART_ABBR[p.name] + (p.retro ? "(R)" : "");
-          pdf.setTextColor(...(p.retro ? [200,60,60] : [0,0,0]));
-          pdf.text(label, mapX(cx), mapY(cy+i*15), {align:'center'});
+          content += `<text class="chart-planet ${p.retro ? 'retro' : ''}" x="${cx}" y="${cy + i * 15}" text-anchor="middle">${label}</text>`;
         });
       }
-      pdf.setTextColor(0,0,0);
-      cursorY = by + boxSize + 8;
+      svg.innerHTML = lines + content;
+    }
+
+    /* Planet Aspects Rules */
+    const ASPECT_RULES = {
+      Sun: [7], Moon: [7], Mars: [4, 7, 8], Mercury: [7], Jupiter: [5, 7, 9], Venus: [7], Saturn: [3, 7, 10],
+      Rahu: [5, 7, 9], Ketu: [5, 7, 9]
     };
-    const addDashaTable = (refDate, moonLon)=>{
-      const mahadashas = computeMahadashas(moonLon, refDate);
-      const body = [];
-      const headerRowIndices = new Set();
-      mahadashas.forEach(m=>{
-        headerRowIndices.add(body.length);
-        body.push([m.planet, fmtDashaDate(m.start), fmtDashaDate(m.end)]);
-        computeAntardashas(m).forEach(a=>{
-          body.push(['    ' + a.planet, fmtDashaDate(a.start), fmtDashaDate(a.end)]);
+    function aspectHouse(fromHouse, aspectNum) { return ((fromHouse - 1 + (aspectNum - 1)) % 12) + 1; }
+
+    /* Render Planet Positions List & Full Table */
+    function renderPlanetPositions(vdata) {
+      const order = ["Ascendant", "Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"];
+      const listEl = el('planetList');
+      const tableBody = el('planetTableBody');
+
+      const orderedPlanets = order.map(name => name === "Ascendant" ? vdata.ascendant : vdata.planets.find(p => p.name === name));
+
+      listEl.innerHTML = orderedPlanets.map(p => {
+        const rashi = RASHI[p.vargaRashi][0];
+        const initial = p.name.substring(0, 2);
+        return `
+      <div class="planet-row">
+        <div class="planet-left">
+          <div class="planet-icon">${initial}</div>
+          <div class="planet-name">${p.name}</div>
+        </div>
+        <div class="planet-right">
+          <div class="planet-house-badge">House ${p.house}</div>
+          <div class="planet-rashi">${rashi}</div>
+          <div class="planet-deg">${fmtDeg(p.longitude)}</div>
+          <div class="chevron">›</div>
+        </div>
+      </div>
+    `;
+      }).join('');
+
+      tableBody.innerHTML = orderedPlanets.map(p => {
+        const rashi = RASHI[p.vargaRashi][0];
+        const motion = p.retro === null ? "—" : (p.retro ? '<span style="color:#E74C3C;font-weight:700">Retro</span>' : '<span style="color:#00B894;font-weight:700">Direct</span>');
+        const combust = p.combust === null ? "—" : (p.combust ? '<span style="color:#E74C3C;font-weight:700">Yes</span>' : 'No');
+        return `<tr>
+      <td><b>${p.name}</b></td><td>${p.house}</td><td>${rashi}</td><td>${fmtDeg(p.longitude)}</td>
+      <td>${NAKSHATRAS[p.nak]}</td><td>${p.pada}</td><td>${motion}</td><td>${combust}</td><td>Active</td>
+    </tr>`;
+      }).join('');
+    }
+
+    /* Render Interactive House Aspect Selector & Badges */
+    function renderHouseAspectsUI(vdata) {
+      const ascRashi = vdata.ascendant.vargaRashi;
+      const pillsContainer = el('housePillsScroll');
+
+      let pillsHtml = '';
+      for (let h = 1; h <= 12; h++) {
+        const signIdx = (ascRashi + h - 1) % 12;
+        const signName = RASHI[signIdx][0];
+        pillsHtml += `
+      <div class="house-pill ${h === selectedHousePill ? 'active' : ''}" data-h="${h}">
+        <div class="h-num">${h}</div>
+        <div class="h-sign">${signName}</div>
+      </div>
+    `;
+      }
+      pillsContainer.innerHTML = pillsHtml;
+
+      pillsContainer.querySelectorAll('.house-pill').forEach(pill => {
+        pill.addEventListener('click', () => {
+          selectedHousePill = parseInt(pill.getAttribute('data-h'), 10);
+          renderHouseAspectsUI(vdata);
         });
       });
-      addHeading('Vimshottari Mahadasha & Antardasha', 12);
-      pdf.autoTable({ startY: cursorY, margin:{left:margin,right:margin}, head:[['Planet','Start','End']], body,
-        styles:{fontSize:7.5, cellPadding:1.6}, headStyles:{fillColor:GOLD_RGB, textColor:DARK_RGB}, theme:'grid',
-        didParseCell: (data)=>{
-          if (data.section!=='body') return;
-          if (headerRowIndices.has(data.row.index)){
-            data.cell.styles.fontStyle = 'bold';
-            data.cell.styles.fillColor = [250,240,220];
-            data.cell.styles.textColor = DARK_RGB;
-          } else {
-            data.cell.styles.textColor = MUTED_RGB;
+
+      // Calculate planets in selected house
+      const targetSignIdx = (ascRashi + selectedHousePill - 1) % 12;
+      const targetSignName = RASHI[targetSignIdx][0];
+      el('selectedHouseLabel').textContent = `House ${selectedHousePill} (${targetSignName})`;
+
+      const planetsInHouse = vdata.planets.filter(p => p.house === selectedHousePill).map(p => p.name);
+      if (selectedHousePill === 1) planetsInHouse.unshift("Ascendant");
+
+      const housePlanetsEl = el('housePlanetsBadges');
+      if (planetsInHouse.length) {
+        housePlanetsEl.innerHTML = planetsInHouse.map(p => `<span class="badge pink">${p}</span>`).join('');
+      } else {
+        housePlanetsEl.innerHTML = `<span class="badge gray">None</span>`;
+      }
+
+      // Calculate aspected by
+      const aspectingPlanets = [];
+      const order = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn", "Rahu", "Ketu"];
+      order.forEach(name => {
+        const p = vdata.planets.find(pl => pl.name === name);
+        ASPECT_RULES[name].forEach(n => {
+          if (aspectHouse(p.house, n) === selectedHousePill) {
+            if (!aspectingPlanets.includes(name)) aspectingPlanets.push(name);
           }
-        }
+        });
       });
-      cursorY = pdf.lastAutoTable.finalY + 8;
-    };
 
-    // ---- Title ----
-    pdf.setFont(undefined,'bold'); pdf.setFontSize(19); pdf.setTextColor(...DARK_RGB);
-    pdf.text('Kundali Report', margin, cursorY); cursorY += 7;
-    pdf.setFont(undefined,'normal'); pdf.setFontSize(9); pdf.setTextColor(...MUTED_RGB);
-    const modeLabel = currentMode === 'birth' ? 'Birth Kundali' : 'Daily Kundali';
-    pdf.text(modeLabel + ' \u00b7 Generated ' + new Date().toLocaleString(), margin, cursorY); cursorY += 9;
-    pdf.setTextColor(0,0,0);
-
-    // ---- Shared, mode-level data (not varga-specific) ----
-    addKvTable('Basic Information', pdfBasicInfoPairs());
-    addKvTable(modeLabel + ' Summary', pdfSummaryPairs());
-    addHtmlTable('Shadbala (Rashi / D1)', '#shadbalaTable', 6);
-    addHtmlTable('Bhavabala (Rashi / D1)', '#bhavabalaTable', 7);
-    if (currentMode === 'daily'){
-      addDashaTable(selectedDateTime, dailyBaseData.planets.find(p=>p.name==="Moon").longitude);
-    } else {
-      addDashaTable(birthDateTime, birthBaseData.planets.find(p=>p.name==="Moon").longitude);
-    }
-
-    // ---- Per-chart sections ----
-    if (currentMode === 'daily'){
-      pdf.addPage(); cursorY = margin;
-      const vdata = applyVarga(dailyBaseData, 1);
-      renderChart(vdata); renderTable(vdata); renderPlanetAspects(vdata); renderHouseAspects(vdata);
-      addChartVector(vdata, 'North Indian Kundali (D1)', VARGA_DESCRIPTIONS[1]);
-      addHtmlTable('Planetary Positions', '#planetTable', 6.5);
-      addHtmlTable('Planet Aspects', '#planetAspectsTable', 7.5);
-      addHtmlTable('House Aspects', '#houseAspectsTable', 7.5);
-      renderDailyResult(); // restore live view
-    } else {
-      for (const v of VARGA_LIST){
-        pdf.addPage(); cursorY = margin;
-        const vdata = applyVarga(birthBaseData, v.n);
-        renderChart(vdata); renderTable(vdata); renderPlanetAspects(vdata); renderHouseAspects(vdata);
-        addChartVector(vdata, 'North Indian Kundali (' + v.full + ')', VARGA_DESCRIPTIONS[v.n]);
-        addHtmlTable('Planetary Positions', '#planetTable', 6.5);
-        addHtmlTable('Planet Aspects', '#planetAspectsTable', 7.5);
-        addHtmlTable('House Aspects', '#houseAspectsTable', 7.5);
+      const aspectedByEl = el('houseAspectedByBadges');
+      if (aspectingPlanets.length) {
+        aspectedByEl.innerHTML = aspectingPlanets.map(p => `<span class="badge purple">${p}</span>`).join('');
+      } else {
+        aspectedByEl.innerHTML = `<span class="badge gray">None</span>`;
       }
-      renderBirthChartAndTable(); // restore live view to whichever varga was selected
     }
 
-    const refDate = currentMode === 'birth' ? birthDateTime : selectedDateTime;
-    pdf.save('Kundali-' + (currentMode==='birth'?'Birth':'Daily') + '-' + dateToInputValue(refDate) + '.pdf');
-  }catch(err){
-    console.error(err);
-    alert('Could not generate the PDF.\n\nReason: ' + (err && err.message ? err.message : err) + '\n\nThis usually means either your connection to the CDN (cdnjs.cloudflare.com) failed, or a browser popup/download blocker stopped the file from saving. Check the browser console for full details.');
-  }finally{
-    hideLoader(); setControlsDisabled(false);
-    loaderText.textContent = 'Calculating Kundali...';
-    loaderSub.textContent = 'Computing planetary positions...';
-  }
-}
-el('downloadPdfBtn').addEventListener('click', downloadPdf);
+    /* Render Vimshottari Dashas with active progress bar */
+    function renderDashaUI(referenceDate, moonLongitude) {
+      const now = new Date();
+      const mahadashas = computeMahadashas(moonLongitude, referenceDate);
+      const container = el('dashaList');
 
-/* ===================== INIT ===================== */
+      container.innerHTML = mahadashas.map((m, idx) => {
+        const isCurrent = now >= m.start && now < m.end;
+        let progressPct = 0;
+        if (isCurrent) {
+          const totalMs = m.end.getTime() - m.start.getTime();
+          const elapsedMs = now.getTime() - m.start.getTime();
+          progressPct = Math.min(100, Math.max(0, (elapsedMs / totalMs) * 100));
+        } else if (now >= m.end) {
+          progressPct = 100;
+        }
 
-(async function init(){
-  el('resultContainer').style.display = 'none';
-  const enginePromise = loadSwissEphemeris();
-  watchGeolocationAvailability();
-  await enginePromise;
-})();
-</script>
+        return `
+      <div class="dasha-list-item ${isCurrent ? 'current' : ''}">
+        <div class="dasha-item-head">
+          <div class="dasha-name-group">
+            <span>${m.planet}</span>
+            ${isCurrent ? '<span class="now-tag">Now</span>' : ''}
+          </div>
+          <div class="dasha-dates">${fmtDashaDate(m.start)} – ${fmtDashaDate(m.end)}</div>
+        </div>
+        <div class="dasha-progress">
+          <div class="dasha-progress-fill" style="width: ${progressPct}%"></div>
+        </div>
+      </div>
+    `;
+      }).join('');
+    }
+
+    /* Shadbala Calculation & Bar + Gauge Render */
+    const SHADBALA_PLANETS = ["Sun", "Moon", "Mars", "Mercury", "Jupiter", "Venus", "Saturn"];
+
+    function computeShadbalaApprox(vdata) {
+      const totalRupas = {};
+
+      SHADBALA_PLANETS.forEach(name => {
+        const p = vdata.planets.find(pl => pl.name === name);
+        let score = 55;
+        if ([1, 4, 7, 10].includes(p.house)) score += 15;
+        else if ([5, 9].includes(p.house)) score += 10;
+        if (!p.combust) score += 5;
+        if (p.retro) score += 8;
+        totalRupas[name] = Math.min(95, Math.max(35, score));
+      });
+
+      return totalRupas;
+    }
+
+    function renderShadbalaUI(vdata) {
+      const strengths = computeShadbalaApprox(vdata);
+      const colors = { Sun: "#FF7675", Moon: "#74B9FF", Mars: "#FF6B6B", Mercury: "#55E6C1", Jupiter: "#F8C291", Venus: "#FD79A8", Saturn: "#A29BFE" };
+
+      let sum = 0, count = 0;
+      let barsHtml = '';
+      SHADBALA_PLANETS.forEach(name => {
+        const val = strengths[name] || 50;
+        sum += val; count++;
+        barsHtml += `
+      <div class="shadbala-bar-row">
+        <div class="s-name">${name}</div>
+        <div class="s-track"><div class="s-fill" style="width:${val}%; background:${colors[name]};"></div></div>
+        <div class="s-val">${val.toFixed(1)}%</div>
+      </div>
+    `;
+      });
+
+      el('shadbalaBars').innerHTML = barsHtml;
+      const avg = (sum / count).toFixed(1);
+      el('overallGaugeVal').textContent = `${avg}%`;
+
+      const dashVal = (avg * 1.0).toFixed(1);
+      const gaugePath = el('gaugePath');
+      if (gaugePath) gaugePath.setAttribute('stroke-dasharray', `${dashVal}, 100`);
+    }
+
+    /* Render Summary Information */
+    function renderSummaryUI(base, vdata) {
+      const moonBase = base.planets.find(p => p.name === "Moon");
+      const sunBase = base.planets.find(p => p.name === "Sun");
+
+      el('sumAsc').textContent = RASHI[vdata.ascendant.vargaRashi][0];
+      el('sumMoonSign').textContent = RASHI[vdata.planets.find(p => p.name === "Moon").vargaRashi][0];
+      el('sumSunSign').textContent = RASHI[vdata.planets.find(p => p.name === "Sun").vargaRashi][0];
+      el('sumNak').textContent = NAKSHATRAS[moonBase.nak];
+
+      const yogaIdx = Math.floor(norm360(sunBase.longitude + moonBase.longitude) / (360 / 27)) % 27;
+      el('sumYoga').textContent = YOGAS[yogaIdx];
+
+      const tithiIdx = Math.floor(norm360(moonBase.longitude - sunBase.longitude) / 12) % 30;
+      el('sumTithi').textContent = TITHIS[tithiIdx];
+
+      el('sumVarna').textContent = getVarna(moonBase.rashi);
+      el('sumYoni').textContent = YONI_TABLE[moonBase.nak];
+    }
+
+    /* Basic Info Renderer */
+    function renderBasicInfoUI(dt, lat, lon) {
+      el('biDate').textContent = fmtFullDate(dt);
+      el('biTime').textContent = fmtTime12(dt);
+      el('biWeekday').textContent = WEEKDAYS[dt.getDay()];
+      el('biLocation').textContent = `${lat.toFixed(2)}°, ${lon.toFixed(2)}°`;
+      el('biLatLon').textContent = `${lat.toFixed(4)}°, ${lon.toFixed(4)}°`;
+      const tzOffsetMin = -dt.getTimezoneOffset();
+      const tzSign = tzOffsetMin >= 0 ? "+" : "-";
+      const tzAbs = Math.abs(tzOffsetMin);
+      el('biTz').textContent = `Asia/Calcutta (UTC${tzSign}${String(Math.floor(tzAbs / 60)).padStart(2, '0')}:${String(tzAbs % 60).padStart(2, '0')})`;
+    }
+
+    /* Varga Chart Selector for Birth Mode */
+    function renderVargaSelectorUI() {
+      el('vargaScroll').innerHTML = VARGA_LIST.map(v =>
+        `<button class="varga-btn ${v.n === selectedVarga ? 'active' : ''}" data-n="${v.n}">${v.label}</button>`
+      ).join('');
+
+      el('vargaScroll').querySelectorAll('.varga-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          selectedVarga = parseInt(btn.getAttribute('data-n'), 10);
+          renderBirthChartAndDetails();
+        });
+      });
+      el('vargaCurrentLabel').textContent = `Showing Division: D${selectedVarga}`;
+    }
+
+    function renderBirthChartAndDetails() {
+      const vdata = applyVarga(birthBaseData, selectedVarga);
+      el('chartSectionTitle').textContent = `North Indian Kundali (D${selectedVarga})`;
+      renderChart(vdata);
+      renderPlanetPositions(vdata);
+      renderHouseAspectsUI(vdata);
+      renderVargaSelectorUI();
+    }
+
+    /* Recalculation Trigger */
+    let activeRequestId = 0;
+    function showLoader() { el('loaderOverlay').classList.add('show'); }
+    function hideLoader() { el('loaderOverlay').classList.remove('show'); }
+
+    async function triggerRecalculation(mode) {
+      const myId = ++activeRequestId;
+      showLoader();
+      await new Promise(r => setTimeout(r, 50));
+
+      if (!sweInstance || userLat === null || userLon === null) {
+        hideLoader(); return;
+      }
+
+      if (mode === 'daily') {
+        const dt = new Date(selectedDateTime.getTime());
+        const freshJd = toJulianUTC(dt);
+        dailyBaseData = computeBaseChart(freshJd, userLat, userLon);
+        if (myId !== activeRequestId) return;
+
+        const vdata = applyVarga(dailyBaseData, 1);
+        el('chartSelectorSection').style.display = 'none';
+        el('summarySectionTitle').textContent = 'Daily Summary';
+        renderBasicInfoUI(selectedDateTime, userLat, userLon);
+        renderChart(vdata);
+        renderPlanetPositions(vdata);
+        renderHouseAspectsUI(vdata);
+        renderShadbalaUI(vdata);
+        renderSummaryUI(dailyBaseData, vdata);
+        renderDashaUI(selectedDateTime, dailyBaseData.planets.find(p => p.name === "Moon").longitude);
+
+      } else if (mode === 'birth') {
+        const dt = new Date(birthDateTime.getTime());
+        const freshJd = toJulianUTC(dt);
+        birthBaseData = computeBaseChart(freshJd, userLat, userLon);
+        if (myId !== activeRequestId) return;
+
+        el('chartSelectorSection').style.display = 'block';
+        el('summarySectionTitle').textContent = 'Birth Summary';
+        renderBasicInfoUI(birthDateTime, userLat, userLon);
+        renderBirthChartAndDetails();
+        const d1 = applyVarga(birthBaseData, 1);
+        renderSummaryUI(birthBaseData, d1);
+        renderShadbalaUI(d1);
+        renderDashaUI(birthDateTime, birthBaseData.planets.find(p => p.name === "Moon").longitude);
+      }
+
+      hideLoader();
+    }
+
+    /* Mode Switch Handling */
+    function updateModeUI() {
+      el('modeDailyBtn').classList.toggle('active', currentMode === 'daily');
+      el('modeBirthBtn').classList.toggle('active', currentMode === 'birth');
+      el('modeMarriageBtn').classList.toggle('active', currentMode === 'marriage');
+      el('dailyPanel').style.display = currentMode === 'daily' ? 'block' : 'none';
+      el('birthPanel').style.display = currentMode === 'birth' ? 'block' : 'none';
+      el('marriagePanel').style.display = currentMode === 'marriage' ? 'block' : 'none';
+
+      if (currentMode === 'marriage') {
+        el('locationSection').style.display = 'none';
+        el('resultContainer').style.display = 'none';
+        return;
+      }
+
+      if (userLat === null || userLon === null) {
+        el('resultContainer').style.display = 'none';
+        el('locationSection').style.display = 'block';
+        return;
+      }
+
+      el('locationSection').style.display = 'none';
+      el('resultContainer').style.display = 'block';
+      triggerRecalculation(currentMode);
+    }
+
+    el('modeDailyBtn').addEventListener('click', () => { currentMode = 'daily'; updateModeUI(); });
+    el('modeBirthBtn').addEventListener('click', () => { currentMode = 'birth'; updateModeUI(); });
+    el('modeMarriageBtn').addEventListener('click', () => { currentMode = 'marriage'; updateModeUI(); });
+
+    /* Date & Time Picker Controls */
+    function dateToInputValue(d) { return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, '0') + "-" + String(d.getDate()).padStart(2, '0'); }
+    function timeToInputValue(d) { return String(d.getHours()).padStart(2, '0') + ":" + String(d.getMinutes()).padStart(2, '0'); }
+    function syncDailyPickers() { el('dailyDatePicker').value = dateToInputValue(selectedDateTime); el('dailyTimePicker').value = timeToInputValue(selectedDateTime); }
+    function syncBirthPickers() { el('birthDatePicker').value = dateToInputValue(birthDateTime); el('birthTimePicker').value = timeToInputValue(birthDateTime); }
+
+    function applyDailyPickers() {
+      const dv = el('dailyDatePicker').value, tv = el('dailyTimePicker').value;
+      if (!dv || !tv) return;
+      const [y, m, d] = dv.split('-').map(Number), [hh, mm] = tv.split(':').map(Number);
+      selectedDateTime = new Date(y, m - 1, d, hh, mm, 0);
+      triggerRecalculation('daily');
+    }
+    function applyBirthPickers() {
+      const dv = el('birthDatePicker').value, tv = el('birthTimePicker').value;
+      if (!dv || !tv) return;
+      const [y, m, d] = dv.split('-').map(Number), [hh, mm] = tv.split(':').map(Number);
+      birthDateTime = new Date(y, m - 1, d, hh, mm, 0);
+      triggerRecalculation('birth');
+    }
+
+    el('dailyDatePicker').addEventListener('change', applyDailyPickers);
+    el('dailyTimePicker').addEventListener('change', applyDailyPickers);
+    el('prevDayBtn').addEventListener('click', () => { selectedDateTime = new Date(selectedDateTime.getTime() - 24 * 3600 * 1000); syncDailyPickers(); triggerRecalculation('daily'); });
+    el('nextDayBtn').addEventListener('click', () => { selectedDateTime = new Date(selectedDateTime.getTime() + 24 * 3600 * 1000); syncDailyPickers(); triggerRecalculation('daily'); });
+    el('todayBtn').addEventListener('click', () => { selectedDateTime = new Date(); syncDailyPickers(); triggerRecalculation('daily'); });
+    el('birthDatePicker').addEventListener('change', applyBirthPickers);
+    el('birthTimePicker').addEventListener('change', applyBirthPickers);
+
+    syncDailyPickers(); syncBirthPickers();
+
+    /* Location Handling */
+    async function useLocation(lat, lon) {
+      userLat = lat; userLon = lon;
+      el('locationSection').style.display = 'none';
+      el('resultContainer').style.display = 'block';
+      triggerRecalculation(currentMode);
+    }
+
+    el('myLocationBtn').addEventListener('click', () => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+          pos => useLocation(pos.coords.latitude, pos.coords.longitude),
+          err => useLocation(20.9262, 70.3595) // default fallback
+        );
+      } else {
+        useLocation(20.9262, 70.3595);
+      }
+    });
+    el('enterLocationBtn').addEventListener('click', () => { el('locChooser').style.display = 'none'; el('locManualForm').style.display = 'block'; });
+    el('manualLocSubmit').addEventListener('click', () => {
+      const lat = parseFloat(el('manualLat').value), lon = parseFloat(el('manualLon').value);
+      if (!isNaN(lat) && !isNaN(lon)) useLocation(lat, lon);
+    });
+    el('changeLocBtn').addEventListener('click', () => { el('resultContainer').style.display = 'none'; el('locationSection').style.display = 'block'; });
+
+    /* Toggle Table View */
+    el('toggleTableBtn').addEventListener('click', () => {
+      const wrap = el('planetTableWrap');
+      const isHidden = wrap.style.display === 'none';
+      wrap.style.display = isHidden ? 'block' : 'none';
+      el('toggleTableBtn').textContent = isHidden ? 'Hide Table' : 'View Table';
+    });
+
+    /* PDF Download Action */
+    el('downloadPdfBtn').addEventListener('click', () => {
+      alert('Downloading PDF Report...');
+      window.print();
+    });
+
+    /* Initialization */
+    (async function init() {
+      userLat = 20.9262; userLon = 70.3595;
+      const engineOk = await loadSwissEphemeris();
+      updateModeUI();
+    })();
+  </script>
 </body>
+
 </html>

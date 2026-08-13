@@ -13,7 +13,7 @@
 const CACHE_VERSION = 'kundali-v1';
 const APP_SHELL = [
   './kundali.html',
-  './kundali.webmanifest',
+  './manifest.json',
   './js/swisseph/swisseph-browser.js',
   './js/swisseph/swisseph.js',
   './js/swisseph/swisseph.wasm',
@@ -50,7 +50,7 @@ self.addEventListener('fetch', (event) => {
   const url = new URL(req.url);
   if (url.origin !== self.location.origin) return; // never intercept cross-origin (CDN) requests
 
-  const isHtmlOrManifest = req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('.webmanifest');
+  const isHtmlOrManifest = req.mode === 'navigate' || url.pathname.endsWith('.html') || url.pathname.endsWith('/manifest.json');
 
   if (isHtmlOrManifest) {
     // Network-first: always try to get the latest page/manifest when online.

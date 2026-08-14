@@ -45,12 +45,16 @@
   }
 
   /* ---------- mode selector ---------- */
-  .install-banner{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(230,180,90,0.14),rgba(255,122,61,0.10));
-    border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:10px 10px 10px 14px;margin:12px 0;}
-  .install-banner .ib-text{flex:1;display:flex;flex-direction:column;font-size:11.5px;color:var(--text-sub);}
-  .install-banner .ib-text b{color:var(--gold-light);font-size:13px;}
-  .install-banner .ib-btn{padding:8px 14px;border:none;border-radius:9px;background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;font-weight:700;font-size:12.5px;flex:0 0 auto;}
-  .install-banner .ib-dismiss{background:none;border:none;color:var(--text-sub);font-size:14px;padding:4px 6px;flex:0 0 auto;}
+  .install-gate{display:flex;flex-direction:column;align-items:center;text-align:center;padding:36px 20px 20px;}
+  .install-gate .ig-icon{width:64px;height:64px;border-radius:20px;background:linear-gradient(135deg,var(--saffron),var(--gold));
+    display:flex;align-items:center;justify-content:center;margin-bottom:18px;box-shadow:0 8px 22px rgba(230,180,90,0.25);}
+  .install-gate .ig-svg{width:30px;height:30px;stroke:#241206;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+  .install-gate h2{font-size:19px;font-weight:700;color:var(--gold-light);margin-bottom:8px;}
+  .install-gate p{font-size:13px;color:var(--text-sub);line-height:1.5;max-width:340px;margin-bottom:22px;}
+  .install-gate .loc-btn{max-width:280px;}
+  .install-gate .ig-fallback{font-size:12px;color:var(--text-sub);background:var(--card-bg2);border:1px solid var(--card-border);
+    border-radius:var(--radius-sm);padding:12px 14px;margin-top:14px;max-width:320px;line-height:1.5;}
+  .install-gate .ig-status{font-size:12px;color:var(--ok);margin-top:12px;font-weight:600;}
 
   .mode-bar{display:flex;gap:6px;margin:14px 0;background:var(--card-bg);border:1px solid var(--card-border);border-radius:var(--radius-sm);padding:5px;}
   .mode-btn{flex:1;padding:10px 4px;border:none;border-radius:8px;background:transparent;color:var(--text-sub);font-size:12px;font-weight:700;text-align:center;line-height:1.3;}
@@ -181,12 +185,20 @@
     <h1>Kundali</h1>
   </header>
 
-  <div id="installBanner" class="install-banner" style="display:none;">
-    <div class="ib-text"><b>Install Kundali</b><span>Add to your home screen for offline access</span></div>
-    <button id="installBtn" class="ib-btn">Install</button>
-    <button id="installDismissBtn" class="ib-dismiss" aria-label="Dismiss">✕</button>
+  <div id="installGate" class="install-gate" style="display:none;">
+    <div class="ig-icon">
+      <svg viewBox="0 0 24 24" class="ig-svg"><rect x="4" y="2" width="16" height="20" rx="3"/><path d="M9 18h6"/></svg>
+    </div>
+    <h2>Install Kundali</h2>
+    <p>This app works fully offline and calculates faster once installed to your home screen. Please install to continue.</p>
+    <button id="installGateBtn" class="loc-btn primary">
+      <svg class="btn-icon"><use href="#icon-download"/></svg>Install App
+    </button>
+    <div class="ig-fallback" id="installGateFallback" style="display:none;"></div>
+    <div class="ig-status" id="installGateStatus"></div>
   </div>
 
+  <div id="appShell" style="display:none;">
   <div class="mode-bar">
     <button class="mode-btn active" id="modeDailyBtn">○ Daily Kundali</button>
     <button class="mode-btn" id="modeBirthBtn">○ Birth Kundali</button>
@@ -393,6 +405,7 @@
   <footer>
     Sun/Moon/Planet positions: Swiss Ephemeris (Moshier, self-hosted @swisseph/browser 1.3.1) · Ayanamsa: Lahiri (Sidereal) · House System: Whole Sign · Rahu: Mean Node, Ketu: Rahu + 180° · Divisional charts: Parashari Shodasavarga rules · Aspects: Parashari graha drishti (7th house full aspect for all grahas; Mars also 4th/8th, Jupiter also 5th/9th, Saturn also 3rd/10th; Rahu/Ketu shown on the common Jupiter-style 5th/7th/9th convention) · Shadbala/Bhavabala: simplified engine (D1-based; full 5-part Sthana Bala, approximated Dig Bala, Paksha-only Kala Bala, retrograde/speed-ratio Chesta Bala, simplified net-aspect Drik Bala) — figures are for relative comparison, not precise classical Shadbala
   </footer>
+  </div><!-- /appShell -->
 </div>
 
 <script type="module">
@@ -1688,49 +1701,75 @@ async function downloadPdf(){
 }
 el('downloadPdfBtn').addEventListener('click', downloadPdf);
 
-/* ===================== PWA: install prompt + service worker ===================== */
+/* ===================== PWA: install gate + service worker ===================== */
 
 let deferredInstallPrompt = null;
 
-function setupPwa(){
+function isRunningStandalone(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+}
+function isIOS(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function registerServiceWorker(){
   if ('serviceWorker' in navigator){
     navigator.serviceWorker.register('./kundali-sw.js').catch(err=> console.error('Service worker registration failed:', err));
   }
+}
 
-  const DISMISS_KEY = 'kundaliInstallBannerDismissed';
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+function showInstallGate(){
+  el('installGate').style.display = 'flex';
+  el('appShell').style.display = 'none';
+}
+function showAppShell(){
+  el('installGate').style.display = 'none';
+  el('appShell').style.display = 'block';
+}
 
+function setupInstallGate(){
   window.addEventListener('beforeinstallprompt', (e)=>{
     e.preventDefault();
     deferredInstallPrompt = e;
-    if (!isStandalone && localStorage.getItem(DISMISS_KEY) !== '1'){
-      el('installBanner').style.display = 'flex';
-    }
   });
 
-  el('installBtn').addEventListener('click', async ()=>{
-    if (!deferredInstallPrompt) return;
-    deferredInstallPrompt.prompt();
-    await deferredInstallPrompt.userChoice;
-    deferredInstallPrompt = null;
-    el('installBanner').style.display = 'none';
-  });
-  el('installDismissBtn').addEventListener('click', ()=>{
-    el('installBanner').style.display = 'none';
-    try{ localStorage.setItem(DISMISS_KEY, '1'); }catch(e){}
+  el('installGateBtn').addEventListener('click', async ()=>{
+    if (deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      const choice = await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt = null;
+      if (choice && choice.outcome === 'accepted'){
+        el('installGateStatus').textContent = 'Installed! Open "Kundali" from your home screen to continue.';
+      }
+      return;
+    }
+    // Native prompt not available (iOS Safari, or Chrome hasn't offered it yet) — show manual steps.
+    const fb = el('installGateFallback');
+    fb.style.display = 'block';
+    fb.textContent = isIOS()
+      ? 'Tap the Share icon in your browser toolbar, then choose "Add to Home Screen".'
+      : 'Open your browser menu and choose "Install app" or "Add to Home screen".';
   });
 
   window.addEventListener('appinstalled', ()=>{
-    el('installBanner').style.display = 'none';
     deferredInstallPrompt = null;
+    el('installGateStatus').textContent = 'Installed! Open "Kundali" from your home screen to continue.';
   });
 }
 
 /* ===================== INIT ===================== */
 
 (async function init(){
+  registerServiceWorker();
+  setupInstallGate();
+
+  if (!isRunningStandalone()){
+    showInstallGate();
+    return; // don't load the engine or request location until launched as an installed app
+  }
+
+  showAppShell();
   el('resultContainer').style.display = 'none';
-  setupPwa();
   const enginePromise = loadSwissEphemeris();
   watchGeolocationAvailability();
   await enginePromise;

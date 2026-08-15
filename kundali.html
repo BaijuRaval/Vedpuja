@@ -171,6 +171,7 @@
   <symbol id="icon-columns" viewBox="0 0 24 24"><path d="M4 21h16"/><path d="M5 21V9M9 21V9M15 21V9M19 21V9"/><path d="M3 9l9-6 9 6"/></symbol>
   <symbol id="icon-cycle" viewBox="0 0 24 24"><path d="M4 12a8 8 0 0 1 14.5-4.5"/><path d="M18.5 4v4h-4"/><path d="M20 12a8 8 0 0 1-14.5 4.5"/><path d="M5.5 20v-4h4"/></symbol>
   <symbol id="icon-download" viewBox="0 0 24 24"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 21h16"/></symbol>
+  <symbol id="icon-sparkle" viewBox="0 0 24 24"><path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/></symbol>
 </defs>
 </svg>
 <div id="loaderOverlay">
@@ -189,10 +190,13 @@
     <div class="ig-icon">
       <svg viewBox="0 0 24 24" class="ig-svg"><rect x="4" y="2" width="16" height="20" rx="3"/><path d="M9 18h6"/></svg>
     </div>
-    <h2>Install Kundali</h2>
-    <p>This app works fully offline and calculates faster once installed to your home screen. Please install to continue.</p>
+    <h2 id="installGateTitle">Install Kundali</h2>
+    <p id="installGateDesc">This app works fully offline and calculates faster once installed to your home screen. Please install to continue.</p>
     <button id="installGateBtn" class="loc-btn primary">
       <svg class="btn-icon"><use href="#icon-download"/></svg>Install App
+    </button>
+    <button id="installGateOpenBtn" class="loc-btn primary" style="display:none;">
+      <svg class="btn-icon"><use href="#icon-sparkle"/></svg>Open App
     </button>
     <div class="ig-fallback" id="installGateFallback" style="display:none;"></div>
     <div class="ig-status" id="installGateStatus"></div>
@@ -1704,12 +1708,19 @@ el('downloadPdfBtn').addEventListener('click', downloadPdf);
 /* ===================== PWA: install gate + service worker ===================== */
 
 let deferredInstallPrompt = null;
+const INSTALLED_KEY = 'kundaliPwaInstalled';
 
 function isRunningStandalone(){
   return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
 }
 function isIOS(){
   return /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function markInstalled(){
+  try{ localStorage.setItem(INSTALLED_KEY, '1'); }catch(e){}
+}
+function knownInstalled(){
+  try{ return localStorage.getItem(INSTALLED_KEY) === '1'; }catch(e){ return false; }
 }
 
 function registerServiceWorker(){
@@ -1727,7 +1738,33 @@ function showAppShell(){
   el('appShell').style.display = 'block';
 }
 
+/* Switches the gate between its two states: "not installed yet" (Install button)
+   and "already installed on this device/browser" (Open button). There is no
+   standard web API to reliably query real install state after the fact, so this
+   relies on a local flag set the moment 'appinstalled' actually fires — which is
+   accurate for the common case (install, then revisit the site in a regular tab
+   later) but can't detect an install performed via iOS's manual "Add to Home
+   Screen" (iOS never fires that event at all). */
+function renderGateState(){
+  const installed = knownInstalled();
+  el('installGateBtn').style.display = installed ? 'none' : 'block';
+  el('installGateOpenBtn').style.display = installed ? 'block' : 'none';
+  el('installGateTitle').textContent = installed ? 'Kundali is installed' : 'Install Kundali';
+  el('installGateDesc').textContent = installed
+    ? 'You already have this app installed on this device. Open it below, or launch "Kundali" from your home screen for the full app experience.'
+    : 'This app works fully offline and calculates faster once installed to your home screen. Please install to continue.';
+}
+
+function enterAppInTab(){
+  showAppShell();
+  el('resultContainer').style.display = 'none';
+  loadSwissEphemeris();
+  watchGeolocationAvailability();
+}
+
 function setupInstallGate(){
+  renderGateState();
+
   window.addEventListener('beforeinstallprompt', (e)=>{
     e.preventDefault();
     deferredInstallPrompt = e;
@@ -1739,7 +1776,9 @@ function setupInstallGate(){
       const choice = await deferredInstallPrompt.userChoice;
       deferredInstallPrompt = null;
       if (choice && choice.outcome === 'accepted'){
+        markInstalled();
         el('installGateStatus').textContent = 'Installed! Open "Kundali" from your home screen to continue.';
+        renderGateState();
       }
       return;
     }
@@ -1751,9 +1790,13 @@ function setupInstallGate(){
       : 'Open your browser menu and choose "Install app" or "Add to Home screen".';
   });
 
+  el('installGateOpenBtn').addEventListener('click', enterAppInTab);
+
   window.addEventListener('appinstalled', ()=>{
     deferredInstallPrompt = null;
+    markInstalled();
     el('installGateStatus').textContent = 'Installed! Open "Kundali" from your home screen to continue.';
+    renderGateState();
   });
 }
 
@@ -1765,7 +1808,7 @@ function setupInstallGate(){
 
   if (!isRunningStandalone()){
     showInstallGate();
-    return; // don't load the engine or request location until launched as an installed app
+    return; // don't load the engine or request location until the user installs (or opens an already-installed app) or launches from the home screen
   }
 
   showAppShell();

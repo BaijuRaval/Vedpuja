@@ -10,17 +10,19 @@
    Bump CACHE_VERSION whenever kundali.html or the engine files change, so old
    clients pick up the new version instead of being stuck on a stale cache. */
 
-const CACHE_VERSION = 'kundali-v1';
+const CACHE_VERSION = 'kundali-v3';
 const APP_SHELL = [
   './kundali.html',
   './manifest.json',
   './js/swisseph/swisseph-browser.js',
   './js/swisseph/swisseph.js',
   './js/swisseph/swisseph.wasm',
+  './data/locations.json',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/icon-512-maskable.png',
-  './icons/apple-touch-icon.png'
+  './icons/apple-touch-icon.png',
+  './data/locations.json'
 ];
 
 self.addEventListener('install', (event) => {

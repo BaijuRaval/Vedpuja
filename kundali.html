@@ -85,7 +85,9 @@
     background:var(--card-bg2);border:1px solid var(--card-border);color:var(--gold-light);}
   .loc-btn:last-child{margin-bottom:0;}
   .loc-btn.primary{background:linear-gradient(90deg,var(--saffron),var(--gold));color:#241206;border:none;}
-  #locManualForm input{width:100%;padding:9px 10px;border-radius:9px;border:1px solid var(--card-border);background:rgba(255,255,255,.05);color:var(--text-main);font-size:12.5px;margin-bottom:8px;}
+  #locManualForm .loc-select{width:100%;padding:10px 11px;border-radius:9px;border:1px solid var(--card-border);background:rgba(255,255,255,.05);color:var(--text-main);font-size:12.5px;margin-bottom:8px;font-family:inherit;-webkit-appearance:none;appearance:none;}
+  #locManualForm .loc-select:disabled{opacity:.5;}
+  #locManualForm .loc-select option{background:#1a0f2a;color:var(--text-main);}
 
   .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
   .info-item{background:var(--card-bg2);border:1px solid rgba(255,255,255,0.06);border-radius:var(--radius-sm);padding:9px 10px;}
@@ -246,9 +248,11 @@
         <button id="enterLocationBtn2" class="loc-btn"><svg class="btn-icon"><use href="#icon-edit"/></svg>Enter Location</button>
       </div>
       <div id="locManualForm" class="loc-state" style="display:none;">
-        <input type="text" id="manualLat" placeholder="Latitude e.g. 23.0225">
-        <input type="text" id="manualLon" placeholder="Longitude e.g. 72.5714">
-        <button id="manualLocSubmit" class="loc-btn primary">Submit</button>
+        <select id="countrySelect" class="loc-select"><option value="">Select Country</option></select>
+        <select id="stateSelect" class="loc-select" disabled><option value="">Select State</option></select>
+        <select id="citySelect" class="loc-select" disabled><option value="">Select City</option></select>
+        <div class="loc-detail" id="manualLocDetail"></div>
+        <button id="manualLocSubmit" class="loc-btn primary" disabled>Submit</button>
       </div>
     </div>
   </div>
@@ -1207,7 +1211,7 @@ function renderSummary(base, vdata, labelPrefix){
 /* ===================== LOADER / CONTROL STATE ===================== */
 
 let activeRequestId = 0;
-const CONTROL_IDS = ['dailyDatePicker','dailyTimePicker','prevDayBtn','todayBtn','nextDayBtn','birthDatePicker','birthTimePicker','myLocationBtn','enterLocationBtn','enterLocationBtn2','retryLocationBtn','manualLocSubmit','modeDailyBtn','modeBirthBtn','modeMarriageBtn','downloadPdfBtn'];
+const CONTROL_IDS = ['dailyDatePicker','dailyTimePicker','prevDayBtn','todayBtn','nextDayBtn','birthDatePicker','birthTimePicker','myLocationBtn','enterLocationBtn','enterLocationBtn2','retryLocationBtn','modeDailyBtn','modeBirthBtn','modeMarriageBtn','downloadPdfBtn'];
 function showLoader(){ el('loaderOverlay').classList.add('show'); }
 function hideLoader(){ el('loaderOverlay').classList.remove('show'); }
 function setControlsDisabled(disabled){
@@ -1413,6 +1417,13 @@ function showLocError(detail){
 function showLocManualForm(){
   el('locGpsOff').style.display='none'; el('locChooser').style.display='none';
   el('locError').style.display='none'; el('locManualForm').style.display='block';
+  el('countrySelect').value = '';
+  el('stateSelect').innerHTML = '<option value="">Select State</option>'; el('stateSelect').disabled = true;
+  el('citySelect').innerHTML = '<option value="">Select City</option>'; el('citySelect').disabled = true;
+  el('manualLocDetail').textContent = '';
+  el('manualLocSubmit').setAttribute('disabled','');
+  selectedCityCoords = null;
+  loadLocationsData();
 }
 function showResults(){ el('locationSection').style.display='none'; el('resultContainer').style.display='block'; }
 function showLocationSection(){ el('resultContainer').style.display='none'; el('locationSection').style.display='block'; }
@@ -1464,10 +1475,75 @@ el('myLocationBtn').addEventListener('click', attemptMyLocation);
 el('retryLocationBtn').addEventListener('click', attemptMyLocation);
 el('enterLocationBtn').addEventListener('click', showLocManualForm);
 el('enterLocationBtn2').addEventListener('click', showLocManualForm);
+
+/* ===================== COUNTRY / STATE / CITY LOCATION PICKER ===================== */
+
+let locationsData = null;
+let locationsLoadPromise = null;
+let selectedCityCoords = null;
+
+function loadLocationsData(){
+  if (!locationsLoadPromise){
+    locationsLoadPromise = fetch('./data/locations.json')
+      .then(res=>{ if(!res.ok) throw new Error('HTTP '+res.status); return res.json(); })
+      .then(data=>{ locationsData = data; populateCountrySelect(); })
+      .catch(err=>{
+        console.error('Failed to load location data:', err);
+        el('manualLocDetail').textContent = 'Could not load the country/state/city list. Check your connection and reopen "Enter Location".';
+      });
+  }
+  return locationsLoadPromise;
+}
+
+function populateCountrySelect(){
+  const sel = el('countrySelect');
+  sel.innerHTML = '<option value="">Select Country</option>' +
+    locationsData.countries.map(c=>`<option value="${c.c}">${c.n}</option>`).join('');
+  sel.disabled = false;
+}
+
+el('countrySelect').addEventListener('change', ()=>{
+  const code = el('countrySelect').value;
+  const stateSel = el('stateSelect'), citySel = el('citySelect');
+  stateSel.innerHTML = '<option value="">Select State</option>';
+  citySel.innerHTML = '<option value="">Select City</option>';
+  citySel.disabled = true;
+  selectedCityCoords = null;
+  el('manualLocSubmit').setAttribute('disabled','');
+  if (!code || !locationsData){ stateSel.disabled = true; return; }
+  const states = locationsData.states[code] || [];
+  stateSel.innerHTML += states.map(s=>`<option value="${s.c}">${s.n}</option>`).join('');
+  stateSel.disabled = false;
+});
+
+el('stateSelect').addEventListener('change', ()=>{
+  const countryCode = el('countrySelect').value;
+  const stateCode = el('stateSelect').value;
+  const citySel = el('citySelect');
+  citySel.innerHTML = '<option value="">Select City</option>';
+  selectedCityCoords = null;
+  el('manualLocSubmit').setAttribute('disabled','');
+  if (!stateCode || !locationsData){ citySel.disabled = true; return; }
+  const cities = locationsData.cities[countryCode+'|'+stateCode] || [];
+  citySel.innerHTML += cities.map((c,i)=>`<option value="${i}">${c.n}</option>`).join('');
+  citySel.disabled = false;
+});
+
+el('citySelect').addEventListener('change', ()=>{
+  const countryCode = el('countrySelect').value;
+  const stateCode = el('stateSelect').value;
+  const idx = el('citySelect').value;
+  if (idx === ''){ selectedCityCoords = null; el('manualLocSubmit').setAttribute('disabled',''); return; }
+  const city = locationsData.cities[countryCode+'|'+stateCode][parseInt(idx,10)];
+  selectedCityCoords = { lat: city.lat, lon: city.lon };
+  el('manualLocDetail').textContent = `${city.n}: ${city.lat.toFixed(4)}°, ${city.lon.toFixed(4)}°`;
+  el('manualLocSubmit').removeAttribute('disabled');
+});
+
 el('manualLocSubmit').addEventListener('click', ()=>{
-  const lat=parseFloat(el('manualLat').value), lon=parseFloat(el('manualLon').value);
-  if (isNaN(lat)||isNaN(lon)||lat<-90||lat>90||lon<-180||lon>180) return;
-  useLocation(lat, lon);
+  if (!selectedCityCoords) return;
+  el('manualLocSubmit').setAttribute('disabled','');
+  useLocation(selectedCityCoords.lat, selectedCityCoords.lon);
 });
 el('changeLocBtn').addEventListener('click', ()=>{ showLocationSection(); showLocChooser(); });
 

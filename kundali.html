@@ -796,6 +796,7 @@ function fmtTime12(date){ return date.toLocaleTimeString('en-IN',{hour:'2-digit'
 /* ===================== APP STATE ===================== */
 
 let userLat=null, userLon=null;
+let userLocationLabel=null; // {city, state, country, approx} — approx=true when derived from a nearest-city lookup rather than an explicit picker selection
 let sweModule=null, sweInstance=null;
 let currentMode = 'daily'; // 'daily' | 'birth' | 'marriage'
 let selectedDateTime = new Date();   // daily kundali reference moment
@@ -1248,7 +1249,12 @@ function renderBasicInfo(dt, lat, lon){
   el('biDate').textContent = fmtFullDate(dt);
   el('biTime').textContent = fmtTime12(dt);
   el('biWeekday').textContent = WEEKDAYS[dt.getDay()];
-  el('biLocation').textContent = lat.toFixed(2)+", "+lon.toFixed(2);
+  if (userLocationLabel){
+    const parts = [userLocationLabel.city, userLocationLabel.state, userLocationLabel.country].filter(Boolean);
+    el('biLocation').textContent = (userLocationLabel.approx ? 'Near ' : '') + parts.join(', ');
+  } else {
+    el('biLocation').textContent = lat.toFixed(2)+", "+lon.toFixed(2);
+  }
   el('biLat').textContent = lat.toFixed(4)+"°";
   el('biLon').textContent = lon.toFixed(4)+"°";
   const tzOffsetMin = -dt.getTimezoneOffset();
@@ -1446,7 +1452,7 @@ function showLocManualForm(){
   resetCombobox('country'); resetCombobox('state', true); resetCombobox('city', true);
   el('manualLocDetail').textContent = '';
   el('manualLocSubmit').setAttribute('disabled','');
-  selectedCityCoords = null;
+  selectedCityCoords = null; selectedCityLabel = null;
   loadLocationsData();
 }
 function showLocCoordForm(){
@@ -1458,8 +1464,37 @@ function showLocCoordForm(){
 function showResults(){ el('locationSection').style.display='none'; el('resultContainer').style.display='block'; }
 function showLocationSection(){ el('resultContainer').style.display='none'; el('locationSection').style.display='block'; }
 
-async function useLocation(lat, lon){
+function findNearestCity(lat, lon){
+  if (!locationsData) return null;
+  let best = null, bestDist = Infinity;
+  for (const key in locationsData.cities){
+    const [countryCode, stateCode] = key.split('|');
+    const cities = locationsData.cities[key];
+    for (const city of cities){
+      const dLat = city.lat-lat, dLon = city.lon-lon;
+      const dist = dLat*dLat + dLon*dLon;
+      if (dist < bestDist){ bestDist = dist; best = { city: city.n, countryCode, stateCode }; }
+    }
+  }
+  if (!best) return null;
+  const countryEntry = locationsData.countries.find(c=>c.c===best.countryCode);
+  const stateEntry = (locationsData.states[best.countryCode]||[]).find(s=>s.c===best.stateCode);
+  return {
+    city: best.city,
+    state: stateEntry ? stateEntry.n : best.stateCode,
+    country: countryEntry ? countryEntry.n : best.countryCode,
+    approx: true
+  };
+}
+
+async function useLocation(lat, lon, label){
   userLat=lat; userLon=lon;
+  if (label){
+    userLocationLabel = label;
+  } else {
+    await loadLocationsData();
+    userLocationLabel = findNearestCity(lat, lon);
+  }
   if (currentMode==='marriage') return;
   await triggerRecalculation(currentMode);
   showResults();
@@ -1520,6 +1555,7 @@ let locationsLoadPromise = null;
 let selectedCountryCode = null;
 let selectedStateCode = null;
 let selectedCityCoords = null;
+let selectedCityLabel = null;
 
 function loadLocationsData(){
   if (!locationsLoadPromise){
@@ -1600,7 +1636,7 @@ setupCombobox('countryInput','countryDropdown',
   ()=> locationsData ? locationsData.countries.map(c=>({value:c.c, label:c.n})) : [],
   (opt)=>{
     resetCombobox('state', true); resetCombobox('city', true);
-    selectedStateCode = null; selectedCityCoords = null;
+    selectedStateCode = null; selectedCityCoords = null; selectedCityLabel = null;
     el('manualLocDetail').textContent = '';
     el('manualLocSubmit').setAttribute('disabled','');
     if (!opt){ selectedCountryCode = null; return; }
@@ -1613,7 +1649,7 @@ setupCombobox('stateInput','stateDropdown',
   ()=> (locationsData && selectedCountryCode) ? (locationsData.states[selectedCountryCode]||[]).map(s=>({value:s.c, label:s.n})) : [],
   (opt)=>{
     resetCombobox('city', true);
-    selectedCityCoords = null;
+    selectedCityCoords = null; selectedCityLabel = null;
     el('manualLocDetail').textContent = '';
     el('manualLocSubmit').setAttribute('disabled','');
     if (!opt){ selectedStateCode = null; return; }
@@ -1629,9 +1665,10 @@ setupCombobox('cityInput','cityDropdown',
     return cities.map(c=>({value:c, label:c.n}));
   },
   (opt)=>{
-    if (!opt){ selectedCityCoords = null; el('manualLocDetail').textContent=''; el('manualLocSubmit').setAttribute('disabled',''); return; }
+    if (!opt){ selectedCityCoords = null; selectedCityLabel = null; el('manualLocDetail').textContent=''; el('manualLocSubmit').setAttribute('disabled',''); return; }
     const city = opt.value;
     selectedCityCoords = { lat: city.lat, lon: city.lon };
+    selectedCityLabel = { city: opt.label, state: el('stateInput').value, country: el('countryInput').value, approx: false };
     el('manualLocDetail').textContent = `${city.n}: ${city.lat.toFixed(4)}°, ${city.lon.toFixed(4)}°`;
     el('manualLocSubmit').removeAttribute('disabled');
   }
@@ -1640,7 +1677,7 @@ setupCombobox('cityInput','cityDropdown',
 el('manualLocSubmit').addEventListener('click', ()=>{
   if (!selectedCityCoords) return;
   el('manualLocSubmit').setAttribute('disabled','');
-  useLocation(selectedCityCoords.lat, selectedCityCoords.lon);
+  useLocation(selectedCityCoords.lat, selectedCityCoords.lon, selectedCityLabel);
 });
 el('changeLocBtn').addEventListener('click', ()=>{ showLocationSection(); showLocChooser(); });
 
